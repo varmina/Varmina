@@ -42,21 +42,21 @@ export const SettingsView: React.FC = () => {
     if (isLoading) return <div className="py-20 flex justify-center"><LoadingScreen /></div>;
 
     return (
-        <div className="max-w-3xl mx-auto animate-in fade-in duration-500 pt-8">
-            <h2 className="text-2xl font-serif text-stone-900 dark:text-white mb-8 border-b border-stone-100 dark:border-stone-800 pb-4 uppercase tracking-widest">Configuración General</h2>
-            <form onSubmit={handleSave} className="space-y-12 pb-24">
+        <div className="max-w-3xl mx-auto animate-in fade-in duration-500 pt-4 md:pt-8 px-4 md:px-0">
+            <h2 className="text-xl md:text-2xl font-serif text-stone-900 dark:text-white mb-6 md:mb-8 border-b border-stone-100 dark:border-stone-800 pb-4 uppercase tracking-widest">Configuración General</h2>
+            <form onSubmit={handleSave} className="space-y-8 md:space-y-12 pb-24">
 
                 {/* 2. NOTIFICACIONES Y ESTADO (NEW) */}
-                <section className="space-y-8 bg-white dark:bg-stone-900/10 p-8 border border-stone-100 dark:border-stone-900 rounded-sm">
+                <section className="space-y-6 md:space-y-8 bg-white dark:bg-stone-900/10 p-6 md:p-8 border border-stone-100 dark:border-stone-900 rounded-sm">
                     <div className="flex items-center gap-3 mb-2">
-                        <Bell className="w-5 h-5 text-gold-600" />
-                        <h2 className="text-xs font-bold uppercase tracking-widest text-stone-900 dark:text-gold-100">Avisos y Estado</h2>
+                        <Bell className="w-4 h-4 md:w-5 md:h-5 text-gold-600" />
+                        <h2 className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-stone-900 dark:text-gold-100">Avisos y Estado</h2>
                     </div>
 
-                    <div className="flex items-center justify-between p-4 bg-stone-50 dark:bg-stone-900/50 rounded-sm border border-stone-100 dark:border-stone-800">
+                    <div className="flex items-center justify-between p-3 md:p-4 bg-stone-50 dark:bg-stone-900/50 rounded-sm border border-stone-100 dark:border-stone-800">
                         <div className="flex items-center gap-3 text-stone-600 dark:text-stone-300">
-                            <AlertTriangle className="w-4 h-4 text-orange-500" />
-                            <span className="text-[10px] font-bold uppercase tracking-widest">Modo Mantenimiento</span>
+                            <AlertTriangle className="w-3.5 h-3.5 md:w-4 md:h-4 text-orange-500" />
+                            <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest">Modo Mantenimiento</span>
                         </div>
                         <input
                             type="checkbox"
@@ -75,27 +75,27 @@ export const SettingsView: React.FC = () => {
 
                     <div className="flex items-center gap-4">
                         <div className="flex-1">
-                            <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-2">Color del Anuncio</label>
+                            <label className="block text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-2">Color del Anuncio</label>
                             <div className="flex items-center gap-4">
                                 <input
                                     type="color"
-                                    className="w-10 h-10 bg-transparent border-none cursor-pointer"
+                                    className="w-8 h-8 md:w-10 md:h-10 bg-transparent border-none cursor-pointer"
                                     value={settings?.announcement_color}
                                     onChange={e => setSettings(prev => ({ ...prev!, announcement_color: e.target.value }))}
                                 />
-                                <code className="text-[10px] text-stone-400 uppercase">{settings?.announcement_color}</code>
+                                <code className="text-[9px] md:text-[10px] text-stone-400 uppercase">{settings?.announcement_color}</code>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <div className="grid grid-cols-1 gap-12"> {/* CHANGED TO SINGLE COLUMN */}
+                <div className="grid grid-cols-1 gap-8 md:gap-12">
 
                     {/* 3. SEO & IDENTITY */}
-                    <div className="space-y-8">
+                    <div className="space-y-6 md:space-y-8">
                         <div className="flex items-center gap-3 mb-2">
-                            <Globe className="w-5 h-5 text-gold-600" />
-                            <h2 className="text-xs font-bold uppercase tracking-widest text-stone-900 dark:text-gold-100">Buscadores y SEO</h2>
+                            <Globe className="w-4 h-4 md:w-5 md:h-5 text-gold-600" />
+                            <h2 className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-stone-900 dark:text-gold-100">Buscadores y SEO</h2>
                         </div>
                         <Input
                             label="Título del Sitio"
@@ -109,7 +109,7 @@ export const SettingsView: React.FC = () => {
                             onChange={e => setSettings(prev => ({ ...prev!, usd_exchange_rate: Number(e.target.value) }))}
                         />
                         <div className="space-y-2">
-                            <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-400">Descripción Meta (Google)</label>
+                            <label className="block text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-stone-400">Descripción Meta (Google)</label>
                             <textarea
                                 className="w-full bg-transparent border border-stone-100 dark:border-stone-800 p-4 text-xs dark:text-white focus:outline-none focus:border-gold-500 transition-colors h-24"
                                 value={settings?.site_description}
@@ -119,10 +119,10 @@ export const SettingsView: React.FC = () => {
                     </div>
 
                     {/* 4. CONTACT & CONVERSION */}
-                    <div className="space-y-8">
+                    <div className="space-y-6 md:space-y-8">
                         <div className="flex items-center gap-3 mb-2">
-                            <MessageCircle className="w-5 h-5 text-gold-600" />
-                            <h2 className="text-xs font-bold uppercase tracking-widest text-stone-900 dark:text-gold-100">Conversión y Contacto</h2>
+                            <MessageCircle className="w-4 h-4 md:w-5 md:h-5 text-gold-600" />
+                            <h2 className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-stone-900 dark:text-gold-100">Conversión y Contacto</h2>
                         </div>
                         <Input
                             label="Email de Contacto"
@@ -138,9 +138,9 @@ export const SettingsView: React.FC = () => {
                             onChange={e => setSettings(prev => ({ ...prev!, whatsapp_number: e.target.value }))}
                         />
                         <div className="space-y-2">
-                            <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-400">Plantilla de Consulta</label>
+                            <label className="block text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-stone-400">Plantilla de Consulta</label>
                             <textarea
-                                className="w-full bg-transparent border border-stone-100 dark:border-stone-800 p-4 font-mono text-[10px] dark:text-gold-100 focus:outline-none focus:border-gold-500 h-24"
+                                className="w-full bg-transparent border border-stone-100 dark:border-stone-800 p-4 font-mono text-[9px] md:text-[10px] dark:text-gold-100 focus:outline-none focus:border-gold-500 h-24"
                                 value={settings?.whatsapp_template}
                                 onChange={e => setSettings(prev => ({ ...prev!, whatsapp_template: e.target.value }))}
                             />
@@ -149,10 +149,10 @@ export const SettingsView: React.FC = () => {
                     </div>
 
                     {/* 5. CONTENT / HERO SECTION */}
-                    <div className="space-y-8 border-t border-stone-100 dark:border-stone-900 pt-8">
+                    <div className="space-y-6 md:space-y-8 border-t border-stone-100 dark:border-stone-900 pt-8">
                         <div className="flex items-center gap-3 mb-2">
-                            <Layout className="w-5 h-5 text-gold-600" />
-                            <h2 className="text-xs font-bold uppercase tracking-widest text-stone-900 dark:text-gold-100">Página de Inicio (Hero)</h2>
+                            <Layout className="w-4 h-4 md:w-5 md:h-5 text-gold-600" />
+                            <h2 className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-stone-900 dark:text-gold-100">Página de Inicio (Hero)</h2>
                         </div>
                         <Input
                             label="Título Principal"

@@ -61,6 +61,7 @@ export const Layout: React.FC<{
                 {view === 'admin' ? (
                     isAuthenticated ? (
                         <div className="flex flex-1 min-h-[calc(100vh-64px)] overflow-hidden">
+                            {/* Desktop Sidebar */}
                             <aside className="w-72 border-r border-stone-100 dark:border-stone-800 bg-white dark:bg-[#0A0A0A] hidden lg:flex flex-col justify-between">
                                 <div className="p-8">
                                     <div className="text-[10px] font-bold text-stone-300 uppercase tracking-[0.2em] mb-8">Administración</div>
@@ -115,9 +116,53 @@ export const Layout: React.FC<{
                                     </button>
                                 </div>
                             </aside>
-                            <div className="flex-1 bg-stone-50 dark:bg-stone-950 overflow-y-auto">
+
+                            {/* Main Content Area */}
+                            <div className="flex-1 bg-stone-50 dark:bg-stone-950 overflow-y-auto pb-20 lg:pb-0">
                                 {children}
                             </div>
+
+                            {/* Mobile Bottom Nav */}
+                            <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-stone-900/90 backdrop-blur border-t border-stone-200 dark:border-stone-800 lg:hidden px-2 py-1">
+                                <ul className="flex items-center justify-around h-16">
+                                    <li>
+                                        <button
+                                            onClick={() => setActiveAdminTab('inventory')}
+                                            className={`flex flex-col items-center gap-1 p-2 transition-all ${activeAdminTab === 'inventory' ? 'text-stone-900 dark:text-gold-400' : 'text-stone-400'}`}
+                                        >
+                                            <LayoutGrid className="w-5 h-5" />
+                                            <span className="text-[9px] font-bold uppercase tracking-[0.1em]">Piezas</span>
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button
+                                            onClick={() => setActiveAdminTab('analytics')}
+                                            className={`flex flex-col items-center gap-1 p-2 transition-all ${activeAdminTab === 'analytics' ? 'text-stone-900 dark:text-gold-400' : 'text-stone-400'}`}
+                                        >
+                                            <BarChart3 className="w-5 h-5" />
+                                            <span className="text-[9px] font-bold uppercase tracking-[0.1em]">Analítica</span>
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button
+                                            onClick={() => setActiveAdminTab('settings')}
+                                            className={`flex flex-col items-center gap-1 p-2 transition-all ${activeAdminTab === 'settings' ? 'text-stone-900 dark:text-gold-400' : 'text-stone-400'}`}
+                                        >
+                                            <Award className="w-5 h-5" />
+                                            <span className="text-[9px] font-bold uppercase tracking-[0.1em]">Ajustes</span>
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button
+                                            onClick={logout}
+                                            className="flex flex-col items-center gap-1 p-2 text-red-500/70"
+                                        >
+                                            <LogOut className="w-5 h-5" />
+                                            <span className="text-[9px] font-bold uppercase tracking-[0.1em]">Salir</span>
+                                        </button>
+                                    </li>
+                                </ul>
+                            </nav>
                         </div>
                     ) : (
                         <div className="flex-1 flex items-center justify-center bg-stone-50 dark:bg-stone-950 p-4">

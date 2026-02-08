@@ -107,35 +107,34 @@ export const AdminDashboard = () => {
         return (
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 max-w-7xl mx-auto">
             {/* Stats Overview */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-              <div className="bg-white dark:bg-stone-900 p-6 rounded-sm border border-stone-100 dark:border-stone-800 shadow-sm">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-2">Total Piezas</p>
-                <p className="text-3xl font-serif text-stone-900 dark:text-gold-200">{stats.total}</p>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8 md:mb-12">
+              <div className="bg-white dark:bg-stone-900 p-4 md:p-6 rounded-sm border border-stone-100 dark:border-stone-800 shadow-sm transition-transform active:scale-95">
+                <p className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-1 md:mb-2">Total Piezas</p>
+                <p className="text-2xl md:text-3xl font-serif text-stone-900 dark:text-gold-200">{stats.total}</p>
               </div>
-              {/* Removed total Interest Card from here */}
-              <div className="bg-white dark:bg-stone-900 p-6 rounded-sm border border-stone-100 dark:border-stone-800 shadow-sm">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-2">Agotado</p>
-                <p className="text-3xl font-serif text-stone-500">{stats.soldOut}</p>
+              <div className="bg-white dark:bg-stone-900 p-4 md:p-6 rounded-sm border border-stone-100 dark:border-stone-800 shadow-sm transition-transform active:scale-95">
+                <p className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-1 md:mb-2">Agotado</p>
+                <p className="text-2xl md:text-3xl font-serif text-stone-500">{stats.soldOut}</p>
               </div>
-              <div className="bg-white dark:bg-stone-900 p-6 rounded-sm border border-stone-100 dark:border-stone-800 shadow-sm">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-2">En Stock</p>
-                <p className="text-3xl font-serif text-stone-900 dark:text-white">{stats.inStock}</p>
+              <div className="bg-white dark:bg-stone-900 p-4 md:p-6 rounded-sm border border-stone-100 dark:border-stone-800 shadow-sm transition-transform active:scale-95">
+                <p className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-1 md:mb-2">En Stock</p>
+                <p className="text-2xl md:text-3xl font-serif text-stone-900 dark:text-white">{stats.inStock}</p>
               </div>
-              <div className="bg-white dark:bg-stone-900 p-6 rounded-sm border border-stone-100 dark:border-stone-800 shadow-sm">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-2">Bajo Pedido</p>
-                <p className="text-3xl font-serif text-stone-900 dark:text-white">{stats.madeToOrder}</p>
+              <div className="bg-white dark:bg-stone-900 p-4 md:p-6 rounded-sm border border-stone-100 dark:border-stone-800 shadow-sm transition-transform active:scale-95">
+                <p className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-1 md:mb-2">Bajo Pedido</p>
+                <p className="text-2xl md:text-3xl font-serif text-stone-900 dark:text-white">{stats.madeToOrder}</p>
               </div>
             </div>
 
             {/* Dashboard Top Area */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
               <div>
-                <h1 className="font-serif text-4xl text-stone-900 dark:text-gold-200 tracking-wider mb-2 uppercase">Inventario</h1>
-                <p className="text-stone-400 text-sm font-sans tracking-wide uppercase font-bold text-[10px]">Gestiona tus piezas exclusivas</p>
+                <h1 className="font-serif text-3xl md:text-4xl text-stone-900 dark:text-gold-200 tracking-wider mb-1 md:mb-2 uppercase">Inventario</h1>
+                <p className="text-stone-400 text-[9px] md:text-sm font-sans tracking-wide uppercase font-bold">Gestiona tus piezas exclusivas</p>
               </div>
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row w-full lg:w-auto gap-3 md:gap-4">
                 <select
-                  className="bg-white dark:bg-stone-900 text-[10px] font-bold uppercase tracking-widest px-4 py-2 outline-none border border-stone-100 dark:border-stone-800 dark:text-stone-300 rounded-sm"
+                  className="w-full sm:w-auto bg-white dark:bg-stone-900 text-[10px] font-bold uppercase tracking-widest px-4 py-3 md:py-2 outline-none border border-stone-100 dark:border-stone-800 dark:text-stone-300 rounded-sm appearance-none"
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value as any)}
                 >
@@ -144,38 +143,39 @@ export const AdminDashboard = () => {
                   <option value={ProductStatus.MADE_TO_ORDER}>Por Encargo</option>
                   <option value={ProductStatus.SOLD_OUT}>Agotado</option>
                 </select>
-                <Button onClick={() => setIsCreating(true)} className="flex gap-2">
-                  <Plus className="w-5 h-5" /> Agregar Producto
+                <Button onClick={() => setIsCreating(true)} className="w-full sm:w-auto flex justify-center items-center gap-2 py-3 md:py-2">
+                  <Plus className="w-4 h-4 md:w-5 md:h-5" /> Agregar Producto
                 </Button>
               </div>
             </div>
 
             {/* Bulk Actions Bar */}
             {selectedIds.length > 0 && (
-              <div className="bg-stone-900 text-white p-4 mb-8 flex items-center justify-between rounded-sm shadow-xl animate-in fade-in slide-in-from-top-4 duration-300">
-                <div className="flex items-center gap-4">
-                  <span className="text-[10px] font-bold uppercase tracking-widest">{selectedIds.length} seleccionados</span>
-                  <div className="h-4 w-px bg-stone-700" />
-                  <button onClick={() => handleBulkStatusChange(ProductStatus.IN_STOCK)} className="text-[10px] uppercase font-bold tracking-widest hover:text-gold-400 transition-colors">Disponible</button>
-                  <button onClick={() => handleBulkStatusChange(ProductStatus.MADE_TO_ORDER)} className="text-[10px] uppercase font-bold tracking-widest hover:text-gold-400 transition-colors">Pedido</button>
-                  <button onClick={() => handleBulkStatusChange(ProductStatus.SOLD_OUT)} className="text-[10px] uppercase font-bold tracking-widest hover:text-gold-400 transition-colors">Agotado</button>
+              <div className="sticky top-20 z-30 bg-stone-900 text-white p-3 md:p-4 mb-8 flex flex-col md:flex-row items-center justify-between rounded-sm shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 gap-4">
+                <div className="flex items-center gap-3 md:gap-4 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-none">
+                  <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest whitespace-nowrap">{selectedIds.length} seleccionados</span>
+                  <div className="h-4 w-px bg-stone-700 flex-shrink-0" />
+                  <button onClick={() => handleBulkStatusChange(ProductStatus.IN_STOCK)} className="text-[9px] md:text-[10px] uppercase font-bold tracking-widest hover:text-gold-400 transition-colors whitespace-nowrap">Disponible</button>
+                  <button onClick={() => handleBulkStatusChange(ProductStatus.MADE_TO_ORDER)} className="text-[9px] md:text-[10px] uppercase font-bold tracking-widest hover:text-gold-400 transition-colors whitespace-nowrap">Pedido</button>
+                  <button onClick={() => handleBulkStatusChange(ProductStatus.SOLD_OUT)} className="text-[9px] md:text-[10px] uppercase font-bold tracking-widest hover:text-gold-400 transition-colors whitespace-nowrap">Agotado</button>
                 </div>
-                <button onClick={() => setDeleteConfirm(selectedIds)} className="bg-red-500/10 text-red-400 px-4 py-2 rounded-sm text-[10px] font-bold uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">
+                <button onClick={() => setDeleteConfirm(selectedIds)} className="w-full md:w-auto bg-red-500 text-white md:bg-red-500/10 md:text-red-400 px-6 py-2 rounded-sm text-[10px] font-bold uppercase tracking-widest hover:bg-red-600 md:hover:bg-red-500 md:hover:text-white transition-all">
                   Eliminar Lote
                 </button>
               </div>
             )}
 
-            {/* Product List Table */}
-            <div className="w-full bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-sm overflow-hidden shadow-sm">
-              <div className="grid grid-cols-12 px-6 py-4 border-b border-stone-100 dark:border-stone-800 text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-stone-400 hidden md:grid">
-                <div className="col-span-1 border-r border-stone-800/0">
+            {/* Product List */}
+            <div className="w-full bg-white dark:bg-stone-900 md:border border-stone-100 dark:border-stone-800 rounded-sm overflow-hidden shadow-sm">
+              {/* Desktop Header */}
+              <div className="grid grid-cols-12 px-6 py-4 border-b border-stone-100 dark:border-stone-800 text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-stone-400 hidden lg:grid">
+                <div className="col-span-1">
                   <input type="checkbox" checked={selectedIds.length === products.length && products.length > 0} onChange={toggleSelectAll} className="w-4 h-4 accent-gold-500 rounded-sm" />
                 </div>
                 <div className="col-span-1">Imagen</div>
-                <div className="col-span-5">Producto / Detalles</div>
+                <div className="col-span-4">Producto / Detalles</div>
                 <div className="col-span-2 text-center">Precio</div>
-                <div className="col-span-1 text-center">Estado</div>
+                <div className="col-span-2 text-center">Estado</div>
                 <div className="col-span-2 text-right">Acciones</div>
               </div>
 
@@ -183,73 +183,94 @@ export const AdminDashboard = () => {
                 {products
                   .filter(p => filterStatus === 'All' || p.status === filterStatus)
                   .map(product => (
-                    <div key={product.id} className="grid grid-cols-1 md:grid-cols-12 items-center px-6 py-8 hover:bg-stone-50 dark:hover:bg-stone-900/30 transition-all group">
+                    <div key={product.id} className="flex flex-col lg:grid lg:grid-cols-12 items-center px-4 md:px-6 py-6 md:py-8 hover:bg-stone-50 dark:hover:bg-stone-900/30 transition-all group relative">
 
-                      <div className="col-span-1 hidden md:block">
+                      {/* Desktop Checkbox */}
+                      <div className="col-span-1 hidden lg:block">
                         <input type="checkbox" checked={selectedIds.includes(product.id)} onChange={() => toggleSelect(product.id)} className="w-4 h-4 accent-gold-500 rounded-sm" />
                       </div>
 
-                      <div className="col-span-1">
-                        <div className="relative w-12 h-14 overflow-hidden bg-stone-100 border border-stone-200 dark:border-stone-800 flex-shrink-0">
-                          <img src={product.images[0]} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                      {/* Mobile Header: Checkbox + Status */}
+                      <div className="w-full flex lg:hidden items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <input type="checkbox" checked={selectedIds.includes(product.id)} onChange={() => toggleSelect(product.id)} className="w-5 h-5 accent-gold-500 rounded-sm" />
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">ID: {product.id.slice(0, 8)}</span>
+                        </div>
+                        <div className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full ${product.status === ProductStatus.IN_STOCK ? 'bg-green-50 text-green-600 dark:bg-green-900/20' :
+                            product.status === ProductStatus.MADE_TO_ORDER ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20' :
+                              'bg-red-50 text-red-600 dark:bg-red-900/20'
+                          }`}>
+                          {product.status}
                         </div>
                       </div>
 
-                      {/* Product Info */}
-                      <div className="col-span-1 md:col-span-5 flex flex-col gap-2 mb-4 md:mb-0 ml-4">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="font-serif text-lg text-stone-900 dark:text-white leading-tight uppercase tracking-widest">{product.name}</h3>
-                          {product.badge && (
-                            <span className="text-[8px] bg-gold-100 dark:bg-gold-900/30 px-2 py-0.5 text-gold-600 rounded-full font-bold border border-gold-200/50 uppercase tracking-tighter">
-                              {product.badge}
-                            </span>
-                          )}
+                      <div className="w-full flex lg:contents gap-4 items-start">
+                        {/* Image */}
+                        <div className="col-span-1 flex-shrink-0">
+                          <div className="relative w-20 h-24 lg:w-12 lg:h-14 overflow-hidden bg-stone-100 border border-stone-200 dark:border-stone-800">
+                            <img src={product.images[0]} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                          </div>
                         </div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          {product.category && (
-                            <span className="text-[8px] bg-stone-100 dark:bg-stone-800 px-2 py-0.5 text-stone-500 rounded-sm font-bold uppercase tracking-widest">
-                              {product.category}
-                            </span>
-                          )}
-                          {product.collection && (
-                            <span className="text-[8px] border border-stone-200 dark:border-stone-800 px-2 py-0.5 text-stone-400 rounded-sm font-bold uppercase tracking-widest">
-                              {product.collection}
-                            </span>
-                          )}
+
+                        {/* Product Info */}
+                        <div className="col-span-1 lg:col-span-4 flex flex-col gap-1 md:gap-2 flex-grow lg:ml-4">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="font-serif text-lg md:text-xl lg:text-lg text-stone-900 dark:text-white leading-tight uppercase tracking-widest">{product.name}</h3>
+                            {product.badge && (
+                              <span className="text-[8px] bg-gold-100 dark:bg-gold-900/30 px-2 py-0.5 text-gold-600 rounded-sm font-bold border border-gold-200/50 uppercase tracking-tighter">
+                                {product.badge}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            {product.category && (
+                              <span className="text-[8px] bg-stone-100 dark:bg-stone-800 px-2 py-0.5 text-stone-500 rounded-sm font-bold uppercase tracking-widest">
+                                {product.category}
+                              </span>
+                            )}
+                            {product.collection && (
+                              <span className="text-[8px] border border-stone-200 dark:border-stone-800 px-2 py-0.5 text-stone-400 rounded-sm font-bold uppercase tracking-widest">
+                                {product.collection}
+                              </span>
+                            )}
+                          </div>
+                          <div className="lg:hidden mt-2">
+                            <span className="font-serif text-2xl text-gold-600">${product.price?.toLocaleString('es-CL')}</span>
+                          </div>
                         </div>
                       </div>
 
-                      {/* Price */}
-                      <div className="col-span-2 text-center">
+                      {/* Desktop Price */}
+                      <div className="hidden lg:block lg:col-span-2 text-center">
                         {inlinePriceId === product.id ? (
                           <div className="flex items-center justify-center gap-2">
                             <input
                               type="number"
                               autoFocus
-                              className="w-20 bg-stone-100 dark:bg-stone-800 border-none p-1.5 text-xs text-stone-900 dark:text-white rounded-sm"
+                              className="w-24 bg-stone-100 dark:bg-stone-800 border-none p-1.5 text-xs text-stone-900 dark:text-white rounded-sm outline-none ring-1 ring-gold-500"
                               value={inlinePrice}
                               onChange={(e) => setInlinePrice(Number(e.target.value))}
                               onKeyDown={(e) => e.key === 'Enter' && handleInlinePriceSave(product.id)}
                             />
-                            <button onClick={() => handleInlinePriceSave(product.id)} className="text-green-500"><Check className="w-3.5 h-3.5" /></button>
-                            <button onClick={() => setInlinePriceId(null)} className="text-red-400"><CloseIcon className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => handleInlinePriceSave(product.id)} className="text-green-500 p-1 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-full"><Check className="w-4 h-4" /></button>
+                            <button onClick={() => setInlinePriceId(null)} className="text-red-400 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full"><CloseIcon className="w-4 h-4" /></button>
                           </div>
                         ) : (
                           <span
                             onClick={() => { setInlinePriceId(product.id); setInlinePrice(product.price); }}
-                            className="font-serif text-lg md:text-base text-stone-600 dark:text-stone-300 cursor-pointer hover:text-gold-600 border-b border-dashed border-transparent hover:border-gold-600 pb-0.5"
+                            className="font-serif text-lg text-stone-600 dark:text-stone-300 cursor-pointer hover:text-gold-600 border-b border-dashed border-stone-200 dark:border-stone-800 hover:border-gold-600 pb-0.5 transition-colors"
                           >
                             ${product.price ? product.price.toLocaleString('es-CL') : '0'}
                           </span>
                         )}
                       </div>
 
-                      {/* Status */}
-                      <div className="col-span-1 text-center">
+                      {/* Desktop Status */}
+                      <div className="hidden lg:block lg:col-span-2 text-center">
                         <select
                           value={product.status}
                           onChange={(e) => handleInlineStatusChange(product.id, e.target.value as ProductStatus)}
-                          className="bg-transparent text-[9px] font-bold uppercase tracking-widest outline-none border-none cursor-pointer focus:ring-0 dark:text-stone-400"
+                          className="bg-transparent text-[10px] font-bold uppercase tracking-widest outline-none border-none cursor-pointer focus:ring-0 dark:text-stone-400 hover:text-gold-600 transition-colors"
                         >
                           {Object.values(ProductStatus).map(s => (
                             <option key={s} value={s} className="bg-white dark:bg-stone-900">{s}</option>
@@ -258,10 +279,21 @@ export const AdminDashboard = () => {
                       </div>
 
                       {/* Actions */}
-                      <div className="col-span-1 md:col-span-2 flex items-center justify-end gap-1 md:opacity-0 group-hover:md:opacity-100 transition-opacity">
-                        <button onClick={() => handleDuplicate(product.id)} className="p-2 text-stone-400 hover:text-gold-600 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full transition-all" title="Duplicar"><Copy className="w-3.5 h-3.5" /></button>
-                        <button onClick={() => setEditingProduct(product)} className="p-2 text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full transition-all" title="Editar"><Edit2 className="w-3.5 h-3.5" /></button>
-                        <button onClick={() => setDeleteConfirm([product.id])} className="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-full transition-all" title="Eliminar"><Trash2 className="w-3.5 h-3.5" /></button>
+                      <div className="w-full lg:w-auto mt-6 lg:mt-0 flex items-center justify-between lg:justify-end gap-2 lg:col-span-2 lg:opacity-0 group-hover:lg:opacity-100 transition-opacity">
+                        <div className="flex gap-1">
+                          <button onClick={() => handleDuplicate(product.id)} className="p-3 lg:p-2 text-stone-500 hover:text-gold-600 hover:bg-gold-50 dark:hover:bg-gold-900/10 rounded-full transition-all flex items-center gap-2 lg:gap-0" title="Duplicar">
+                            <Copy className="w-4 h-4" />
+                            <span className="lg:hidden text-[10px] font-bold uppercase tracking-widest">Duplicar</span>
+                          </button>
+                          <button onClick={() => setEditingProduct(product)} className="p-3 lg:p-2 text-stone-500 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full transition-all flex items-center gap-2 lg:gap-0" title="Editar">
+                            <Edit2 className="w-4 h-4" />
+                            <span className="lg:hidden text-[10px] font-bold uppercase tracking-widest">Editar</span>
+                          </button>
+                        </div>
+                        <button onClick={() => setDeleteConfirm([product.id])} className="p-3 lg:p-2 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-full transition-all flex items-center gap-2 lg:gap-0" title="Eliminar">
+                          <Trash2 className="w-4 h-4" />
+                          <span className="lg:hidden text-[10px] font-bold uppercase tracking-widest">Eliminar</span>
+                        </button>
                       </div>
                     </div>
                   ))}
