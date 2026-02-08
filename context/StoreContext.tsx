@@ -34,7 +34,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   // Check authentication status on mount
   useEffect(() => {
-    const isAdminEmail = (email?: string) => !!email?.endsWith('@varmina.com');
+    const isAdminEmail = (email?: string) => email === 'varminamail@gmail.com';
 
     const checkAuth = async () => {
       const currentUser = await authService.getCurrentUser();
