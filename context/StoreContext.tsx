@@ -45,22 +45,14 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [currency, setCurrency] = useState<'CLP' | 'USD'>('CLP');
-  const [darkMode, setDarkMode] = useState(() => {
-    try {
-      return localStorage.getItem('varmina_dark_mode') === 'true';
-    } catch {
-      return false;
-    }
-  });
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('varmina_dark_mode') === 'true');
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // No longer optimistic
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [settings, setSettings] = useState<BrandSettings | null>(null);
   const [activeAdminTab, setActiveAdminTab] = useState<'inventory' | 'analytics' | 'settings'>('inventory');
 
   const lastRefreshRef = useRef(0);
-  const isInitializingRef = useRef(false);
-  const authCheckedRef = useRef(false);
 
   const removeToast = useCallback((id: string) => {
     setToasts(prev => prev.filter(t => t.id !== id));
@@ -95,76 +87,51 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   }, [addToast]);
 
-  // Helper to verify admin status strictly
-  const verifyAdmin = useCallback(async (userId: string) => {
-    try {
-      console.log('⚡ [Auth] Verifying admin status for:', userId);
-      const isAuthorized = await withTimeout(authService.isAdmin(userId), 15000, false);
-      console.log('⚡ [Auth] Admin check result:', isAuthorized);
-      setIsAuthenticated(isAuthorized);
-      return isAuthorized;
-    } catch (e) {
-      console.error('Verify Admin Fail:', e);
-      setIsAuthenticated(false);
-      return false;
-    }
-  }, []);
-
-  // SINGLE INITIALIZATION EFFECT
+  // Standard Auth Listener
   useEffect(() => {
-    if (isInitializingRef.current) return;
-    isInitializingRef.current = true;
-
-    const initialize = async () => {
-      console.log('⚡ [Auth] App initialization started');
-      setLoading(true);
-
+    // 1. Initial Load: Check if we have a session
+    const setupAuth = async () => {
       try {
-        // 1. Get session first
         const session = await authService.getCurrentSession();
         const currentUser = session?.user || null;
         setUser(currentUser);
 
-        // 2. Fetch critical app data
-        await Promise.all([
-          refreshSettings().catch(e => console.error('BG Settings:', e)),
-          refreshProducts(true, true).catch(e => console.error('BG Products:', e))
-        ]);
-
-        // 3. If logged in, verify admin status strictly before finishing loader
         if (currentUser) {
-          await verifyAdmin(currentUser.id);
-        } else {
-          setIsAuthenticated(false);
+          const isCheckAdmin = await authService.isAdmin(currentUser.id);
+          setIsAuthenticated(isCheckAdmin);
         }
+
+        // Always fetch public data
+        refreshSettings().catch(console.error);
+        refreshProducts(true, true).catch(console.error);
+
       } catch (err) {
-        console.error('⚡ [Auth] Init Error:', err);
+        console.error('Auth setup failed:', err);
       } finally {
         setLoading(false);
-        console.log('🏁 [Auth] Initialization finished');
       }
     };
 
-    initialize();
+    setupAuth();
 
+    // 2. Listen for changes (Login/Logout/Refresh)
     const { data: { subscription } } = authService.onAuthStateChange(async (event, session) => {
-      console.log('🔐 [Auth] Event:', event);
+      console.log('Auth event:', event);
       const currentUser = session?.user || null;
       setUser(currentUser);
 
       if (currentUser) {
-        if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-          await verifyAdmin(currentUser.id);
-        }
+        const isCheckAdmin = await authService.isAdmin(currentUser.id);
+        setIsAuthenticated(isCheckAdmin);
       } else {
         setIsAuthenticated(false);
       }
+
+      setLoading(false);
     });
 
-    return () => {
-      subscription?.unsubscribe();
-    };
-  }, [refreshSettings, refreshProducts, verifyAdmin]);
+    return () => subscription?.unsubscribe();
+  }, [refreshSettings, refreshProducts]);
 
   useEffect(() => {
     if (darkMode) document.documentElement.classList.add('dark');
@@ -181,27 +148,17 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   }, []);
 
   const login = async (email: string, password: string) => {
-    console.log('Attempting login for:', email);
     const { user: authUser, error } = await authService.signIn(email, password);
 
     if (error) {
-      console.error('Login error:', error.message);
       addToast('error', error.message);
       throw error;
     }
 
     if (authUser) {
-      console.log('Login successful, verifying admin status for:', authUser.id);
-      const isAuthorized = await verifyAdmin(authUser.id);
-
-      if (isAuthorized) {
-        setUser(authUser);
-        setIsAuthenticated(true);
-        addToast('success', 'Acceso concedido. Bienvenido.');
-      } else {
-        addToast('error', 'Su cuenta no tiene permisos de administrador.');
-        throw new Error('Not authorized as admin');
-      }
+      // We don't need to manually check admin here
+      // The useEffect listener will catch the event and update state
+      addToast('success', 'Bienvenido');
     }
   };
 
