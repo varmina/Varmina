@@ -3,6 +3,7 @@ import { Product, ToastMessage } from '../types';
 import { supabaseProductService } from '../services/supabaseProductService';
 import { authService } from '../services/authService';
 import { User } from '@supabase/supabase-js';
+import { settingsService, BrandSettings } from '../services/settingsService';
 
 interface StoreContextType {
   products: Product[];
@@ -19,6 +20,10 @@ interface StoreContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  settings: BrandSettings | null;
+  refreshSettings: () => Promise<void>;
+  activeAdminTab: 'inventory' | 'brand';
+  setActiveAdminTab: (tab: 'inventory' | 'brand') => void;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -31,6 +36,8 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [settings, setSettings] = useState<BrandSettings | null>(null);
+  const [activeAdminTab, setActiveAdminTab] = useState<'inventory' | 'brand'>('inventory');
 
   // Consolidated Initialization
   useEffect(() => {
@@ -39,7 +46,8 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       try {
         const [currentUser] = await Promise.all([
           authService.getCurrentUser(),
-          refreshProducts()
+          refreshProducts(),
+          refreshSettings()
         ]);
 
         setUser(currentUser);
@@ -116,6 +124,15 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   };
 
+  const refreshSettings = async () => {
+    try {
+      const data = await settingsService.getSettings();
+      setSettings(data);
+    } catch (error) {
+      console.error('Error loading settings:', error);
+    }
+  };
+
   const toggleCurrency = () => setCurrency(prev => prev === 'CLP' ? 'USD' : 'CLP');
   const toggleDarkMode = () => setDarkMode(prev => !prev);
 
@@ -157,7 +174,11 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       isAuthenticated,
       user,
       login,
-      logout
+      logout,
+      settings,
+      refreshSettings,
+      activeAdminTab,
+      setActiveAdminTab
     }}>
       {children}
     </StoreContext.Provider>

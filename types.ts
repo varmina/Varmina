@@ -8,6 +8,8 @@ export interface ProductVariant {
   id: string;
   name: string; // e.g., "Oro 18k", "Plata 950"
   price: number;
+  images?: string[]; // Images specifically for this variant
+  isPrimary?: boolean; // Whether this variant is shown by default
 }
 
 export interface Product {

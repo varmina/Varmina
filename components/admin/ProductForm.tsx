@@ -3,7 +3,7 @@ import { useStore } from '../../context/StoreContext';
 import { Product, ProductStatus } from '../../types';
 import { Button, Input } from '../UI';
 import { supabaseProductService } from '../../services/supabaseProductService';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, GripVertical, Star, Check } from 'lucide-react';
 
 interface ProductFormProps {
     initialData?: Product;
@@ -24,6 +24,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
         badge: '',
         variants: []
     });
+    const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -38,14 +39,40 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
     };
 
     const addVariant = () => {
-        const newVariant = { id: crypto.randomUUID(), name: '', price: formData.price || 0 };
+        const newVariant = { id: crypto.randomUUID(), name: '', price: formData.price || 0, images: [], isPrimary: false };
         setFormData(prev => ({ ...prev, variants: [...(prev.variants || []), newVariant] }));
     };
 
     const updateVariant = (id: string, field: string, value: any) => {
+        setFormData(prev => {
+            let nextVariants = prev.variants?.map(v => {
+                if (v.id === id) {
+                    const updated = { ...v, [field]: value };
+                    return updated;
+                }
+                // If setting this one to primary, unset others
+                if (field === 'isPrimary' && value === true) {
+                    return { ...v, isPrimary: false };
+                }
+                return v;
+            });
+            return { ...prev, variants: nextVariants };
+        });
+    };
+
+    const toggleVariantImage = (variantId: string, imageUrl: string) => {
         setFormData(prev => ({
             ...prev,
-            variants: prev.variants?.map(v => v.id === id ? { ...v, [field]: value } : v)
+            variants: prev.variants?.map(v => {
+                if (v.id === variantId) {
+                    const images = v.images || [];
+                    const nextImages = images.includes(imageUrl)
+                        ? images.filter((i: string) => i !== imageUrl)
+                        : [...images, imageUrl];
+                    return { ...v, images: nextImages };
+                }
+                return v;
+            })
         }));
     };
 
@@ -112,11 +139,30 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
             if (imageUrl.includes('supabase')) {
                 await supabaseProductService.deleteImage(imageUrl);
             }
-            setFormData({ ...formData, images: formData.images?.filter((_, i) => i !== index) });
+            setFormData(prev => ({
+                ...prev,
+                images: prev.images?.filter((_, i) => i !== index),
+                variants: prev.variants?.map(v => ({
+                    ...v,
+                    images: v.images?.filter((i: string) => i !== imageUrl)
+                }))
+            }));
         } catch (error) {
             console.error('Error removing image:', error);
             addToast('error', 'Error al eliminar imagen');
         }
+    };
+
+    const handleDragStart = (idx: number) => setDraggedIdx(idx);
+    const handleDragOver = (e: React.DragEvent) => e.preventDefault();
+    const handleDrop = (idx: number) => {
+        if (draggedIdx === null) return;
+        const nextImages = [...(formData.images || [])];
+        const draggedItem = nextImages[draggedIdx];
+        nextImages.splice(draggedIdx, 1);
+        nextImages.splice(idx, 0, draggedItem);
+        setFormData({ ...formData, images: nextImages });
+        setDraggedIdx(null);
     };
 
     return (
@@ -177,33 +223,68 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                     <button type="button" onClick={addVariant} className="text-[10px] font-bold text-gold-600 uppercase tracking-widest hover:text-gold-700">+ Añadir Variante</button>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-6">
                     {formData.variants?.map((v) => (
-                        <div key={v.id} className="flex gap-4 items-end animate-in fade-in slide-in-from-left-2 duration-300">
-                            <div className="flex-1">
-                                <input
-                                    placeholder="Nombre variante (Ej: Oro Rosa)"
-                                    className="w-full bg-stone-50 dark:bg-stone-900 border-none p-3 text-xs focus:ring-1 focus:ring-gold-500 outline-none"
-                                    value={v.name}
-                                    onChange={e => updateVariant(v.id, 'name', e.target.value)}
-                                />
+                        <div key={v.id} className="p-4 bg-stone-50 dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-sm animate-in fade-in slide-in-from-left-2 duration-300">
+                            <div className="flex gap-4 items-end mb-4">
+                                <div className="flex-1">
+                                    <input
+                                        placeholder="Nombre variante (Ej: Oro Rosa)"
+                                        className="w-full bg-white dark:bg-stone-800 border-none p-3 text-xs focus:ring-1 focus:ring-gold-500 outline-none"
+                                        value={v.name}
+                                        onChange={e => updateVariant(v.id, 'name', e.target.value)}
+                                    />
+                                </div>
+                                <div className="w-32">
+                                    <input
+                                        type="number"
+                                        placeholder="Precio"
+                                        className="w-full bg-white dark:bg-stone-800 border-none p-3 text-xs focus:ring-1 focus:ring-gold-500 outline-none"
+                                        value={v.price}
+                                        onChange={e => updateVariant(v.id, 'price', Number(e.target.value))}
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => updateVariant(v.id, 'isPrimary', !v.isPrimary)}
+                                    className={`p-3 rounded-sm transition-all ${v.isPrimary ? 'text-gold-500 bg-gold-100/50' : 'text-stone-300 hover:text-stone-500'}`}
+                                    title="Variante Principal"
+                                >
+                                    <Star className={`w-4 h-4 ${v.isPrimary ? 'fill-current' : ''}`} />
+                                </button>
+                                <button type="button" onClick={() => removeVariant(v.id)} className="p-3 text-red-400 hover:text-red-600">
+                                    <X className="w-4 h-4" />
+                                </button>
                             </div>
-                            <div className="w-32">
-                                <input
-                                    type="number"
-                                    placeholder="Precio"
-                                    className="w-full bg-stone-50 dark:bg-stone-900 border-none p-3 text-xs focus:ring-1 focus:ring-gold-500 outline-none"
-                                    value={v.price}
-                                    onChange={e => updateVariant(v.id, 'price', Number(e.target.value))}
-                                />
+
+                            {/* Images for this variant */}
+                            <div className="space-y-2">
+                                <p className="text-[9px] font-bold uppercase tracking-widest text-stone-400">Imágenes de la Variante:</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {formData.images?.map((img, idx) => (
+                                        <button
+                                            key={idx}
+                                            type="button"
+                                            onClick={() => toggleVariantImage(v.id, img)}
+                                            className={`relative w-12 h-14 border-2 transition-all rounded-sm overflow-hidden ${v.images?.includes(img) ? 'border-gold-500 scale-105' : 'border-transparent opacity-40 hover:opacity-100'}`}
+                                        >
+                                            <img src={img} className="w-full h-full object-cover" />
+                                            {v.images?.includes(img) && (
+                                                <div className="absolute top-0 right-0 bg-gold-500 text-white p-0.5 rounded-bl-sm">
+                                                    <Check className="w-2 h-2" />
+                                                </div>
+                                            )}
+                                        </button>
+                                    ))}
+                                    {(!formData.images || formData.images.length === 0) && (
+                                        <p className="text-[9px] italic text-stone-400">Sube imágenes primero</p>
+                                    )}
+                                </div>
                             </div>
-                            <button type="button" onClick={() => removeVariant(v.id)} className="p-3 text-red-400 hover:text-red-600">
-                                <X className="w-4 h-4" />
-                            </button>
                         </div>
                     ))}
                     {formData.variants?.length === 0 && (
-                        <p className="text-[10px] italic text-stone-400">No hay variantes definidas. Se usará el precio base.</p>
+                        <p className="text-[10px] italic text-stone-400">No hay variantes definidas. Se usará el precio base e imágenes generales.</p>
                     )}
                 </div>
             </div>
@@ -239,8 +320,18 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                 <label className="block text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-stone-400">Imágenes</label>
                 <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     {formData.images?.map((img, idx) => (
-                        <div key={idx} className="relative aspect-square group overflow-hidden bg-stone-50 border border-stone-100 rounded-sm">
+                        <div
+                            key={idx}
+                            draggable
+                            onDragStart={() => handleDragStart(idx)}
+                            onDragOver={handleDragOver}
+                            onDrop={() => handleDrop(idx)}
+                            className={`relative aspect-square group overflow-hidden bg-stone-50 border border-stone-100 rounded-sm cursor-move transition-transform ${draggedIdx === idx ? 'opacity-30' : ''}`}
+                        >
                             <img src={img} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="upload" />
+                            <div className="absolute top-2 left-2 bg-stone-900/60 p-1 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                                <GripVertical className="w-3 h-3 text-white" />
+                            </div>
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                 <button
                                     type="button"

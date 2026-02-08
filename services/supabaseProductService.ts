@@ -213,4 +213,31 @@ export const supabaseProductService = {
             console.error('Error deleting image from storage:', error);
         }
     },
+
+    // Duplicate product
+    duplicate: async (id: string): Promise<Product> => {
+        const { data: original, error: fetchError } = await (supabase as any)
+            .from('products')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (fetchError || !original) throw new Error('No se pudo encontrar el producto original');
+
+        const { id: _, created_at: __, updated_at: ___, ...rest } = original;
+        const copyData = {
+            ...rest,
+            name: `${original.name} (Copia)`,
+            whatsapp_clicks: 0
+        };
+
+        const { data, error } = await (supabase as any)
+            .from('products')
+            .insert(copyData)
+            .select()
+            .single();
+
+        if (error) throw new Error('Error al duplicar el producto');
+        return data;
+    }
 };

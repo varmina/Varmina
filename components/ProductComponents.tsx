@@ -3,6 +3,7 @@ import { Product, ProductStatus } from '../types';
 import { Button, StatusBadge } from './UI';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabaseProductService } from '../services/supabaseProductService';
+import { useStore } from '../context/StoreContext';
 
 const formatPrice = (price: number, currency: 'CLP' | 'USD') => {
     if (currency === 'CLP') {
@@ -17,7 +18,9 @@ export const ProductCard: React.FC<{
     layout: 'grid' | 'list';
     onClick: (p: Product) => void
 }> = ({ product, currency, layout, onClick }) => {
-    const displayPrice = currency === 'CLP' ? product.price : Math.round(product.price / 950);
+    const { settings } = useStore();
+    const exchangeRate = settings?.usd_exchange_rate || 950;
+    const displayPrice = currency === 'CLP' ? product.price : Math.round(product.price / exchangeRate);
 
     return (
         <div
@@ -80,21 +83,34 @@ export const ProductDetail: React.FC<{
     currency: 'CLP' | 'USD';
     onClose: () => void;
 }> = ({ product, currency, onClose }) => {
+    const { settings } = useStore();
     const [activeImg, setActiveImg] = useState(0);
-    const [selectedVariant, setSelectedVariant] = useState<any>(null);
+    const primaryVariant = product.variants?.find(v => v.isPrimary);
+    const [selectedVariant, setSelectedVariant] = useState<any>(primaryVariant || null);
 
-    const basePrice = currency === 'CLP' ? product.price : Math.round(product.price / 950);
+    const imagesToDisplay = (selectedVariant && selectedVariant.images && selectedVariant.images.length > 0)
+        ? selectedVariant.images
+        : product.images;
+
+    const exchangeRate = settings?.usd_exchange_rate || 950;
+    const basePrice = currency === 'CLP' ? product.price : Math.round(product.price / exchangeRate);
     const currentPrice = selectedVariant
-        ? (currency === 'CLP' ? selectedVariant.price : Math.round(selectedVariant.price / 950))
+        ? (currency === 'CLP' ? selectedVariant.price : Math.round(selectedVariant.price / exchangeRate))
         : basePrice;
 
     const handleWhatsApp = async () => {
         // Track interest
         await supabaseProductService.incrementWhatsappClicks(product.id);
 
-        const message = `Hola Varmina, me gustaría consultar por la pieza: "${product.name}"${selectedVariant ? ` (${selectedVariant.name})` : ''}. ID: ${product.id.slice(0, 8)}`;
+        const number = settings?.whatsapp_number || '56927435294';
+        const template = settings?.whatsapp_template || 'Hola Varmina, me gustaría consultar por la pieza: "{{product_name}}". ID: {{product_id}}';
+
+        const message = template
+            .replace('{{product_name}}', `${product.name}${selectedVariant ? ` (${selectedVariant.name})` : ''}`)
+            .replace('{{product_id}}', product.id.slice(0, 8));
+
         const encoded = encodeURIComponent(message);
-        window.open(`https://wa.me/56927435294?text=${encoded}`, '_blank');
+        window.open(`https://wa.me/${number}?text=${encoded}`, '_blank');
     };
 
     return (
@@ -102,20 +118,20 @@ export const ProductDetail: React.FC<{
             <div className="md:w-1/2 space-y-4">
                 <div className="aspect-[4/5] bg-stone-100 overflow-hidden relative rounded-sm shadow-inner">
                     <img
-                        src={product.images[activeImg]}
+                        src={imagesToDisplay[activeImg] || product.images[0]}
                         className="w-full h-full object-cover animate-in fade-in duration-500"
                         alt={product.name}
                     />
-                    {product.images.length > 1 && (
+                    {imagesToDisplay.length > 1 && (
                         <>
                             <button
-                                onClick={(e) => { e.stopPropagation(); setActiveImg(prev => prev === 0 ? product.images.length - 1 : prev - 1); }}
+                                onClick={(e) => { e.stopPropagation(); setActiveImg(prev => prev === 0 ? imagesToDisplay.length - 1 : prev - 1); }}
                                 className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/90 backdrop-blur shadow-xl text-stone-900 rounded-full hover:bg-gold-500 hover:text-white transition-all"
                             >
                                 <ChevronLeft className="w-5 h-5" />
                             </button>
                             <button
-                                onClick={(e) => { e.stopPropagation(); setActiveImg(prev => prev === product.images.length - 1 ? 0 : prev + 1); }}
+                                onClick={(e) => { e.stopPropagation(); setActiveImg(prev => prev === imagesToDisplay.length - 1 ? 0 : prev + 1); }}
                                 className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/90 backdrop-blur shadow-xl text-stone-900 rounded-full hover:bg-gold-500 hover:text-white transition-all"
                             >
                                 <ChevronRight className="w-5 h-5" />
@@ -124,7 +140,7 @@ export const ProductDetail: React.FC<{
                     )}
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-4 hide-scrollbar">
-                    {product.images.map((img, idx) => (
+                    {imagesToDisplay.map((img: string, idx: number) => (
                         <button
                             key={idx}
                             onClick={() => setActiveImg(idx)}
@@ -163,7 +179,7 @@ export const ProductDetail: React.FC<{
                             {product.variants.map((v) => (
                                 <button
                                     key={v.id}
-                                    onClick={() => setSelectedVariant(v)}
+                                    onClick={() => { setSelectedVariant(v); setActiveImg(0); }}
                                     className={`px-5 py-2.5 text-xs font-bold uppercase tracking-widest border transition-all rounded-full ${selectedVariant?.id === v.id ? 'bg-stone-900 text-white border-stone-900 shadow-lg' : 'bg-transparent border-stone-200 text-stone-500 hover:border-gold-500'}`}
                                 >
                                     {v.name}
@@ -184,10 +200,8 @@ export const ProductDetail: React.FC<{
                         disabled={product.status === ProductStatus.SOLD_OUT}
                         onClick={handleWhatsApp}
                     >
-                        {product.status === ProductStatus.IN_STOCK ? 'Consultar WhatsApp' :
-                            product.status === ProductStatus.MADE_TO_ORDER ? 'Solicitar Encargo' : 'Agotado'}
+                        Consultar
                     </Button>
-                    <p className="text-center text-[9px] text-stone-400 uppercase tracking-widest">Atención personalizada inmediata</p>
                 </div>
             </div>
         </div>
