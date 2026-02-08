@@ -45,12 +45,7 @@ export const BrandManagement: React.FC = () => {
         .slice(0, 5);
 
     return (
-        <div className="max-w-3xl mx-auto animate-in fade-in duration-500">
-            <header className="mb-12">
-                <h1 className="font-serif text-3xl text-stone-900 dark:text-gold-200 uppercase tracking-widest mb-2">Gestión de Marca</h1>
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Controla la identidad y el rendimiento de Varmina</p>
-            </header>
-
+        <div className="max-w-3xl mx-auto animate-in fade-in duration-500 pt-8">
             <form onSubmit={handleSave} className="space-y-12 pb-24">
 
                 {/* 1. ANALYTICS PREVIEW */}

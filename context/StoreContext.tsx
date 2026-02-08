@@ -53,15 +53,10 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const refreshProducts = async (force = false, silent = false) => {
     const now = Date.now();
 
-    // Check cache
-    if (!force && now - lastRefresh < 5000) {
-      console.log('Skipping product refresh, using cache');
-      if (!silent) setLoading(false);
-      return;
-    }
+    // SIMPLE CACHE: Don't fetch if fetched in last 2 seconds unless forced
+    if (!force && now - lastRefresh < 2000) return;
 
     if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-      console.error('Missing Supabase credentials');
       setLoading(false);
       return;
     }
@@ -69,25 +64,22 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     if (!silent) setLoading(true);
 
     try {
-      console.log('Fetching products from Supabase...');
       const data = await supabaseProductService.getAll();
       setProducts(data);
       setLastRefresh(now);
-      console.log(`Successfully loaded ${data.length} products`);
     } catch (error) {
       console.error('Error loading products:', error);
       addToast('error', 'Error al conectar con la base de datos');
     } finally {
+      // Safety net: always ensure loading is false
       setLoading(false);
     }
   };
 
   const refreshSettings = async () => {
     try {
-      console.log('Fetching settings...');
       const data = await settingsService.getSettings();
       setSettings(data);
-      console.log('Settings loaded');
     } catch (error) {
       console.error('Error loading settings:', error);
     }
@@ -96,27 +88,29 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   // Consolidated Initialization
   useEffect(() => {
     const initialize = async () => {
-      console.log('Initializing application...');
+      console.log('App: Initializing...');
       setLoading(true);
       try {
-        // Run fetches in parallel for speed
-        const [currentUser] = await Promise.all([
-          authService.getCurrentUser().catch(e => { console.error('Auth error:', e); return null; }),
-          refreshSettings().catch(e => { console.error('Settings error:', e); return null; }),
-          refreshProducts(true, true).catch(e => { console.error('Products error:', e); return null; })
-        ]);
-
+        // Fetch user first to set auth state
+        const currentUser = await authService.getCurrentUser().catch(() => null);
         setUser(currentUser);
+
         if (currentUser) {
           const isAuthorized = await authService.isAdmin(currentUser.id).catch(() => false);
           setIsAuthenticated(isAuthorized);
         } else {
           setIsAuthenticated(false);
         }
+
+        // Fetch remaining data
+        await Promise.all([
+          refreshSettings().catch(() => null),
+          refreshProducts(true, true).catch(() => null)
+        ]);
       } catch (error) {
-        console.error('Initialization error:', error);
+        console.error('App: Initialization failed', error);
       } finally {
-        console.log('Initialization complete');
+        console.log('App: Initialization finished');
         setLoading(false);
       }
     };
@@ -129,7 +123,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       setUser(currentUser);
 
       if (currentUser) {
-        const isAuthorized = await authService.isAdmin(currentUser.id);
+        const isAuthorized = await authService.isAdmin(currentUser.id).catch(() => false);
         setIsAuthenticated(isAuthorized);
 
         if (event === 'SIGNED_IN' && !isAuthorized) {
@@ -138,9 +132,6 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         }
       } else {
         setIsAuthenticated(false);
-        if (event === 'SIGNED_OUT') {
-          addToast('info', 'Sesión cerrada');
-        }
       }
     });
 
@@ -163,7 +154,6 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const login = async (email: string, password: string) => {
     const { error } = await authService.signIn(email, password);
-
     if (error) {
       addToast('error', error.message || 'Error al iniciar sesión');
       throw error;
