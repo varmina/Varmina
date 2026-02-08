@@ -63,7 +63,7 @@ export const Layout: React.FC<{
                         <div className="flex flex-1 min-h-[calc(100vh-64px)] overflow-hidden">
                             <aside className="w-72 border-r border-stone-100 dark:border-stone-800 bg-white dark:bg-[#0A0A0A] hidden lg:flex flex-col justify-between">
                                 <div className="p-8">
-                                    <div className="text-[10px] font-bold text-stone-300 uppercase tracking-[0.2em] mb-8">Gestión de Marca</div>
+                                    <div className="text-[10px] font-bold text-stone-300 uppercase tracking-[0.2em] mb-8">Administración</div>
                                     <nav>
                                         <ul className="space-y-4">
                                             <li>

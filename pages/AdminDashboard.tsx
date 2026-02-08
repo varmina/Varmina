@@ -40,7 +40,7 @@ export const AdminDashboard = () => {
     try {
       await supabaseProductService.deleteBulk(deleteConfirm);
       addToast('success', `${deleteConfirm.length} producto(s) eliminado(s)`);
-      refreshProducts(true);
+      refreshProducts(true, true);
       setDeleteConfirm(null);
       setSelectedIds([]);
     } catch (e) {
@@ -52,7 +52,7 @@ export const AdminDashboard = () => {
     try {
       await supabaseProductService.updateStatusBulk(selectedIds, status);
       addToast('success', 'Estado actualizado en lote');
-      refreshProducts(true);
+      refreshProducts(true, true);
       setSelectedIds([]);
     } catch (e) {
       addToast('error', 'Error al actualizar estados');
@@ -60,7 +60,7 @@ export const AdminDashboard = () => {
   };
 
   const handleSave = () => {
-    refreshProducts(true);
+    refreshProducts(true, true);
     setEditingProduct(null);
     setIsCreating(false);
   };
@@ -69,7 +69,7 @@ export const AdminDashboard = () => {
     try {
       await supabaseProductService.duplicate(id);
       addToast('success', 'Producto duplicado correctamente');
-      refreshProducts(true);
+      refreshProducts(true, true);
     } catch (e) {
       addToast('error', 'Error al duplicar producto');
     }
@@ -79,7 +79,7 @@ export const AdminDashboard = () => {
     try {
       await supabaseProductService.update(id, { price: inlinePrice });
       addToast('success', 'Precio actualizado');
-      refreshProducts(true);
+      refreshProducts(true, true);
       setInlinePriceId(null);
     } catch (e) {
       addToast('error', 'Error al actualizar precio');
@@ -90,7 +90,7 @@ export const AdminDashboard = () => {
     try {
       await supabaseProductService.update(id, { status });
       addToast('success', 'Estado actualizado');
-      refreshProducts(true);
+      refreshProducts(true, true);
     } catch (e) {
       addToast('error', 'Error al actualizar estado');
     }

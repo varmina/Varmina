@@ -12,7 +12,7 @@ interface StoreContextType {
   toggleCurrency: () => void;
   darkMode: boolean;
   toggleDarkMode: () => void;
-  refreshProducts: (force?: boolean) => Promise<void>;
+  refreshProducts: (force?: boolean, silent?: boolean) => Promise<void>;
   toasts: ToastMessage[];
   addToast: (type: ToastMessage['type'], message: string) => void;
   removeToast: (id: string) => void;
@@ -103,7 +103,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const [lastRefresh, setLastRefresh] = useState(0);
 
-  const refreshProducts = async (force = false) => {
+  const refreshProducts = async (force = false, silent = false) => {
     const now = Date.now();
     if (!force && now - lastRefresh < 5000) return; // Cache for 5 seconds
 
@@ -112,7 +112,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       return;
     }
 
-    setLoading(true);
+    if (!silent) setLoading(true);
     try {
       const data = await supabaseProductService.getAll();
       setProducts(data);
