@@ -32,17 +32,29 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
-  // Check authentication status on mount
+  // Consolidated Initialization
   useEffect(() => {
     const isAdminEmail = (email?: string) => email === 'varminamail@gmail.com';
 
-    const checkAuth = async () => {
-      const currentUser = await authService.getCurrentUser();
-      setUser(currentUser);
-      setIsAuthenticated(!!currentUser && isAdminEmail(currentUser.email));
+    const initialize = async () => {
+      setLoading(true);
+      try {
+        // Run both in parallel to reduce load time
+        const [currentUser] = await Promise.all([
+          authService.getCurrentUser(),
+          refreshProducts()
+        ]);
+
+        setUser(currentUser);
+        setIsAuthenticated(!!currentUser && isAdminEmail(currentUser.email));
+      } catch (error) {
+        console.error('Initialization error:', error);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    checkAuth();
+    initialize();
 
     // Listen to auth state changes
     const { data: { subscription } } = authService.onAuthStateChange(async (event, session) => {
@@ -59,7 +71,9 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           addToast('error', 'Acceso denegado: Solo administradores autorizados');
           await authService.signOut();
         }
-        await refreshProducts();
+        // No need to set loading here if we are already logged in via login function, 
+        // but if it's a fresh session detection, we might want to refresh.
+        // To be safe, let's only refresh if we aren't already loading.
       } else if (event === 'SIGNED_OUT') {
         addToast('info', 'Sesión cerrada');
       }
@@ -68,11 +82,6 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     return () => {
       subscription?.unsubscribe();
     };
-  }, []);
-
-  // Initial Load
-  useEffect(() => {
-    refreshProducts();
   }, []);
 
   // Dark Mode Side Effect
