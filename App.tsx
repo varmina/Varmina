@@ -4,7 +4,7 @@ import { useStore } from './context/StoreContext';
 import { PublicCatalog } from './pages/PublicCatalog';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { LoginPage } from './pages/LoginPage';
-import { ToastContainer } from './components/UI';
+import { ToastContainer, LoadingScreen } from './components/UI';
 import { APP_NAME } from './constants';
 import { LayoutGrid, Sun, Moon, Store, ShoppingBag, LogOut } from 'lucide-react';
 
@@ -55,36 +55,43 @@ const Layout: React.FC<{
       <main className="flex-1 w-full flex flex-col">
         {view === 'admin' ? (
           isAuthenticated ? (
-            <div className="flex flex-1 min-h-[calc(100vh-64px)]">
-              <aside className="w-64 border-r border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 hidden lg:flex flex-col justify-between">
-                <div className="p-6">
-                  <div className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">Gestión</div>
-                  <ul className="space-y-2">
-                    <li>
-                      <button className="w-full flex items-center gap-3 px-4 py-2 bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-white rounded text-sm font-medium">
-                        <LayoutGrid className="w-4 h-4" /> Inventario
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        onClick={() => navigate('/')}
-                        className="w-full flex items-center gap-3 px-4 py-2 text-stone-500 hover:bg-stone-50 dark:hover:bg-stone-800/50 rounded text-sm font-medium transition-colors"
-                      >
-                        <Store className="w-4 h-4" /> Ver Tienda Pública
-                      </button>
-                    </li>
-                  </ul>
+            <div className="flex flex-1 min-h-[calc(100vh-64px)] overflow-hidden">
+              <aside className="w-72 border-r border-stone-100 dark:border-stone-800 bg-white dark:bg-[#0A0A0A] hidden lg:flex flex-col justify-between">
+                <div className="p-8">
+                  <div className="text-[10px] font-bold text-stone-300 uppercase tracking-[0.2em] mb-8">Gestión de Marca</div>
+                  <nav>
+                    <ul className="space-y-4">
+                      <li>
+                        <button
+                          className="w-full flex items-center gap-4 px-4 py-3 bg-[#1A1A1A] text-white rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all shadow-lg shadow-black/5"
+                        >
+                          <LayoutGrid className="w-4 h-4 text-gold-400" />
+                          <span>Inventario</span>
+                        </button>
+                      </li>
+                      <li>
+                        <button
+                          onClick={() => navigate('/')}
+                          className="w-full flex items-center gap-4 px-4 py-3 text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-50 dark:hover:bg-stone-900 rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all group"
+                        >
+                          <Store className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                          <span>Tienda Pública</span>
+                        </button>
+                      </li>
+                    </ul>
+                  </nav>
                 </div>
-                <div className="p-6 border-t border-stone-100 dark:border-stone-800">
+                <div className="p-8 border-t border-stone-50 dark:border-stone-800">
                   <button
                     onClick={logout}
-                    className="w-full flex items-center gap-3 px-4 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded text-sm font-medium transition-colors"
+                    className="w-full flex items-center gap-4 px-4 py-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all"
                   >
-                    <LogOut className="w-4 h-4" /> Cerrar Sesión
+                    <LogOut className="w-4 h-4" />
+                    <span>Cerrar Sesión</span>
                   </button>
                 </div>
               </aside>
-              <div className="flex-1 bg-stone-50 dark:bg-stone-950">
+              <div className="flex-1 bg-stone-50 dark:bg-stone-950 overflow-y-auto">
                 {children}
               </div>
             </div>
@@ -99,8 +106,8 @@ const Layout: React.FC<{
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-stone-200 dark:border-stone-800 py-8 text-center text-[10px] md:text-xs text-stone-400 uppercase tracking-widest bg-white dark:bg-stone-900">
-        &copy; {new Date().getFullYear()} {APP_NAME}. Todos los derechos reservados.
+      <footer className="border-t border-stone-100 dark:border-stone-800 py-12 text-center text-[9px] text-stone-400 uppercase tracking-[0.3em] bg-white dark:bg-[#0A0A0A]">
+        &copy; {new Date().getFullYear()} {APP_NAME} <span className="mx-2 text-gold-300">|</span> Alta Joyería
       </footer>
 
       <ToastContainer />
@@ -111,7 +118,7 @@ const Layout: React.FC<{
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useStore();
 
-  if (loading) return null; // Or a loading spinner
+  if (loading) return <LoadingScreen />;
 
   if (!isAuthenticated) {
     return <LoginPage />;

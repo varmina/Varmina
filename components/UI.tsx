@@ -115,23 +115,25 @@ export const ToastContainer = () => {
   const { toasts, removeToast } = useStore();
 
   return (
-    <div className="fixed bottom-4 right-4 z-[60] flex flex-col gap-2">
+    <div className="fixed bottom-6 right-6 z-[60] flex flex-col gap-3">
       {toasts.map(toast => (
         <div
           key={toast.id}
           className={`
-            flex items-center gap-3 px-4 py-3 shadow-lg min-w-[300px] border-l-4
-            animate-in slide-in-from-right duration-300
+            flex items-center gap-4 px-6 py-4 shadow-2xl min-w-[320px] border-l-2
+            animate-in slide-in-from-right duration-500
             ${toast.type === 'success' ? 'bg-white border-green-500 text-stone-800' : ''}
             ${toast.type === 'error' ? 'bg-white border-red-500 text-stone-800' : ''}
-            ${toast.type === 'info' ? 'bg-stone-900 border-gold-400 text-white' : ''}
+            ${toast.type === 'info' ? 'bg-[#1A1A1A] border-gold-400 text-white' : ''}
           `}
         >
-          {toast.type === 'success' && <Check className="w-4 h-4 text-green-500" />}
-          {toast.type === 'error' && <X className="w-4 h-4 text-red-500" />}
-          {toast.type === 'info' && <Info className="w-4 h-4 text-gold-400" />}
-          <p className="text-sm font-medium">{toast.message}</p>
-          <button onClick={() => removeToast(toast.id)} className="ml-auto text-current opacity-50 hover:opacity-100">
+          <div className="flex-shrink-0">
+            {toast.type === 'success' && <Check className="w-4 h-4 text-green-500" />}
+            {toast.type === 'error' && <X className="w-4 h-4 text-red-500" />}
+            {toast.type === 'info' && <Info className="w-4 h-4 text-gold-400" />}
+          </div>
+          <p className="text-[11px] font-bold uppercase tracking-wider flex-1 leading-relaxed">{toast.message}</p>
+          <button onClick={() => removeToast(toast.id)} className="p-1 hover:bg-stone-100 dark:hover:bg-white/10 rounded-full transition-colors opacity-50 hover:opacity-100">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -139,6 +141,20 @@ export const ToastContainer = () => {
     </div>
   );
 };
+
+// --- LOADING SCREEN ---
+export const LoadingScreen: React.FC = () => (
+  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-50 dark:bg-stone-950 flex-col gap-6">
+    <div className="relative">
+      <div className="w-16 h-16 border-2 border-stone-200 dark:border-stone-800 rounded-full" />
+      <div className="absolute inset-0 w-16 h-16 border-t-2 border-gold-400 rounded-full animate-spin" />
+    </div>
+    <div className="text-center">
+      <h2 className="font-serif text-lg tracking-[0.3em] text-stone-900 dark:text-gold-200 uppercase mb-1">Varmina</h2>
+      <div className="w-12 h-[1px] bg-gold-200 mx-auto" />
+    </div>
+  </div>
+);
 
 // --- SKELETON ---
 export const Skeleton: React.FC<{ className?: string }> = ({ className }) => (
