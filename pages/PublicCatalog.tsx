@@ -142,9 +142,6 @@ const ProductDetail = ({ product, currency, onClose }: { product: Product, curre
                             {product.status === ProductStatus.IN_STOCK ? 'Consultar' :
                                 product.status === ProductStatus.MADE_TO_ORDER ? 'Solicitar Encargo' : 'Agotado'}
                         </Button>
-                        <p className="text-center text-[10px] text-stone-400 mt-3 uppercase tracking-widest">
-                            Asesoría personalizada incluida
-                        </p>
                     </div>
                 </div>
             </div>

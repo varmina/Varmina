@@ -107,7 +107,7 @@ const Layout: React.FC<{
 
       {/* Footer */}
       <footer className="border-t border-stone-100 dark:border-stone-800 py-12 text-center text-[9px] text-stone-400 uppercase tracking-[0.3em] bg-white dark:bg-[#0A0A0A]">
-        &copy; {new Date().getFullYear()} {APP_NAME} <span className="mx-2 text-gold-300">|</span> Alta Joyería
+        &copy; {new Date().getFullYear()} {APP_NAME}
       </footer>
 
       <ToastContainer />
