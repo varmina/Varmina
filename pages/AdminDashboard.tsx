@@ -1,9 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
 import { Product, ProductStatus } from '../types';
 import { Button, Input, StatusBadge, Modal } from '../components/UI';
 import { supabaseProductService } from '../services/supabaseProductService';
-import { Plus, Edit2, Trash2, Upload, X, Save, AlertCircle, Package } from 'lucide-react';
+import { Plus, Edit2, Trash2, Upload, X, AlertCircle, Package } from 'lucide-react';
 
 // --- PRODUCT FORM ---
 const ProductForm = ({ initialData, onSave, onCancel }: {
@@ -66,7 +66,6 @@ const ProductForm = ({ initialData, onSave, onCancel }: {
     }
   };
 
-  // Real Image Upload to Supabase Storage
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setIsUploading(true);
@@ -89,7 +88,6 @@ const ProductForm = ({ initialData, onSave, onCancel }: {
 
   const handleRemoveImage = async (imageUrl: string, index: number) => {
     try {
-      // Only delete from storage if it's a Supabase URL (not a blob URL)
       if (imageUrl.includes('supabase')) {
         await supabaseProductService.deleteImage(imageUrl);
       }
@@ -101,10 +99,11 @@ const ProductForm = ({ initialData, onSave, onCancel }: {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-2 gap-6">
+    <form onSubmit={handleSubmit} className="space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <Input
           label="Nombre del Producto"
+          placeholder="Ej: Collar Luz de Luna"
           value={formData.name}
           onChange={e => setFormData({ ...formData, name: e.target.value })}
           error={errors.name}
@@ -112,67 +111,89 @@ const ProductForm = ({ initialData, onSave, onCancel }: {
         <Input
           label="Precio (CLP)"
           type="number"
+          placeholder="0"
           value={formData.price}
           onChange={e => setFormData({ ...formData, price: Number(e.target.value) })}
           error={errors.price}
         />
       </div>
 
-      <div>
-        <label className="block text-xs font-serif uppercase tracking-wider text-stone-500 mb-1">Descripción</label>
+      <div className="space-y-2">
+        <label className="block text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-stone-400 mb-2">Descripción</label>
         <textarea
-          className="w-full bg-transparent border border-stone-300 p-3 text-stone-900 focus:border-gold-400 focus:outline-none min-h-[100px] dark:border-stone-700 dark:text-stone-100"
+          className="w-full bg-transparent border border-stone-200 p-4 text-stone-900 font-sans text-sm focus:border-gold-400 focus:outline-none min-h-[120px] dark:border-stone-700 dark:text-stone-100 transition-colors resize-none leading-relaxed"
+          placeholder="Escribe la historia o detalles técnicos de la pieza..."
           value={formData.description}
           onChange={e => setFormData({ ...formData, description: e.target.value })}
         />
       </div>
 
-      <div>
-        <label className="block text-xs font-serif uppercase tracking-wider text-stone-500 mb-1">Estado</label>
-        <div className="flex gap-4">
-          {Object.values(ProductStatus).map(s => (
-            <label key={s} className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="status"
-                checked={formData.status === s}
-                onChange={() => setFormData({ ...formData, status: s })}
-                className="accent-gold-500"
-              />
-              <span className="text-sm">{s}</span>
+      <div className="space-y-4">
+        <label className="block text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-stone-400">Estado</label>
+        <div className="flex flex-wrap gap-6">
+          {[
+            { id: ProductStatus.IN_STOCK, label: 'Disponible', color: 'bg-gold-500' },
+            { id: ProductStatus.MADE_TO_ORDER, label: 'Por Encargo', color: 'bg-stone-500' },
+            { id: ProductStatus.SOLD_OUT, label: 'Agotado', color: 'bg-stone-900' }
+          ].map(s => (
+            <label key={s.id} className="flex items-center gap-3 cursor-pointer group">
+              <div className="relative flex items-center justify-center">
+                <input
+                  type="radio"
+                  name="status"
+                  checked={formData.status === s.id}
+                  onChange={() => setFormData({ ...formData, status: s.id as ProductStatus })}
+                  className="peer appearance-none w-5 h-5 border-2 border-stone-200 rounded-full checked:border-gold-500 transition-all cursor-pointer"
+                />
+                <div className={`absolute w-2.5 h-2.5 rounded-full scale-0 peer-checked:scale-100 transition-transform ${s.color}`} />
+              </div>
+              <span className={`text-xs tracking-wide transition-colors ${formData.status === s.id ? 'text-stone-900 font-bold' : 'text-stone-400 group-hover:text-stone-600'}`}>
+                {s.label}
+              </span>
             </label>
           ))}
         </div>
       </div>
 
-      <div>
-        <label className="block text-xs font-serif uppercase tracking-wider text-stone-500 mb-2">Imágenes</label>
-        <div className="grid grid-cols-4 gap-4">
+      <div className="space-y-4">
+        <label className="block text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-stone-400">Imágenes</label>
+        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {formData.images?.map((img, idx) => (
-            <div key={idx} className="relative aspect-square group">
-              <img src={img} className="w-full h-full object-cover rounded border border-stone-200" alt="upload" />
-              <button
-                type="button"
-                onClick={() => handleRemoveImage(img, idx)}
-                className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <X className="w-3 h-3" />
-              </button>
+            <div key={idx} className="relative aspect-square group overflow-hidden bg-stone-50 border border-stone-100 rounded-sm">
+              <img src={img} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="upload" />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => handleRemoveImage(img, idx)}
+                  className="bg-white text-red-500 p-2 rounded-full hover:bg-red-50 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           ))}
-          <label className="border-2 border-dashed border-stone-300 hover:border-gold-400 flex flex-col items-center justify-center aspect-square cursor-pointer transition-colors dark:border-stone-700">
-            <Upload className="w-6 h-6 text-stone-400 mb-2" />
-            <span className="text-xs text-stone-500">Subir</span>
-            <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageUpload} />
+          <label className={`
+            border-2 border-dashed border-stone-200 rounded-sm flex flex-col items-center justify-center aspect-square cursor-pointer transition-all hover:border-gold-400 hover:bg-stone-50 group
+            ${isUploading ? 'opacity-50 cursor-wait' : ''}
+          `}>
+            <div className="flex flex-col items-center gap-2 group-hover:translate-y-[-2px] transition-transform">
+              <Upload className="w-6 h-6 text-stone-300 group-hover:text-gold-500" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400 group-hover:text-gold-600">
+                {isUploading ? 'Subiendo...' : 'Subir'}
+              </span>
+            </div>
+            <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageUpload} disabled={isUploading} />
           </label>
         </div>
-        {errors.images && <p className="text-xs text-red-500 mt-1">{errors.images}</p>}
+        {errors.images && <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest">{errors.images}</p>}
       </div>
 
-      <div className="flex justify-end gap-3 pt-4 border-t border-stone-100 dark:border-stone-800">
-        <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
-        <Button type="submit" isLoading={isSubmitting}>
-          {initialData ? 'Actualizar' : 'Crear'}
+      <div className="flex justify-end gap-4 pt-8 border-t border-stone-100">
+        <Button type="button" variant="ghost" onClick={onCancel}>
+          Cancelar
+        </Button>
+        <Button type="submit" isLoading={isSubmitting} size="lg">
+          {initialData ? 'Actualizar' : 'Agregar Pieza'}
         </Button>
       </div>
     </form>
@@ -204,70 +225,80 @@ export const AdminDashboard = () => {
   };
 
   return (
-    <div className="container mx-auto px-6 py-8">
-      <div className="flex justify-between items-center mb-8">
+    <div className="flex-1 px-6 py-12 md:px-12 bg-white dark:bg-stone-950 min-h-screen">
+
+      {/* Dashboard Top Area */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-16">
         <div>
-          <h1 className="font-serif text-3xl text-stone-900 dark:text-white mb-2">Inventario</h1>
-          <p className="text-stone-500 text-sm">Gestiona tus productos</p>
+          <h1 className="font-serif text-4xl text-stone-900 dark:text-gold-200 tracking-wider mb-2 uppercase">Inventario</h1>
+          <p className="text-stone-400 text-sm font-sans tracking-wide uppercase font-bold text-[10px]">Gestiona tus piezas exclusivas</p>
         </div>
-        <Button onClick={() => setIsCreating(true)}>
-          <Plus className="w-4 h-4 mr-2" /> Agregar Producto
+        <Button onClick={() => setIsCreating(true)} className="flex gap-2">
+          <Plus className="w-5 h-5" /> Agregar Producto
         </Button>
       </div>
 
-      {/* Product Table */}
-      <div className="bg-white dark:bg-stone-800 shadow-sm border border-stone-200 dark:border-stone-700 rounded-lg overflow-hidden">
-        <table className="w-full text-left border-collapse">
-          <thead className="bg-stone-50 dark:bg-stone-900/50 text-xs uppercase tracking-wider text-stone-500 border-b border-stone-200 dark:border-stone-700">
-            <tr>
-              <th className="p-4 font-serif">Producto</th>
-              <th className="p-4 font-serif">Precio</th>
-              <th className="p-4 font-serif">Estado</th>
-              <th className="p-4 font-serif text-right">Acciones</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-stone-100 dark:divide-stone-700">
-            {products.map(product => (
-              <tr key={product.id} className="hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors group">
-                <td className="p-4">
-                  <div className="flex items-center gap-4">
-                    <img src={product.images[0]} alt="" className="w-12 h-12 object-cover rounded" />
-                    <div>
-                      <div className="font-medium text-stone-900 dark:text-white">{product.name}</div>
-                      <div className="text-xs text-stone-400 truncate max-w-[200px]">{product.id}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="p-4 text-stone-600 dark:text-stone-300 font-medium">
+      {/* Product List Table */}
+      <div className="w-full">
+        <div className="grid grid-cols-12 px-6 py-4 border-b border-stone-100 dark:border-stone-800 text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-stone-400 hidden md:grid">
+          <div className="col-span-6">Producto</div>
+          <div className="col-span-2">Precio</div>
+          <div className="col-span-2">Estado</div>
+          <div className="col-span-2 text-right">Acciones</div>
+        </div>
+
+        <div className="divide-y divide-stone-100 dark:divide-stone-800">
+          {products.map(product => (
+            <div key={product.id} className="grid grid-cols-1 md:grid-cols-12 items-center px-6 py-8 hover:bg-stone-50 dark:hover:bg-stone-900/30 transition-all group">
+
+              {/* Product Info */}
+              <div className="col-span-1 md:col-span-6 flex items-center gap-6 mb-4 md:mb-0">
+                <div className="relative w-20 h-24 overflow-hidden bg-stone-100 border border-stone-200 dark:border-stone-800 flex-shrink-0">
+                  <img src={product.images[0]} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="font-serif text-lg text-stone-900 dark:text-white leading-tight uppercase tracking-widest">{product.name}</h3>
+                  <p className="text-[10px] font-mono text-stone-400 uppercase">{product.id.slice(0, 8)}...</p>
+                </div>
+              </div>
+
+              {/* Price */}
+              <div className="col-span-2 mb-4 md:mb-0">
+                <span className="font-serif text-lg md:text-base text-stone-600 dark:text-stone-300">
                   ${product.price.toLocaleString('es-CL')}
-                </td>
-                <td className="p-4">
-                  <StatusBadge status={product.status} />
-                </td>
-                <td className="p-4 text-right">
-                  <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={() => setEditingProduct(product)}
-                      className="p-2 text-stone-400 hover:text-gold-500 hover:bg-stone-100 rounded-full dark:hover:bg-stone-600"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => setDeleteConfirm(product.id)}
-                      className="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-full dark:hover:bg-red-900/30"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </span>
+              </div>
+
+              {/* Status */}
+              <div className="col-span-2 mb-6 md:mb-0">
+                <StatusBadge status={product.status} />
+              </div>
+
+              {/* Actions */}
+              <div className="col-span-1 md:col-span-2 flex items-center justify-end gap-3 md:opacity-0 group-hover:md:opacity-100 transition-opacity">
+                <button
+                  onClick={() => setEditingProduct(product)}
+                  className="p-3 text-stone-400 hover:text-stone-900 hover:bg-stone-100 rounded-full dark:hover:bg-stone-800 transition-all"
+                  title="Editar"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setDeleteConfirm(product.id)}
+                  className="p-3 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-full dark:hover:bg-red-900/30 transition-all"
+                  title="Eliminar"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
         {products.length === 0 && (
-          <div className="p-12 text-center text-stone-400">
-            <Package className="w-12 h-12 mx-auto mb-4 opacity-20" />
-            <p>No hay productos en el inventario.</p>
+          <div className="py-24 text-center">
+            <Package className="w-16 h-16 mx-auto mb-6 text-stone-200" />
+            <p className="font-serif text-xl text-stone-400 uppercase tracking-widest">No hay piezas en el inventario.</p>
           </div>
         )}
       </div>
@@ -276,7 +307,7 @@ export const AdminDashboard = () => {
       <Modal
         isOpen={isCreating || !!editingProduct}
         onClose={() => { setIsCreating(false); setEditingProduct(null); }}
-        title={isCreating ? "Agregar Nueva Pieza" : "Editar Pieza"}
+        title={isCreating ? "Agregar Pieza" : "Editar Pieza"}
       >
         <ProductForm
           initialData={editingProduct || undefined}
@@ -287,14 +318,16 @@ export const AdminDashboard = () => {
 
       {/* Delete Confirmation Modal */}
       <Modal isOpen={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Confirmar Eliminación">
-        <div className="text-center py-4">
-          <div className="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="w-6 h-6" />
+        <div className="text-center py-8">
+          <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="w-8 h-8" />
           </div>
-          <p className="text-stone-600 mb-6">¿Estás seguro de que deseas eliminar este artículo? Esta acción no se puede deshacer.</p>
-          <div className="flex justify-center gap-3">
-            <Button variant="ghost" onClick={() => setDeleteConfirm(null)}>Cancelar</Button>
-            <Button variant="danger" onClick={() => deleteConfirm && handleDelete(deleteConfirm)}>Eliminar</Button>
+          <p className="text-stone-600 dark:text-stone-300 mb-8 font-serif leading-relaxed">
+            ¿Estás seguro de que deseas eliminar esta pieza de lujo?<br />Esta acción no se puede deshacer.
+          </p>
+          <div className="flex justify-center gap-4">
+            <Button variant="ghost" onClick={() => setDeleteConfirm(null)}>No, Conservar</Button>
+            <Button className="bg-red-600 hover:bg-red-700" onClick={() => deleteConfirm && handleDelete(deleteConfirm)}>Sí, Eliminar</Button>
           </div>
         </div>
       </Modal>
