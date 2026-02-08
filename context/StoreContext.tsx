@@ -47,7 +47,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [currency, setCurrency] = useState<'CLP' | 'USD'>('CLP');
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('varmina_dark_mode') === 'true');
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => localStorage.getItem('varmina_is_admin') === 'true');
   const [user, setUser] = useState<User | null>(null);
   const [settings, setSettings] = useState<BrandSettings | null>(null);
   const [activeAdminTab, setActiveAdminTab] = useState<'inventory' | 'analytics' | 'settings'>('inventory');
@@ -98,7 +98,13 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
         if (currentUser) {
           const isCheckAdmin = await authService.isAdmin(currentUser.id);
-          setIsAuthenticated(isCheckAdmin);
+          if (isCheckAdmin) {
+            setIsAuthenticated(true);
+            localStorage.setItem('varmina_is_admin', 'true');
+          }
+        } else {
+          setIsAuthenticated(false);
+          localStorage.removeItem('varmina_is_admin');
         }
 
         // Always fetch public data
@@ -116,15 +122,26 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     // 2. Listen for changes (Login/Logout/Refresh)
     const { data: { subscription } } = authService.onAuthStateChange(async (event, session) => {
-      console.log('Auth event:', event);
+      console.log('Auth event triggered:', event);
       const currentUser = session?.user || null;
       setUser(currentUser);
 
-      if (currentUser) {
-        const isCheckAdmin = await authService.isAdmin(currentUser.id);
-        setIsAuthenticated(isCheckAdmin);
-      } else {
+      // CRITICAL: Only revoke admin access on explicit logout
+      if (event === 'SIGNED_OUT') {
         setIsAuthenticated(false);
+        localStorage.removeItem('varmina_is_admin');
+        return;
+      }
+
+      if (currentUser && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+        const isCheckAdmin = await authService.isAdmin(currentUser.id);
+        if (isCheckAdmin) {
+          setIsAuthenticated(true);
+          localStorage.setItem('varmina_is_admin', 'true');
+        } else {
+          setIsAuthenticated(false);
+          localStorage.removeItem('varmina_is_admin');
+        }
       }
 
       setLoading(false);

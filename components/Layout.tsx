@@ -103,13 +103,13 @@ export const Layout: React.FC<{
                                                     <span>Configuración</span>
                                                 </button>
                                             </li>
-                                            <li className="pt-4 mt-4 border-t border-stone-100 dark:border-stone-900">
+                                            <li>
                                                 <button
-                                                    onClick={() => navigate('/')}
+                                                    onClick={() => window.open('/', '_blank')}
                                                     className="w-full flex items-center gap-4 px-4 py-3 text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-50 dark:hover:bg-stone-900 rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all group"
                                                 >
                                                     <Store className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                                                    <span>Tienda Pública</span>
+                                                    <span>Ver Tienda</span>
                                                 </button>
                                             </li>
                                         </ul>
