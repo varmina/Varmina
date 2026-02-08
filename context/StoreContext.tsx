@@ -75,14 +75,11 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   }, []);
 
   const refreshProducts = useCallback(async (force = false, silent = false) => {
-    const now = Date.now();
-    if (!force && now - lastRefreshRef.current < 5000) return;
-
     if (!silent) setLoading(true);
     try {
       const data = await withTimeout(supabaseProductService.getAll(), 6000, []);
       setProducts(data);
-      lastRefreshRef.current = now;
+      lastRefreshRef.current = Date.now();
     } catch (e) {
       console.error('Products Fail:', e);
       if (!silent) addToast('error', 'Error al sincronizar inventario');
