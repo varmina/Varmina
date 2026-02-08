@@ -42,15 +42,6 @@ async function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Pro
 }
 
 export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Get cached admin status for optimistic UI
-  const getCachedAuth = () => {
-    try {
-      return localStorage.getItem('varmina_is_admin') === 'true';
-    } catch {
-      return false;
-    }
-  };
-
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [currency, setCurrency] = useState<'CLP' | 'USD'>('CLP');
@@ -62,7 +53,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   });
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
-  const [isAuthenticated, setIsAuthenticated] = useState(getCachedAuth);
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // No longer optimistic
   const [user, setUser] = useState<User | null>(null);
   const [settings, setSettings] = useState<BrandSettings | null>(null);
   const [activeAdminTab, setActiveAdminTab] = useState<'inventory' | 'analytics' | 'settings'>('inventory');
@@ -104,15 +95,17 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   }, [addToast]);
 
-  // Helper to verify and cache admin status
+  // Helper to verify admin status strictly
   const verifyAdmin = useCallback(async (userId: string) => {
     try {
-      const isAuthorized = await withTimeout(authService.isAdmin(userId), 10000, false);
+      console.log('⚡ [Auth] Verifying admin status for:', userId);
+      const isAuthorized = await withTimeout(authService.isAdmin(userId), 15000, false);
+      console.log('⚡ [Auth] Admin check result:', isAuthorized);
       setIsAuthenticated(isAuthorized);
-      localStorage.setItem('varmina_is_admin', isAuthorized ? 'true' : 'false');
       return isAuthorized;
     } catch (e) {
       console.error('Verify Admin Fail:', e);
+      setIsAuthenticated(false);
       return false;
     }
   }, []);
@@ -123,57 +116,55 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     isInitializingRef.current = true;
 
     const initialize = async () => {
-      console.log('⚡ [Auth] Fast Initialization Started');
+      console.log('⚡ [Auth] App initialization started');
+      setLoading(true);
 
       try {
-        // 1. Get session and start data fetches in parallel
-        const [session] = await Promise.all([
-          authService.getCurrentSession(),
+        // 1. Get session first
+        const session = await authService.getCurrentSession();
+        const currentUser = session?.user || null;
+        setUser(currentUser);
+
+        // 2. Fetch critical app data
+        await Promise.all([
           refreshSettings().catch(e => console.error('BG Settings:', e)),
           refreshProducts(true, true).catch(e => console.error('BG Products:', e))
         ]);
 
-        const currentUser = session?.user || null;
-        setUser(currentUser);
-
+        // 3. If logged in, verify admin status strictly before finishing loader
         if (currentUser) {
-          // If we have a user, verify them in the background (Optimistic UI handles the rest)
           await verifyAdmin(currentUser.id);
         } else {
           setIsAuthenticated(false);
-          localStorage.setItem('varmina_is_admin', 'false');
         }
       } catch (err) {
         console.error('⚡ [Auth] Init Error:', err);
       } finally {
         setLoading(false);
-        console.log('🏁 [Auth] Fast Initialization Finished');
+        console.log('🏁 [Auth] Initialization finished');
       }
     };
 
     initialize();
 
     const { data: { subscription } } = authService.onAuthStateChange(async (event, session) => {
+      console.log('🔐 [Auth] Event:', event);
       const currentUser = session?.user || null;
       setUser(currentUser);
 
       if (currentUser) {
         if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-          const isAuthorized = await verifyAdmin(currentUser.id);
-          if (event === 'SIGNED_IN' && !isAuthorized) {
-            addToast('error', 'No tienes permisos de administrador.');
-          }
+          await verifyAdmin(currentUser.id);
         }
       } else {
         setIsAuthenticated(false);
-        localStorage.setItem('varmina_is_admin', 'false');
       }
     });
 
     return () => {
       subscription?.unsubscribe();
     };
-  }, [refreshSettings, refreshProducts, addToast, verifyAdmin]);
+  }, [refreshSettings, refreshProducts, verifyAdmin]);
 
   useEffect(() => {
     if (darkMode) document.documentElement.classList.add('dark');
