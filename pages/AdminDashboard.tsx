@@ -8,9 +8,13 @@ import { ProductForm } from '../components/admin/ProductForm';
 import { AnalyticsDashboard } from '../components/admin/AnalyticsDashboard';
 import { SettingsView } from '../components/admin/SettingsView';
 
+import { useInventory } from '../hooks/useInventory';
+
 // --- MAIN ADMIN COMPONENT ---
 export const AdminDashboard = () => {
-  const { products, refreshProducts, addToast, activeAdminTab, loading } = useStore();
+  const { addToast, activeAdminTab } = useStore();
+  const { products, loading, refreshInventory } = useInventory(); // NEW: Local inventory hook
+
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string[] | null>(null);
@@ -40,7 +44,7 @@ export const AdminDashboard = () => {
     try {
       await supabaseProductService.deleteBulk(deleteConfirm);
       addToast('success', `${deleteConfirm.length} producto(s) eliminado(s)`);
-      refreshProducts(true, true);
+      refreshInventory();
       setDeleteConfirm(null);
       setSelectedIds([]);
     } catch (e) {
@@ -52,7 +56,7 @@ export const AdminDashboard = () => {
     try {
       await supabaseProductService.updateStatusBulk(selectedIds, status);
       addToast('success', 'Estado actualizado en lote');
-      refreshProducts(true, true);
+      refreshInventory();
       setSelectedIds([]);
     } catch (e) {
       addToast('error', 'Error al actualizar estados');
@@ -60,7 +64,7 @@ export const AdminDashboard = () => {
   };
 
   const handleSave = () => {
-    refreshProducts(true, true);
+    refreshInventory();
     setEditingProduct(null);
     setIsCreating(false);
   };
@@ -69,7 +73,7 @@ export const AdminDashboard = () => {
     try {
       await supabaseProductService.duplicate(id);
       addToast('success', 'Producto duplicado correctamente');
-      refreshProducts(true, true);
+      refreshInventory();
     } catch (e) {
       addToast('error', 'Error al duplicar producto');
     }
@@ -79,7 +83,7 @@ export const AdminDashboard = () => {
     try {
       await supabaseProductService.update(id, { price: inlinePrice });
       addToast('success', 'Precio actualizado');
-      refreshProducts(true, true);
+      refreshInventory();
       setInlinePriceId(null);
     } catch (e) {
       addToast('error', 'Error al actualizar precio');
@@ -90,7 +94,7 @@ export const AdminDashboard = () => {
     try {
       await supabaseProductService.update(id, { status });
       addToast('success', 'Estado actualizado');
-      refreshProducts(true, true);
+      refreshInventory();
     } catch (e) {
       addToast('error', 'Error al actualizar estado');
     }

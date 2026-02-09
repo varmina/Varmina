@@ -1,12 +1,12 @@
 import React from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAdmin } from '../hooks/useAdmin';
 import { LoadingScreen } from './UI';
 import { LoginPage } from '../pages/LoginPage';
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-    const { isAdmin, loading: authLoading } = useAuth();
+    const { isAdmin, loading } = useAdmin();
 
-    if (authLoading) {
+    if (loading) {
         return <LoadingScreen />;
     }
 

@@ -5,6 +5,7 @@ import { AdminDashboard } from './pages/AdminDashboard';
 import { PublicLayout } from './components/PublicLayout';
 import { AdminLayout } from './components/AdminLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { LoginPage } from './pages/LoginPage';
 
 const App = () => {
   return (
@@ -15,6 +16,8 @@ const App = () => {
           <PublicCatalog />
         </PublicLayout>
       } />
+
+      <Route path="/login" element={<LoginPage />} />
 
       {/* Admin Routes */}
       <Route path="/admin" element={

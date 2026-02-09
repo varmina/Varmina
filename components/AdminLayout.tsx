@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
+import { useAuth } from '../context/AuthContext';
 import { APP_NAME } from '../constants';
 import { LayoutGrid, Sun, Moon, Store, LogOut, Award, BarChart3 } from 'lucide-react';
 import { ToastContainer } from './UI';
@@ -8,22 +9,22 @@ import { ToastContainer } from './UI';
 export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const {
         darkMode, toggleDarkMode,
-        isAuthenticated, logout,
-        activeAdminTab, setActiveAdminTab
+        activeAdminTab, setActiveAdminTab,
+        addToast
     } = useStore();
+    const { signOut } = useAuth();
     const navigate = useNavigate();
 
     const handleLogout = async () => {
         try {
-            await logout();
+            await signOut();
+            addToast('success', 'Sesión cerrada');
             navigate('/');
         } catch (err) {
             console.error('Logout failed:', err);
             navigate('/'); // Force redirection anyway
         }
     };
-
-    if (!isAuthenticated) return null; // Or some fallback/redirect logic, but ProtectedRoute should handle this
 
     return (
         <div className={`min-h-screen flex flex-col transition-colors duration-500 ${darkMode ? 'dark bg-stone-950' : 'bg-stone-50'}`}>

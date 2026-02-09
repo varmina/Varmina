@@ -16,14 +16,6 @@ interface StoreContextType {
   toasts: ToastMessage[];
   addToast: (type: ToastMessage['type'], message: string) => void;
   removeToast: (id: string) => void;
-
-  // Auth (delegated to AuthContext)
-  isAuthenticated: boolean;
-  isAdmin: boolean;
-  user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-
   settings: BrandSettings | null;
   refreshSettings: () => Promise<void>;
   activeAdminTab: 'inventory' | 'analytics' | 'settings';
@@ -32,7 +24,7 @@ interface StoreContextType {
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
-// Core Timeout Helper (kept for data fetching resilience)
+// Core Timeout Helper
 async function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
   let timeoutId: any;
   const timeoutPromise = new Promise<T>((resolve) => {
@@ -46,10 +38,7 @@ async function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Pro
 }
 
 export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // 1. Get Auth State from dedicated Context
-  const { user, isAdmin, signIn, signOut, loading: authLoading } = useAuth();
-
-  // 2. Data State
+  // Data State
   const [products, setProducts] = useState<Product[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [currency, setCurrency] = useState<'CLP' | 'USD'>('CLP');
@@ -60,7 +49,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const lastRefreshRef = useRef(0);
 
-  // 3. UI Helpers
+  // UI Helpers
   const removeToast = useCallback((id: string) => {
     setToasts(prev => prev.filter(t => t.id !== id));
   }, []);
@@ -89,7 +78,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     else document.documentElement.classList.remove('dark');
   }, []);
 
-  // 4. Data Fetching
+  // Data Fetching
   const refreshSettings = useCallback(async () => {
     try {
       const data = await withTimeout(settingsService.getSettings(), 5000, null);
@@ -119,42 +108,14 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     refreshProducts();
   }, [refreshSettings, refreshProducts]);
 
-
-  // 5. Auth Wrappers
-  const login = async (email: string, password: string) => {
-    const { error } = await signIn(email, password);
-    if (error) {
-      addToast('error', error.message);
-      throw error;
-    }
-    // AuthContext listener will handle state update
-    addToast('success', 'Bienvenido');
-  };
-
-  const logout = async () => {
-    try {
-      await signOut();
-      addToast('success', 'Sesión cerrada');
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  // 6. Global Loading State (Data only for public pages)
-  const globalLoading = dataLoading && products.length === 0;
-
   return (
     <StoreContext.Provider value={{
       products,
-      loading: globalLoading,
+      loading: dataLoading,
       currency, toggleCurrency,
       darkMode, toggleDarkMode,
       refreshProducts,
       toasts, addToast, removeToast,
-      isAuthenticated: !!user,
-      isAdmin,
-      user,
-      login, logout,
       settings, refreshSettings,
       activeAdminTab, setActiveAdminTab
     }}>

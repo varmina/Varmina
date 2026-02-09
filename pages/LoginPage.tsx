@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { useStore } from '../context/StoreContext';
 import { Button, Input } from '../components/UI';
 import { Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export const LoginPage = () => {
-  const { login } = useStore();
+  const { signIn } = useAuth();
+  const { addToast } = useStore();
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -13,10 +18,14 @@ export const LoginPage = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await login(email, password);
-    } catch (error) {
-      console.error('Login failed in component:', error);
-      // Toast is already handled in login()
+      const { error } = await signIn(email, password);
+      if (error) throw error;
+
+      addToast('success', 'Bienvenido');
+      navigate('/admin');
+    } catch (error: any) {
+      console.error('Login failed:', error);
+      addToast('error', error.message || 'Error al iniciar sesión');
     } finally {
       setIsLoading(false);
     }
