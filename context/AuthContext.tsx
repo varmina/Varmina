@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useRef } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { authService } from '../services/authService';
 import { supabase } from '../lib/supabase';
@@ -19,17 +19,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [session, setSession] = useState<Session | null>(null);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
+    const lastCheckedUserId = useRef<string | null>(null);
 
-    const checkAdminStatus = async (userId: string) => {
+    const checkAdminStatus = async (userId: string, isInitial = false) => {
+        // Optimization: skip if check is already done for this user and we are admin
+        if (userId === lastCheckedUserId.current && isAdmin && !isInitial) return true;
+
         try {
             const isAdm = await authService.isAdmin(userId);
             setIsAdmin(isAdm);
+            lastCheckedUserId.current = userId;
             return isAdm;
         } catch (err) {
-            console.error('Error checking admin status:', err);
-            // Don't flip to false if we had a network error but still have a session? 
-            // Actually, safety first for admin routes.
-            setIsAdmin(false);
+            console.warn('[Auth] Could not verify admin status (network error). Preserving current state.', err);
+            // If we already verified this user as admin before, we trust that for now
+            if (userId === lastCheckedUserId.current) {
+                return isAdmin;
+            }
             return false;
         }
     };
@@ -47,7 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 if (currentSession) {
                     setSession(currentSession);
                     setUser(currentSession.user);
-                    await checkAdminStatus(currentSession.user.id);
+                    await checkAdminStatus(currentSession.user.id, true);
                 }
             } catch (error) {
                 console.error('Auth init error:', error);
@@ -63,19 +69,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
             if (!mounted) return;
 
-            console.log(`[Auth] Event: ${event}`, newSession?.user?.email);
+            console.log(`[Auth] Event: ${event} for ${newSession?.user?.email ?? 'no user'}`);
 
             setSession(newSession);
             setUser(newSession?.user ?? null);
 
             if (newSession?.user) {
-                // Check admin status on sign in, initial session, or if we don't know yet
-                // We also check on TOKEN_REFRESHED if we weren't already confirmed as admin
-                if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
-                    await checkAdminStatus(newSession.user.id);
+                // If it's a sign-out followed by sign-in (new user), reset the cache
+                if (event === 'SIGNED_IN') {
+                    lastCheckedUserId.current = null;
                 }
+                await checkAdminStatus(newSession.user.id);
             } else {
                 setIsAdmin(false);
+                lastCheckedUserId.current = null;
             }
 
             setLoading(false);
@@ -98,6 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setIsAdmin(false);
             setUser(null);
             setSession(null);
+            lastCheckedUserId.current = null;
             return { error: error as AuthError };
         }
     };

@@ -14,14 +14,23 @@ export interface AuthService {
 export const authService: AuthService = {
     // Check if user is admin
     isAdmin: async (userId: string) => {
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', userId)
-            .single() as any;
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', userId)
+                .single() as any;
 
-        if (error || !data) return false;
-        return data.role === 'admin';
+            if (error) {
+                console.error('Error fetching admin profile:', error);
+                throw error;
+            }
+            if (!data) return false;
+            return data.role === 'admin';
+        } catch (err) {
+            console.error('isAdmin check exploded:', err);
+            throw err;
+        }
     },
     // Sign in with email and password
     signIn: async (email: string, password: string) => {
