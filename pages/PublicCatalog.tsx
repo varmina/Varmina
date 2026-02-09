@@ -21,7 +21,6 @@ export const PublicCatalog = () => {
     const [collectionFilter, setCollectionFilter] = useState<string>('All');
     const [sort, setSort] = useState<SortOption>('newest');
 
-    console.log('[PublicCatalog] Products:', products.length, 'Loading:', loading);
 
     const categories = useMemo(() => ['All', ...Array.from(new Set(products.map(p => p.category).filter(Boolean)))], [products]);
     const collections = useMemo(() => ['All', ...Array.from(new Set(products.map(p => p.collection).filter(Boolean)))], [products]);
