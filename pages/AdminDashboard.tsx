@@ -10,7 +10,7 @@ import { SettingsView } from '../components/admin/SettingsView';
 
 // --- MAIN ADMIN COMPONENT ---
 export const AdminDashboard = () => {
-  const { products, refreshProducts, addToast, activeAdminTab } = useStore();
+  const { products, refreshProducts, addToast, activeAdminTab, loading } = useStore();
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string[] | null>(null);
@@ -166,144 +166,153 @@ export const AdminDashboard = () => {
             )}
 
             {/* Product List */}
-            <div className="w-full bg-white dark:bg-stone-900 md:border border-stone-100 dark:border-stone-800 rounded-sm overflow-hidden shadow-sm">
-              {/* Desktop Header */}
-              <div className="grid grid-cols-12 px-6 py-4 border-b border-stone-100 dark:border-stone-800 text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-stone-400 hidden lg:grid">
-                <div className="col-span-1">
-                  <input type="checkbox" checked={selectedIds.length === products.length && products.length > 0} onChange={toggleSelectAll} className="w-4 h-4 accent-gold-500 rounded-sm" />
-                </div>
-                <div className="col-span-1">Imagen</div>
-                <div className="col-span-4">Producto / Detalles</div>
-                <div className="col-span-2 text-center">Precio</div>
-                <div className="col-span-2 text-center">Estado</div>
-                <div className="col-span-2 text-right">Acciones</div>
-              </div>
-
-              <div className="divide-y divide-stone-100 dark:divide-stone-800">
-                {products
-                  .filter(p => filterStatus === 'All' || p.status === filterStatus)
-                  .map(product => (
-                    <div key={product.id} className="flex flex-col lg:grid lg:grid-cols-12 items-center px-4 md:px-6 py-6 md:py-8 hover:bg-stone-50 dark:hover:bg-stone-900/30 transition-all group relative">
-
-                      {/* Desktop Checkbox */}
-                      <div className="col-span-1 hidden lg:block">
-                        <input type="checkbox" checked={selectedIds.includes(product.id)} onChange={() => toggleSelect(product.id)} className="w-4 h-4 accent-gold-500 rounded-sm" />
-                      </div>
-
-                      {/* Mobile Header: Checkbox + Status */}
-                      <div className="w-full flex lg:hidden items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <input type="checkbox" checked={selectedIds.includes(product.id)} onChange={() => toggleSelect(product.id)} className="w-5 h-5 accent-gold-500 rounded-sm" />
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">ID: {product.id.slice(0, 8)}</span>
-                        </div>
-                        <div className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full ${product.status === ProductStatus.IN_STOCK ? 'bg-green-50 text-green-600 dark:bg-green-900/20' :
-                            product.status === ProductStatus.MADE_TO_ORDER ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20' :
-                              'bg-red-50 text-red-600 dark:bg-red-900/20'
-                          }`}>
-                          {product.status}
-                        </div>
-                      </div>
-
-                      <div className="w-full flex lg:contents gap-4 items-start">
-                        {/* Image */}
-                        <div className="col-span-1 flex-shrink-0">
-                          <div className="relative w-20 h-24 lg:w-12 lg:h-14 overflow-hidden bg-stone-100 border border-stone-200 dark:border-stone-800">
-                            <img src={product.images[0]} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                          </div>
-                        </div>
-
-                        {/* Product Info */}
-                        <div className="col-span-1 lg:col-span-4 flex flex-col gap-1 md:gap-2 flex-grow lg:ml-4">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="font-serif text-lg md:text-xl lg:text-lg text-stone-900 dark:text-white leading-tight uppercase tracking-widest">{product.name}</h3>
-                            {product.badge && (
-                              <span className="text-[8px] bg-gold-100 dark:bg-gold-900/30 px-2 py-0.5 text-gold-600 rounded-sm font-bold border border-gold-200/50 uppercase tracking-tighter">
-                                {product.badge}
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            {product.category && (
-                              <span className="text-[8px] bg-stone-100 dark:bg-stone-800 px-2 py-0.5 text-stone-500 rounded-sm font-bold uppercase tracking-widest">
-                                {product.category}
-                              </span>
-                            )}
-                            {product.collection && (
-                              <span className="text-[8px] border border-stone-200 dark:border-stone-800 px-2 py-0.5 text-stone-400 rounded-sm font-bold uppercase tracking-widest">
-                                {product.collection}
-                              </span>
-                            )}
-                          </div>
-                          <div className="lg:hidden mt-2">
-                            <span className="font-serif text-2xl text-gold-600">${product.price?.toLocaleString('es-CL')}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Desktop Price */}
-                      <div className="hidden lg:block lg:col-span-2 text-center">
-                        {inlinePriceId === product.id ? (
-                          <div className="flex items-center justify-center gap-2">
-                            <input
-                              type="number"
-                              autoFocus
-                              className="w-24 bg-stone-100 dark:bg-stone-800 border-none p-1.5 text-xs text-stone-900 dark:text-white rounded-sm outline-none ring-1 ring-gold-500"
-                              value={inlinePrice}
-                              onChange={(e) => setInlinePrice(Number(e.target.value))}
-                              onKeyDown={(e) => e.key === 'Enter' && handleInlinePriceSave(product.id)}
-                            />
-                            <button onClick={() => handleInlinePriceSave(product.id)} className="text-green-500 p-1 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-full"><Check className="w-4 h-4" /></button>
-                            <button onClick={() => setInlinePriceId(null)} className="text-red-400 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full"><CloseIcon className="w-4 h-4" /></button>
-                          </div>
-                        ) : (
-                          <span
-                            onClick={() => { setInlinePriceId(product.id); setInlinePrice(product.price); }}
-                            className="font-serif text-lg text-stone-600 dark:text-stone-300 cursor-pointer hover:text-gold-600 border-b border-dashed border-stone-200 dark:border-stone-800 hover:border-gold-600 pb-0.5 transition-colors"
-                          >
-                            ${product.price ? product.price.toLocaleString('es-CL') : '0'}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Desktop Status */}
-                      <div className="hidden lg:block lg:col-span-2 text-center">
-                        <select
-                          value={product.status}
-                          onChange={(e) => handleInlineStatusChange(product.id, e.target.value as ProductStatus)}
-                          className="bg-transparent text-[10px] font-bold uppercase tracking-widest outline-none border-none cursor-pointer focus:ring-0 dark:text-stone-400 hover:text-gold-600 transition-colors"
-                        >
-                          {Object.values(ProductStatus).map(s => (
-                            <option key={s} value={s} className="bg-white dark:bg-stone-900">{s}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="w-full lg:w-auto mt-6 lg:mt-0 flex items-center justify-between lg:justify-end gap-2 lg:col-span-2 lg:opacity-0 group-hover:lg:opacity-100 transition-opacity">
-                        <div className="flex gap-1">
-                          <button onClick={() => handleDuplicate(product.id)} className="p-3 lg:p-2 text-stone-500 hover:text-gold-600 hover:bg-gold-50 dark:hover:bg-gold-900/10 rounded-full transition-all flex items-center gap-2 lg:gap-0" title="Duplicar">
-                            <Copy className="w-4 h-4" />
-                            <span className="lg:hidden text-[10px] font-bold uppercase tracking-widest">Duplicar</span>
-                          </button>
-                          <button onClick={() => setEditingProduct(product)} className="p-3 lg:p-2 text-stone-500 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full transition-all flex items-center gap-2 lg:gap-0" title="Editar">
-                            <Edit2 className="w-4 h-4" />
-                            <span className="lg:hidden text-[10px] font-bold uppercase tracking-widest">Editar</span>
-                          </button>
-                        </div>
-                        <button onClick={() => setDeleteConfirm([product.id])} className="p-3 lg:p-2 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-full transition-all flex items-center gap-2 lg:gap-0" title="Eliminar">
-                          <Trash2 className="w-4 h-4" />
-                          <span className="lg:hidden text-[10px] font-bold uppercase tracking-widest">Eliminar</span>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-
-              {products.length === 0 && (
+            <div className="w-full bg-white dark:bg-stone-900 md:border border-stone-100 dark:border-stone-800 rounded-sm overflow-hidden shadow-sm min-h-[400px]">
+              {loading ? (
                 <div className="py-24 text-center">
-                  <Package className="w-16 h-16 mx-auto mb-6 text-stone-200" />
-                  <p className="font-serif text-xl text-stone-400 uppercase tracking-widest">No hay piezas en el inventario.</p>
+                  <div className="w-10 h-10 border-2 border-gold-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                  <p className="text-[10px] uppercase tracking-widest text-stone-400">Cargando inventario...</p>
                 </div>
+              ) : (
+                <>
+                  {/* Desktop Header */}
+                  <div className="grid grid-cols-12 px-6 py-4 border-b border-stone-100 dark:border-stone-800 text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-stone-400 hidden lg:grid">
+                    <div className="col-span-1">
+                      <input type="checkbox" checked={selectedIds.length === products.length && products.length > 0} onChange={toggleSelectAll} className="w-4 h-4 accent-gold-500 rounded-sm" />
+                    </div>
+                    <div className="col-span-1">Imagen</div>
+                    <div className="col-span-4">Producto / Detalles</div>
+                    <div className="col-span-2 text-center">Precio</div>
+                    <div className="col-span-2 text-center">Estado</div>
+                    <div className="col-span-2 text-right">Acciones</div>
+                  </div>
+
+                  <div className="divide-y divide-stone-100 dark:divide-stone-800">
+                    {products
+                      .filter(p => filterStatus === 'All' || p.status === filterStatus)
+                      .map(product => (
+                        <div key={product.id} className="flex flex-col lg:grid lg:grid-cols-12 items-center px-4 md:px-6 py-6 md:py-8 hover:bg-stone-50 dark:hover:bg-stone-900/30 transition-all group relative">
+
+                          {/* Desktop Checkbox */}
+                          <div className="col-span-1 hidden lg:block">
+                            <input type="checkbox" checked={selectedIds.includes(product.id)} onChange={() => toggleSelect(product.id)} className="w-4 h-4 accent-gold-500 rounded-sm" />
+                          </div>
+
+                          {/* Mobile Header: Checkbox + Status */}
+                          <div className="w-full flex lg:hidden items-center justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <input type="checkbox" checked={selectedIds.includes(product.id)} onChange={() => toggleSelect(product.id)} className="w-5 h-5 accent-gold-500 rounded-sm" />
+                              <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">ID: {product.id.slice(0, 8)}</span>
+                            </div>
+                            <div className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full ${product.status === ProductStatus.IN_STOCK ? 'bg-green-50 text-green-600 dark:bg-green-900/20' :
+                              product.status === ProductStatus.MADE_TO_ORDER ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20' :
+                                'bg-red-50 text-red-600 dark:bg-red-900/20'
+                              }`}>
+                              {product.status}
+                            </div>
+                          </div>
+
+                          <div className="w-full flex lg:contents gap-4 items-start">
+                            {/* Image */}
+                            <div className="col-span-1 flex-shrink-0">
+                              <div className="relative w-20 h-24 lg:w-12 lg:h-14 overflow-hidden bg-stone-100 border border-stone-200 dark:border-stone-800">
+                                <img src={product.images[0]} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                              </div>
+                            </div>
+
+                            {/* Product Info */}
+                            <div className="col-span-1 lg:col-span-4 flex flex-col gap-1 md:gap-2 flex-grow lg:ml-4">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <h3 className="font-serif text-lg md:text-xl lg:text-lg text-stone-900 dark:text-white leading-tight uppercase tracking-widest">{product.name}</h3>
+                                {product.badge && (
+                                  <span className="text-[8px] bg-gold-100 dark:bg-gold-900/30 px-2 py-0.5 text-gold-600 rounded-sm font-bold border border-gold-200/50 uppercase tracking-tighter">
+                                    {product.badge}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex flex-wrap items-center gap-2">
+                                {product.category && (
+                                  <span className="text-[8px] bg-stone-100 dark:bg-stone-800 px-2 py-0.5 text-stone-500 rounded-sm font-bold uppercase tracking-widest">
+                                    {product.category}
+                                  </span>
+                                )}
+                                {product.collection && (
+                                  <span className="text-[8px] border border-stone-200 dark:border-stone-800 px-2 py-0.5 text-stone-400 rounded-sm font-bold uppercase tracking-widest">
+                                    {product.collection}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="lg:hidden mt-2">
+                                <span className="font-serif text-2xl text-gold-600">${product.price?.toLocaleString('es-CL')}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Desktop Price */}
+                          <div className="hidden lg:block lg:col-span-2 text-center">
+                            {inlinePriceId === product.id ? (
+                              <div className="flex items-center justify-center gap-2">
+                                <input
+                                  type="number"
+                                  autoFocus
+                                  className="w-24 bg-stone-100 dark:bg-stone-800 border-none p-1.5 text-xs text-stone-900 dark:text-white rounded-sm outline-none ring-1 ring-gold-500"
+                                  value={inlinePrice}
+                                  onChange={(e) => setInlinePrice(Number(e.target.value))}
+                                  onKeyDown={(e) => e.key === 'Enter' && handleInlinePriceSave(product.id)}
+                                />
+                                <button onClick={() => handleInlinePriceSave(product.id)} className="text-green-500 p-1 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-full"><Check className="w-4 h-4" /></button>
+                                <button onClick={() => setInlinePriceId(null)} className="text-red-400 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full"><CloseIcon className="w-4 h-4" /></button>
+                              </div>
+                            ) : (
+                              <span
+                                onClick={() => { setInlinePriceId(product.id); setInlinePrice(product.price); }}
+                                className="font-serif text-lg text-stone-600 dark:text-stone-300 cursor-pointer hover:text-gold-600 border-b border-dashed border-stone-200 dark:border-stone-800 hover:border-gold-600 pb-0.5 transition-colors"
+                              >
+                                ${product.price ? product.price.toLocaleString('es-CL') : '0'}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Desktop Status */}
+                          <div className="hidden lg:block lg:col-span-2 text-center">
+                            <select
+                              value={product.status}
+                              onChange={(e) => handleInlineStatusChange(product.id, e.target.value as ProductStatus)}
+                              className="bg-transparent text-[10px] font-bold uppercase tracking-widest outline-none border-none cursor-pointer focus:ring-0 dark:text-stone-400 hover:text-gold-600 transition-colors"
+                            >
+                              {Object.values(ProductStatus).map(s => (
+                                <option key={s} value={s} className="bg-white dark:bg-stone-900">{s}</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="w-full lg:w-auto mt-6 lg:mt-0 flex items-center justify-between lg:justify-end gap-2 lg:col-span-2 lg:opacity-0 group-hover:lg:opacity-100 transition-opacity">
+                            <div className="flex gap-1">
+                              <button onClick={() => handleDuplicate(product.id)} className="p-3 lg:p-2 text-stone-500 hover:text-gold-600 hover:bg-gold-50 dark:hover:bg-gold-900/10 rounded-full transition-all flex items-center gap-2 lg:gap-0" title="Duplicar">
+                                <Copy className="w-4 h-4" />
+                                <span className="lg:hidden text-[10px] font-bold uppercase tracking-widest">Duplicar</span>
+                              </button>
+                              <button onClick={() => setEditingProduct(product)} className="p-3 lg:p-2 text-stone-500 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full transition-all flex items-center gap-2 lg:gap-0" title="Editar">
+                                <Edit2 className="w-4 h-4" />
+                                <span className="lg:hidden text-[10px] font-bold uppercase tracking-widest">Editar</span>
+                              </button>
+                            </div>
+                            <button onClick={() => setDeleteConfirm([product.id])} className="p-3 lg:p-2 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-full transition-all flex items-center gap-2 lg:gap-0" title="Eliminar">
+                              <Trash2 className="w-4 h-4" />
+                              <span className="lg:hidden text-[10px] font-bold uppercase tracking-widest">Eliminar</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+
+                  {products.length === 0 && (
+                    <div className="py-24 text-center">
+                      <Package className="w-16 h-16 mx-auto mb-6 text-stone-200" />
+                      <p className="font-serif text-xl text-stone-400 uppercase tracking-widest">No hay piezas en el inventario.</p>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>

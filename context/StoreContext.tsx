@@ -19,6 +19,7 @@ interface StoreContextType {
 
   // Auth (delegated to AuthContext)
   isAuthenticated: boolean;
+  isAdmin: boolean;
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -101,7 +102,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const refreshProducts = useCallback(async (force = false, silent = false) => {
     if (!silent) setDataLoading(true);
     try {
-      const data = await withTimeout(supabaseProductService.getAll(), 8000, []);
+      const data = await withTimeout(supabaseProductService.getAll(), 15000, []);
       setProducts(data);
       lastRefreshRef.current = Date.now();
     } catch (e) {
@@ -139,8 +140,8 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   };
 
-  // 6. Global Loading State (Auth + Data)
-  const globalLoading = authLoading || (dataLoading && products.length === 0);
+  // 6. Global Loading State (Data only for public pages)
+  const globalLoading = dataLoading && products.length === 0;
 
   return (
     <StoreContext.Provider value={{
@@ -150,7 +151,8 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       darkMode, toggleDarkMode,
       refreshProducts,
       toasts, addToast, removeToast,
-      isAuthenticated: isAdmin, // Map isAdmin to isAuthenticated for legacy usage
+      isAuthenticated: !!user,
+      isAdmin,
       user,
       login, logout,
       settings, refreshSettings,

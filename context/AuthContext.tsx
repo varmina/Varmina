@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User, Session } from '@supabase/supabase-js';
+import { User, Session, AuthError } from '@supabase/supabase-js';
 import { authService } from '../services/authService';
+import { supabase } from '../lib/supabase';
 
 interface AuthContextType {
     user: User | null;
@@ -13,13 +14,12 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [session, setSession] = useState<Session | null>(null);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    // Helper to fetch admin status
     const checkAdminStatus = async (userId: string) => {
         try {
             const isAdm = await authService.isAdmin(userId);
@@ -27,6 +27,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             return isAdm;
         } catch (err) {
             console.error('Error checking admin status:', err);
+            // Don't flip to false if we had a network error but still have a session? 
+            // Actually, safety first for admin routes.
             setIsAdmin(false);
             return false;
         }
@@ -35,17 +37,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     useEffect(() => {
         let mounted = true;
 
-        // 1. Initial Session Check
         const initAuth = async () => {
             try {
-                const currentSession = await authService.getCurrentSession();
-                if (mounted) {
-                    setSession(currentSession);
-                    setUser(currentSession?.user ?? null);
+                // Get initial session
+                const { data: { session: currentSession } } = await supabase.auth.getSession();
 
-                    if (currentSession?.user) {
-                        await checkAdminStatus(currentSession.user.id);
-                    }
+                if (!mounted) return;
+
+                if (currentSession) {
+                    setSession(currentSession);
+                    setUser(currentSession.user);
+                    await checkAdminStatus(currentSession.user.id);
                 }
             } catch (error) {
                 console.error('Auth init error:', error);
@@ -54,24 +56,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             }
         };
 
+        // Initialize
         initAuth();
 
-        // 2. Auth State Listener
-        const { data: { subscription } } = authService.onAuthStateChange(async (event, newSession) => {
+        // Listen for changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
             if (!mounted) return;
 
-            console.log('Auth event:', event);
+            console.log(`[Auth] Event: ${event}`, newSession?.user?.email);
+
             setSession(newSession);
             setUser(newSession?.user ?? null);
 
             if (newSession?.user) {
-                // Only re-check admin on relevant events to avoid noise
-                if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+                // Check admin status on sign in, initial session, or if we don't know yet
+                // We also check on TOKEN_REFRESHED if we weren't already confirmed as admin
+                if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
                     await checkAdminStatus(newSession.user.id);
-                } else if (event === 'SIGNED_OUT') {
-                    setIsAdmin(false);
                 }
-                // TOKEN_REFRESHED usually doesn't change admin status, so we skip it or assume state is preserved
             } else {
                 setIsAdmin(false);
             }
@@ -92,10 +94,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         loading,
         signIn: authService.signIn,
         signOut: async () => {
-            await authService.signOut();
+            const { error } = await authService.signOut();
             setIsAdmin(false);
             setUser(null);
             setSession(null);
+            return { error: error as AuthError };
         }
     };
 

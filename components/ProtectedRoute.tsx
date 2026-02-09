@@ -1,14 +1,16 @@
 import React from 'react';
-import { useStore } from '../context/StoreContext';
+import { useAuth } from '../context/AuthContext';
 import { LoadingScreen } from './UI';
 import { LoginPage } from '../pages/LoginPage';
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-    const { isAuthenticated, loading } = useStore();
+    const { isAdmin, loading: authLoading } = useAuth();
 
-    if (loading) return <LoadingScreen />;
+    if (authLoading) {
+        return <LoadingScreen />;
+    }
 
-    if (!isAuthenticated) {
+    if (!isAdmin) {
         return <LoginPage />;
     }
 
