@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../context/StoreContext';
+import { usePublicProducts } from '../hooks/usePublicProducts';
 import { Product, ProductStatus, SortOption } from '../types';
 import { Modal, Skeleton } from '../components/UI';
 import { Search, SlidersHorizontal, Grid, List, X } from 'lucide-react';
@@ -7,7 +8,8 @@ import { ProductCard, ProductDetail } from '../components/ProductComponents';
 
 // --- MAIN PAGE COMPONENT ---
 export const PublicCatalog = () => {
-    const { products, loading, currency } = useStore();
+    const { currency } = useStore();
+    const { products, loading, error } = usePublicProducts();
 
     const [layout, setLayout] = useState<'grid' | 'list'>('grid');
     const [search, setSearch] = useState('');
@@ -21,10 +23,10 @@ export const PublicCatalog = () => {
     const [collectionFilter, setCollectionFilter] = useState<string>('All');
     const [sort, setSort] = useState<SortOption>('newest');
 
-
     const categories = useMemo(() => ['All', ...Array.from(new Set(products.map(p => p.category).filter(Boolean)))], [products]);
     const collections = useMemo(() => ['All', ...Array.from(new Set(products.map(p => p.collection).filter(Boolean)))], [products]);
 
+    // Filtering Logic
     const filteredProducts = useMemo(() => {
         let result = products.filter(p => {
             const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
@@ -40,174 +42,156 @@ export const PublicCatalog = () => {
             if (sort === 'price_desc') return b.price - a.price;
             return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         });
-    }, [products, search, minPrice, maxPrice, statusFilter, sort]);
-
-    const sortOptions = [
-        { value: 'newest', label: 'Recientes' },
-        { value: 'price_asc', label: 'Menor Precio' },
-        { value: 'price_desc', label: 'Mayor Precio' },
-    ];
+    }, [products, search, minPrice, maxPrice, statusFilter, categoryFilter, collectionFilter, sort]);
 
     return (
-        <div className="container mx-auto px-4 py-4 md:py-8 max-w-7xl min-h-screen">
+        <div className="w-full max-w-7xl mx-auto px-4 md:px-8 py-8 animate-in fade-in duration-500">
+            {/* Header & Controls */}
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 md:mb-12 gap-4">
+                <h2 className="font-serif text-xl md:text-3xl tracking-[0.2em] text-stone-800 dark:text-stone-200 uppercase">
+                    Catálogo
+                </h2>
 
-            {/* Header & Controls Section */}
-            <div className="sticky top-16 z-30 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur py-3 md:py-4 mb-6 md:mb-8 -mx-4 px-4 border-b border-stone-200 dark:border-stone-800 transition-colors">
-
-                <div className="flex items-center justify-between gap-2">
-                    <div className="hidden lg:block w-1/4">
-                        <span className="text-[10px] font-serif tracking-[0.3em] text-stone-500 uppercase">
-                            {filteredProducts.length} Productos
-                        </span>
+                <div className="flex items-center gap-2 md:gap-4 shrink-0 self-end md:self-auto">
+                    {/* Unique Search Bar */}
+                    <div className={`flex items-center transition-all duration-300 ${isSearchOpen ? 'w-48 md:w-64 opacity-100' : 'w-0 opacity-0 overflow-hidden'}`}>
+                        <input
+                            type="text"
+                            placeholder="Buscar..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full bg-stone-50 dark:bg-stone-900 border-none outline-none text-xs p-2 text-stone-600 dark:text-stone-300 placeholder-stone-400 font-serif"
+                            autoFocus={isSearchOpen}
+                        />
                     </div>
+                    <button onClick={() => setIsSearchOpen(!isSearchOpen)} className="p-2 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full text-stone-400 hover:text-stone-900 dark:hover:text-gold-400 transition-colors" title="Buscar">
+                        <Search className="w-5 h-5" />
+                    </button>
 
-                    <div className="flex-1 lg:w-1/2 text-left md:text-center">
-                        <h2 className="font-serif text-sm md:text-xl tracking-[0.2em] text-stone-900 dark:text-white uppercase truncate">
-                            Catálogo
-                        </h2>
-                    </div>
+                    {/* Filter Toggle */}
+                    <button
+                        onClick={() => setShowFilters(!showFilters)}
+                        className={`p-2 rounded-full transition-colors ${showFilters ? 'bg-stone-900 text-white dark:bg-gold-500 dark:text-stone-900' : 'hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 hover:text-stone-900 dark:hover:text-gold-400'}`}
+                        title="Filtros"
+                    >
+                        <SlidersHorizontal className="w-5 h-5" />
+                    </button>
 
-                    <div className="flex items-center justify-end gap-1 md:gap-4 lg:w-1/4 shrink-0">
-                        <button
-                            onClick={() => setIsSearchOpen(!isSearchOpen)}
-                            className={`p-2.5 md:p-2 rounded-full hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors ${isSearchOpen ? 'text-gold-500 bg-stone-100 dark:bg-stone-800' : 'text-stone-400'}`}
-                        >
-                            <Search className="w-4 h-4 md:w-5 md:h-5" />
-                        </button>
+                    <div className="h-6 w-px bg-stone-200 dark:bg-stone-800 mx-1"></div>
 
-                        <button
-                            onClick={() => setShowFilters(!showFilters)}
-                            className={`p-2.5 md:p-2 rounded-full hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors ${showFilters ? 'text-gold-500 bg-stone-100 dark:bg-stone-800' : 'text-stone-400'}`}
-                        >
-                            <SlidersHorizontal className="w-4 h-4 md:w-5 md:h-5" />
-                        </button>
-
-                        <div className="h-4 w-px bg-stone-300 dark:bg-stone-700 mx-1 hidden sm:block" />
-
-                        <div className="flex gap-1">
-                            <button
-                                onClick={() => setLayout('grid')}
-                                className={`p-2.5 md:p-2 rounded transition-colors hover:bg-stone-200 dark:hover:bg-stone-800 ${layout === 'grid' ? 'text-gold-500 bg-stone-100 dark:bg-stone-800' : 'text-stone-400'}`}
-                            >
-                                <Grid className="w-4 h-4 md:w-5 md:h-5" />
-                            </button>
-                            <button
-                                onClick={() => setLayout('list')}
-                                className={`p-2.5 md:p-2 rounded transition-colors hover:bg-stone-200 dark:hover:bg-stone-800 ${layout === 'list' ? 'text-gold-500 bg-stone-100 dark:bg-stone-800' : 'text-stone-400'}`}
-                            >
-                                <List className="w-4 h-4 md:w-5 md:h-5" />
-                            </button>
-                        </div>
-                    </div>
+                    {/* Layout Toggles */}
+                    <button onClick={() => setLayout('grid')} className={`p-2 rounded-md transition-colors ${layout === 'grid' ? 'bg-stone-100 dark:bg-stone-800 text-gold-600 dark:text-gold-400' : 'text-stone-400'}`}>
+                        <Grid className="w-5 h-5" />
+                    </button>
+                    <button onClick={() => setLayout('list')} className={`p-2 rounded-md transition-colors ${layout === 'list' ? 'bg-stone-100 dark:bg-stone-800 text-gold-600 dark:text-gold-400' : 'text-stone-400'}`}>
+                        <List className="w-5 h-5" />
+                    </button>
                 </div>
+            </div>
 
-                {isSearchOpen && (
-                    <div className="mt-3 animate-in slide-in-from-top-2 fade-in duration-200 border-t border-stone-100 dark:border-stone-800 pt-3">
-                        <div className="relative">
-                            <input
-                                type="text"
-                                placeholder="Buscar joya..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                autoFocus
-                                className="w-full bg-stone-100 dark:bg-stone-800 border-none rounded py-3 pl-4 pr-10 text-sm text-stone-900 dark:text-white focus:ring-1 focus:ring-gold-500 placeholder:text-stone-400 outline-none"
-                            />
-                            {search && (
-                                <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 p-1">
-                                    <X className="w-4 h-4" />
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                )}
-
+            {/* Filters Area */}
+            <div className={`overflow-hidden transition-[max-height,opacity] duration-500 ease-in-out ${showFilters ? 'max-h-[500px] opacity-100 mb-8' : 'max-h-0 opacity-0'}`}>
                 {showFilters && (
-                    <div className="mt-4 pt-4 border-t border-stone-100 dark:border-stone-800 animate-in slide-in-from-top-4 duration-300">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-2">
-                            <div>
-                                <h4 className="font-serif text-xs mb-3 text-stone-900 dark:text-white uppercase tracking-wider">Ordenar</h4>
-                                <div className="space-y-3">
-                                    {sortOptions.map(opt => (
-                                        <label key={opt.value} className="flex items-center gap-3 cursor-pointer group">
-                                            <div className={`w-5 h-5 border rounded-full flex items-center justify-center transition-colors ${sort === opt.value ? 'border-gold-500 bg-gold-50' : 'border-stone-300'}`}>
-                                                {sort === opt.value && <div className="w-2.5 h-2.5 bg-gold-500 rounded-full" />}
-                                            </div>
-                                            <input type="radio" name="sort" className="hidden" checked={sort === opt.value} onChange={() => setSort(opt.value as SortOption)} />
-                                            <span className={`text-xs uppercase tracking-widest ${sort === opt.value ? 'text-gold-600 font-bold' : 'text-stone-500 dark:text-stone-300'}`}>
-                                                {opt.label}
-                                            </span>
-                                        </label>
-                                    ))}
-                                </div>
+                    <div className="bg-stone-50 dark:bg-stone-900/50 p-6 md:p-8 rounded-sm grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+                        {/* Price Range */}
+                        <div className="space-y-4">
+                            <h4 className="font-serif text-[10px] uppercase tracking-widest text-stone-400 font-bold mb-4 border-b border-stone-200 dark:border-stone-800 pb-2">Rango de Precio</h4>
+                            <div className="flex items-center justify-between text-xs font-bold text-stone-500 dark:text-stone-400 mb-2">
+                                <span>${minPrice.toLocaleString()}</span>
+                                <span>${maxPrice === 300000 ? '300,000+' : maxPrice.toLocaleString()}</span>
                             </div>
+                            <input
+                                type="range"
+                                min="0"
+                                max="300000"
+                                step="10000"
+                                value={minPrice}
+                                onChange={(e) => {
+                                    const val = Number(e.target.value);
+                                    if (val <= maxPrice) setMinPrice(val);
+                                }}
+                                className="w-full h-1 bg-stone-200 dark:bg-stone-700 rounded-lg appearance-none cursor-pointer accent-stone-900 dark:accent-gold-500"
+                            />
+                            <input
+                                type="range"
+                                min="0"
+                                max="300000"
+                                step="10000"
+                                value={maxPrice}
+                                onChange={(e) => {
+                                    const val = Number(e.target.value);
+                                    if (val >= minPrice) setMaxPrice(val);
+                                }}
+                                className="w-full h-1 bg-stone-200 dark:bg-stone-700 rounded-lg appearance-none cursor-pointer accent-stone-900 dark:accent-gold-500 mt-2"
+                            />
+                        </div>
 
-                            <div>
-                                <h4 className="font-serif text-xs mb-3 text-stone-900 dark:text-white uppercase tracking-wider">Categoría</h4>
-                                <select
-                                    value={categoryFilter}
-                                    onChange={(e) => setCategoryFilter(e.target.value)}
-                                    className="w-full bg-transparent border border-stone-200 dark:border-stone-800 p-3 text-[10px] uppercase tracking-widest outline-none focus:border-gold-500"
-                                >
-                                    {categories.map(c => <option key={c} value={c || ''}>{c}</option>)}
-                                </select>
-                            </div>
-
-                            <div>
-                                <h4 className="font-serif text-xs mb-3 text-stone-900 dark:text-white uppercase tracking-wider">Colección</h4>
-                                <select
-                                    value={collectionFilter}
-                                    onChange={(e) => setCollectionFilter(e.target.value)}
-                                    className="w-full bg-transparent border border-stone-200 dark:border-stone-800 p-3 text-[10px] uppercase tracking-widest outline-none focus:border-gold-500"
-                                >
-                                    {collections.map(c => <option key={c} value={c || ''}>{c}</option>)}
-                                </select>
-                            </div>
-
-                            <div>
-                                <h4 className="font-serif text-xs mb-3 text-stone-900 dark:text-white uppercase tracking-wider">Presupuesto</h4>
-                                <div className="space-y-4">
-                                    <input
-                                        type="range" min="0" max="300000" step="10000"
-                                        value={maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value))}
-                                        className="w-full accent-gold-500 h-2 bg-stone-200 dark:bg-stone-800 rounded-lg appearance-none cursor-pointer"
-                                    />
-                                    <div className="flex justify-between text-[10px] text-stone-500 font-mono">
-                                        <span>$0</span>
-                                        <span className="text-gold-600 font-bold">{maxPrice >= 300000 ? 'Sin Límite' : `$${maxPrice.toLocaleString('es-CL')}`}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <h4 className="font-serif text-xs mb-3 text-stone-900 dark:text-white uppercase tracking-wider">Estado</h4>
-                                <div className="flex flex-wrap gap-2">
-                                    <button
-                                        onClick={() => setStatusFilter('All')}
-                                        className={`px-4 py-2 text-[9px] uppercase tracking-widest border transition-all ${statusFilter === 'All'
-                                            ? 'bg-stone-900 text-white border-stone-900 dark:bg-gold-500 dark:border-gold-500'
-                                            : 'text-stone-500 border-stone-200 dark:border-stone-800'}`}
-                                    >
-                                        Todos
-                                    </button>
-                                    {Object.values(ProductStatus).map((status) => (
-                                        <button
-                                            key={status}
-                                            onClick={() => setStatusFilter(status as any)}
-                                            className={`px-4 py-2 text-[9px] uppercase tracking-widest border transition-all ${statusFilter === status
-                                                ? 'bg-stone-900 text-white border-stone-900 dark:bg-gold-500 dark:border-gold-500'
-                                                : 'text-stone-500 border-stone-200 dark:border-stone-800'}`}
-                                        >
-                                            {status}
-                                        </button>
-                                    ))}
-                                </div>
+                        {/* Status Filter */}
+                        <div className="space-y-4">
+                            <h4 className="font-serif text-[10px] uppercase tracking-widest text-stone-400 font-bold mb-4 border-b border-stone-200 dark:border-stone-800 pb-2">Estado</h4>
+                            <div className="flex flex-col gap-2">
+                                {['All', ...Object.values(ProductStatus)].map(status => (
+                                    <label key={status} className="flex items-center gap-3 cursor-pointer group">
+                                        <div className={`w-3 h-3 border border-stone-300 dark:border-stone-600 rounded-full flex items-center justify-center transition-colors ${statusFilter === status ? 'border-gold-500 bg-gold-500' : 'group-hover:border-stone-400'}`}>
+                                            {statusFilter === status && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                                        </div>
+                                        <input
+                                            type="radio"
+                                            name="status"
+                                            className="hidden"
+                                            checked={statusFilter === status}
+                                            onChange={() => setStatusFilter(status as any)}
+                                        />
+                                        <span className={`text-[11px] uppercase tracking-wider transition-colors ${statusFilter === status ? 'text-stone-900 dark:text-white font-bold' : 'text-stone-500 dark:text-stone-400 group-hover:text-stone-700'}`}>
+                                            {status === 'All' ? 'Todos' : status}
+                                        </span>
+                                    </label>
+                                ))}
                             </div>
                         </div>
-                        <div className="mt-6 pt-4 border-t border-stone-100 dark:border-stone-800 flex justify-between items-center">
-                            <button onClick={() => { setSearch(''); setStatusFilter('All'); setMinPrice(0); setMaxPrice(300000); setCategoryFilter('All'); setCollectionFilter('All'); }} className="text-[9px] uppercase tracking-[0.2em] text-stone-400 hover:text-stone-900">Limpiar Todo</button>
-                            <button onClick={() => setShowFilters(false)} className="text-[9px] uppercase tracking-[0.2em] font-bold text-gold-600 border border-gold-600 px-4 py-1.5 rounded-full">
-                                Aplicar
-                            </button>
+
+                        {/* Sort */}
+                        <div className="space-y-4">
+                            <h4 className="font-serif text-[10px] uppercase tracking-widest text-stone-400 font-bold mb-4 border-b border-stone-200 dark:border-stone-800 pb-2">Ordenar Por</h4>
+                            <div className="flex flex-col gap-2">
+                                {[
+                                    { value: 'newest', label: 'Más Recientes' },
+                                    { value: 'price_asc', label: 'Precio: Menor a Mayor' },
+                                    { value: 'price_desc', label: 'Precio: Mayor a Menor' }
+                                ].map(option => (
+                                    <label key={option.value} className="flex items-center gap-3 cursor-pointer group">
+                                        <div className={`w-3 h-3 border border-stone-300 dark:border-stone-600 rounded-full flex items-center justify-center transition-colors ${sort === option.value ? 'border-gold-500 bg-gold-500' : 'group-hover:border-stone-400'}`}>
+                                            {sort === option.value && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                                        </div>
+                                        <input
+                                            type="radio"
+                                            name="sort"
+                                            className="hidden"
+                                            checked={sort === option.value}
+                                            onChange={() => setSort(option.value as any)}
+                                        />
+                                        <span className={`text-[11px] uppercase tracking-wider transition-colors ${sort === option.value ? 'text-stone-900 dark:text-white font-bold' : 'text-stone-500 dark:text-stone-400 group-hover:text-stone-700'}`}>
+                                            {option.label}
+                                        </span>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Categories */}
+                        <div className="space-y-4">
+                            <h4 className="font-serif text-[10px] uppercase tracking-widest text-stone-400 font-bold mb-4 border-b border-stone-200 dark:border-stone-800 pb-2">Categoría</h4>
+                            <div className="flex flex-wrap gap-2">
+                                {categories.map(cat => (
+                                    <button
+                                        key={cat}
+                                        onClick={() => setCategoryFilter(cat)}
+                                        className={`px-3 py-1 text-[10px] uppercase tracking-widest border rounded-sm transition-all ${categoryFilter === cat ? 'bg-stone-900 text-white dark:bg-white dark:text-stone-900 border-stone-900 dark:border-white' : 'text-stone-500 border-stone-200 dark:border-stone-700 hover:border-stone-400'}`}
+                                    >
+                                        {cat === 'All' ? 'Todas' : cat}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 )}
