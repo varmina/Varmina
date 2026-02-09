@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 
 export function useAdmin() {
+    const { user } = useAuth();
     const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -9,16 +11,17 @@ export function useAdmin() {
         let mounted = true;
 
         const checkAdmin = async () => {
-            try {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (!user) {
-                    if (mounted) {
-                        setIsAdmin(false);
-                        setLoading(false);
-                    }
-                    return;
+            if (!user) {
+                if (mounted) {
+                    setIsAdmin(false);
+                    setLoading(false);
                 }
+                return;
+            }
 
+            // If we have a user, we must check if they are admin
+            setLoading(true);
+            try {
                 const { data, error } = await supabase
                     .from('profiles')
                     .select('role')
@@ -45,7 +48,7 @@ export function useAdmin() {
         return () => {
             mounted = false;
         };
-    }, []);
+    }, [user]); // Re-run when user changes
 
     return { isAdmin, loading };
 }
