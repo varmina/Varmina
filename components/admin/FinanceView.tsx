@@ -4,23 +4,32 @@ import { Transaction } from '../../types';
 import { Button, Input, Modal } from '../UI';
 import { useStore } from '../../context/StoreContext';
 import {
-    TrendingUp,
-    TrendingDown,
-    DollarSign,
-    Calendar,
-    Plus,
-    Minus,
-    ArrowUpRight,
-    ArrowDownLeft,
-    PieChart,
     Trash2,
     Edit2,
-    FileText
+    FileText,
+    Search,
+    Filter,
+    CheckCircle2,
+    AlertCircle,
+    ArrowRight,
+    Plus,
+    Minus,
+    DollarSign,
+    ArrowUpRight,
+    ArrowDownLeft,
+    Info,
+    TrendingUp,
+    TrendingDown
 } from 'lucide-react';
 
 const getLocalISODate = () => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+};
+
+const CATEGORIES = {
+    income: ['Ventas', 'Servicios', 'Reembolsos', 'Otros'],
+    expense: ['Insumos', 'Marketing', 'Logística', 'Servicios Básicos', 'Sueldos', 'Otros']
 };
 
 export const FinanceView: React.FC = () => {
@@ -40,9 +49,15 @@ export const FinanceView: React.FC = () => {
     });
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
+    // List Filters
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('All');
+    const [viewType, setViewType] = useState<'all' | 'income' | 'expense'>('all');
+
     // Bulk State
     const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
     const [bulkData, setBulkData] = useState('');
+    const [bulkPreview, setBulkPreview] = useState<any[]>([]);
 
     useEffect(() => {
         loadData();
@@ -105,39 +120,49 @@ export const FinanceView: React.FC = () => {
         setIsModalOpen(true);
     };
 
+    useEffect(() => {
+        const lines = bulkData.split('\n').filter(line => line.trim());
+        const preview = lines.map((line, index) => {
+            const parts = line.split(',').map(s => s.trim());
+            const amount = Number(parts[1]);
+            const isValid = parts[0] && !isNaN(amount) && amount > 0;
+            return {
+                id: index,
+                description: parts[0] || '---',
+                amount: isNaN(amount) ? 0 : amount,
+                category: parts[2] || 'General',
+                date: parts[3] || getLocalISODate(),
+                isValid
+            };
+        });
+        setBulkPreview(preview);
+    }, [bulkData]);
+
     const handleBulkSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const lines = bulkData.split('\n').filter(line => line.trim());
-        const newTransactions = lines.map(line => {
-            // Format: Descripcón, Monto, Categoría (opcional), Fecha (opcional)
-            const parts = line.split(',').map(s => s.trim());
-            const description = parts[0];
-            const amount = Number(parts[1]);
-            const category = parts[2] || 'General';
-            const date = parts[3] || getLocalISODate();
-
-            return {
-                description,
-                amount,
+        const validTransactions = bulkPreview
+            .filter(p => p.isValid)
+            .map(p => ({
+                description: p.description,
+                amount: p.amount,
                 type: modalType,
-                category,
-                date
-            };
-        }).filter(t => t.description && !isNaN(t.amount));
+                category: p.category,
+                date: p.date
+            }));
 
-        if (newTransactions.length === 0) {
-            addToast('error', 'No se encontraron transacciones válidas. Use el formato: Descripción, Monto, Categoría, Fecha');
+        if (validTransactions.length === 0) {
+            addToast('error', 'No hay datos válidos para importar');
             return;
         }
 
         try {
-            await financeService.createBulk(newTransactions);
-            addToast('success', `${newTransactions.length} transacciones registradas`);
+            await financeService.createBulk(validTransactions);
+            addToast('success', `${validTransactions.length} registros importados`);
             setIsBulkModalOpen(false);
             setBulkData('');
             loadData();
         } catch (error) {
-            addToast('error', 'Error en el registro masivo');
+            addToast('error', 'Error en el proceso masivo');
         }
     };
 
@@ -155,6 +180,15 @@ export const FinanceView: React.FC = () => {
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(amount);
     };
+
+    const filteredTransactions = transactions.filter(tx => {
+        const matchesSearch = tx.description.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = selectedCategory === 'All' || tx.category === selectedCategory;
+        const matchesType = viewType === 'all' || tx.type === viewType;
+        return matchesSearch && matchesCategory && matchesType;
+    });
+
+    const expenseRatio = balance.income > 0 ? (balance.expense / balance.income) * 100 : 0;
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500 pb-20">
@@ -187,120 +221,190 @@ export const FinanceView: React.FC = () => {
                 </div>
             </div>
 
-            {/* Balance Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Total Balance */}
-                <div className="bg-white dark:bg-stone-900 p-6 rounded-xl shadow-sm border border-stone-100 dark:border-stone-800 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-4 opacity-10">
-                        <DollarSign className="w-24 h-24 text-stone-900 dark:text-white" />
+            {/* Balance Summary Header */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-stretch">
+                {/* Total Balance Card */}
+                <div className="md:col-span-2 bg-stone-900 text-white p-8 rounded-2xl shadow-xl relative overflow-hidden group border border-stone-800">
+                    <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
+                        <DollarSign className="w-32 h-32" />
                     </div>
-                    <p className="text-sm font-bold uppercase tracking-widest text-stone-400 mb-2">Balance Total</p>
-                    <h3 className={`text-3xl font-serif ${balance.balance >= 0 ? 'text-stone-900 dark:text-white' : 'text-red-600'}`}>
-                        {formatCurrency(balance.balance)}
-                    </h3>
-                    <div className="mt-4 flex items-center gap-2 text-xs text-stone-500">
-                        <Calendar className="w-3 h-3" />
-                        <span>Histórico</span>
+                    <div className="relative z-10 flex flex-col h-full justify-between">
+                        <div>
+                            <p className="text-gold-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-1">Balance Actual</p>
+                            <h3 className="text-4xl md:text-5xl font-serif">
+                                {formatCurrency(balance.balance)}
+                            </h3>
+                        </div>
+                        <div className="mt-8 space-y-4">
+                            <div className="flex justify-between items-end text-xs mb-2">
+                                <span className="text-stone-400 uppercase tracking-wider">Flujo de Caja</span>
+                                <span className={expenseRatio > 80 ? 'text-red-400' : 'text-green-400'}>
+                                    {expenseRatio.toFixed(1)}% Egresos/Ingresos
+                                </span>
+                            </div>
+                            <div className="h-1.5 w-full bg-stone-800 rounded-full overflow-hidden">
+                                <div
+                                    className={`h-full transition-all duration-1000 ${expenseRatio > 80 ? 'bg-red-500' : (expenseRatio > 50 ? 'bg-gold-500' : 'bg-green-500')}`}
+                                    style={{ width: `${Math.min(100, expenseRatio)}%` }}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                {/* Income */}
-                <div className="bg-white dark:bg-stone-900 p-6 rounded-xl shadow-sm border border-stone-100 dark:border-stone-800 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-4 opacity-10">
-                        <TrendingUp className="w-24 h-24 text-green-600" />
+                {/* Vertical Stats */}
+                <div className="bg-white dark:bg-stone-900 p-6 rounded-2xl border border-stone-100 dark:border-stone-800 flex flex-col justify-center">
+                    <p className="text-stone-400 text-[10px] font-bold uppercase tracking-widest mb-1">Ingresos</p>
+                    <div className="flex items-center gap-2 mb-2">
+                        <div className="p-1.5 bg-green-50 dark:bg-green-900/20 text-green-600 rounded">
+                            <ArrowUpRight className="w-4 h-4" />
+                        </div>
+                        <h4 className="text-2xl font-serif text-green-600">{formatCurrency(balance.income)}</h4>
                     </div>
-                    <p className="text-sm font-bold uppercase tracking-widest text-stone-400 mb-2">Ingresos</p>
-                    <h3 className="text-3xl font-serif text-green-600">
-                        {formatCurrency(balance.income)}
-                    </h3>
-                    <div className="mt-4 flex items-center gap-2 text-xs text-green-600/80">
-                        <ArrowUpRight className="w-3 h-3" />
-                        <span>Entradas registradas</span>
-                    </div>
+                    <p className="text-stone-400 text-[10px] italic">Total histórico bruto</p>
                 </div>
 
-                {/* Expenses */}
-                <div className="bg-white dark:bg-stone-900 p-6 rounded-xl shadow-sm border border-stone-100 dark:border-stone-800 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-4 opacity-10">
-                        <TrendingDown className="w-24 h-24 text-red-600" />
+                <div className="bg-white dark:bg-stone-900 p-6 rounded-2xl border border-stone-100 dark:border-stone-800 flex flex-col justify-center">
+                    <p className="text-stone-400 text-[10px] font-bold uppercase tracking-widest mb-1">Egresos</p>
+                    <div className="flex items-center gap-2 mb-2">
+                        <div className="p-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 rounded">
+                            <ArrowDownLeft className="w-4 h-4" />
+                        </div>
+                        <h4 className="text-2xl font-serif text-red-600">{formatCurrency(balance.expense)}</h4>
                     </div>
-                    <p className="text-sm font-bold uppercase tracking-widest text-stone-400 mb-2">Egresos</p>
-                    <h3 className="text-3xl font-serif text-red-600">
-                        {formatCurrency(balance.expense)}
-                    </h3>
-                    <div className="mt-4 flex items-center gap-2 text-xs text-red-600/80">
-                        <ArrowDownLeft className="w-3 h-3" />
-                        <span>Salidas registradas</span>
-                    </div>
+                    <p className="text-stone-400 text-[10px] italic">Gasto total acumulado</p>
                 </div>
             </div>
 
-            {/* Recent Transactions List */}
-            <div className="bg-white dark:bg-stone-900 rounded-xl shadow-sm border border-stone-100 dark:border-stone-800 overflow-hidden">
-                <div className="p-6 border-b border-stone-100 dark:border-stone-800 flex justify-between items-center">
-                    <h3 className="font-serif text-lg text-stone-900 dark:text-white">Movimientos Recientes</h3>
-                    <span className="text-xs text-stone-400 italic">Últimos 50 movimientos</span>
+            {/* List Header & Controls */}
+            <div className="flex flex-col gap-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-stone-50 dark:bg-stone-950/50 p-4 rounded-xl border border-stone-200 dark:border-stone-800">
+                    <div className="flex items-center gap-4 flex-1">
+                        <div className="relative flex-1 max-w-md">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                            <input
+                                type="text"
+                                placeholder="Buscar transacciones..."
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
+                                className="w-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gold-400"
+                            />
+                        </div>
+                        <div className="flex bg-white dark:bg-stone-900 p-1 rounded-lg border border-stone-200 dark:border-stone-800">
+                            <button
+                                onClick={() => setViewType('all')}
+                                className={`px-4 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all ${viewType === 'all' ? 'bg-stone-900 text-white dark:bg-white dark:text-stone-900' : 'text-stone-500 hover:text-stone-900 dark:hover:text-white'}`}
+                            >
+                                Todas
+                            </button>
+                            <button
+                                onClick={() => setViewType('income')}
+                                className={`px-4 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all ${viewType === 'income' ? 'bg-green-600 text-white' : 'text-stone-500 hover:text-green-600'}`}
+                            >
+                                Ingresos
+                            </button>
+                            <button
+                                onClick={() => setViewType('expense')}
+                                className={`px-4 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all ${viewType === 'expense' ? 'bg-red-600 text-white' : 'text-stone-500 hover:text-red-600'}`}
+                            >
+                                Gastos
+                            </button>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-hide">
+                        <Filter className="w-3.5 h-3.5 text-stone-400 mr-2 shrink-0" />
+                        {['All', ...(viewType === 'expense' ? CATEGORIES.expense : CATEGORIES.income)].map(cat => (
+                            <button
+                                key={cat}
+                                onClick={() => setSelectedCategory(cat)}
+                                className={`px-3 py-1.5 rounded-full text-[10px] font-medium whitespace-nowrap transition-colors ${selectedCategory === cat ? 'bg-gold-100 text-gold-700 dark:bg-gold-500/20 dark:text-gold-200 border border-gold-200' : 'bg-transparent text-stone-500 border border-transparent hover:border-stone-200'}`}
+                            >
+                                {cat === 'All' ? 'TODAS LAS CATEGORÍAS' : cat.toUpperCase()}
+                            </button>
+                        ))}
+                    </div>
                 </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-stone-50 dark:bg-stone-950/30 text-[10px] uppercase tracking-widest text-stone-400">
-                                <th className="p-4 font-bold">Descripción</th>
-                                <th className="p-4 font-bold">Categoría</th>
-                                <th className="p-4 font-bold">Fecha</th>
-                                <th className="p-4 font-bold text-right">Monto</th>
-                                <th className="p-4 font-bold text-center">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-stone-100 dark:divide-stone-800 text-sm">
-                            {transactions.length === 0 ? (
-                                <tr>
-                                    <td colSpan={5} className="p-8 text-center text-stone-400">No hay movimientos registrados.</td>
+
+                <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-100 dark:border-stone-800 overflow-hidden">
+                    <div className="p-6 border-b border-stone-100 dark:border-stone-800 flex justify-between items-center bg-stone-50/50 dark:bg-stone-950/20">
+                        <div className="flex items-center gap-2">
+                            <h3 className="font-serif text-lg text-stone-900 dark:text-white">Movimientos</h3>
+                            <span className="text-[10px] bg-stone-200 dark:bg-stone-800 px-2 py-0.5 rounded text-stone-500 uppercase tracking-widest">
+                                {filteredTransactions.length} registros
+                            </span>
+                        </div>
+                    </div>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-stone-50/10 dark:bg-stone-950/30 text-[10px] uppercase tracking-[0.2em] text-stone-400 border-b border-stone-100 dark:border-stone-800 text-center">
+                                    <th className="p-5 font-bold text-left">Detalle</th>
+                                    <th className="p-5 font-bold">Categoría</th>
+                                    <th className="p-5 font-bold">Fecha</th>
+                                    <th className="p-5 font-bold text-right">Monto</th>
+                                    <th className="p-5 font-bold">Acciones</th>
                                 </tr>
-                            ) : (
-                                transactions.map(tx => (
-                                    <tr key={tx.id} className="hover:bg-stone-50 dark:hover:bg-stone-800/30 transition-colors">
-                                        <td className="p-4 font-medium text-stone-900 dark:text-white flex items-center gap-3">
-                                            <div className={`p-2 rounded-full ${tx.type === 'income' ? 'bg-green-100 text-green-600 dark:bg-green-900/30' : 'bg-red-100 text-red-600 dark:bg-red-900/30'}`}>
-                                                {tx.type === 'income' ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownLeft className="w-4 h-4" />}
-                                            </div>
-                                            {tx.description}
-                                        </td>
-                                        <td className="p-4 text-stone-500">
-                                            <span className="bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded text-xs">{tx.category}</span>
-                                        </td>
-                                        <td className="p-4 text-stone-500">
-                                            {tx.date ? (() => {
-                                                const [year, month, day] = tx.date.split('-').map(Number);
-                                                return new Date(year, month - 1, day).toLocaleDateString();
-                                            })() : '-'}
-                                        </td>
-                                        <td className={`p-4 text-right font-medium ${tx.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                                            {tx.type === 'income' ? '+' : '-'} {formatCurrency(Number(tx.amount))}
-                                        </td>
-                                        <td className="p-4">
-                                            <div className="flex items-center justify-center gap-2">
-                                                <button
-                                                    onClick={() => handleEdit(tx)}
-                                                    className="p-1.5 text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors"
-                                                    title="Editar"
-                                                >
-                                                    <Edit2 className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(tx.id)}
-                                                    className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                                                    title="Eliminar"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
+                            </thead>
+                            <tbody className="divide-y divide-stone-50 dark:divide-stone-800/50 text-sm">
+                                {filteredTransactions.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={5} className="p-20 text-center">
+                                            <div className="flex flex-col items-center gap-3 text-stone-400 text-center">
+                                                <div className="p-4 bg-stone-50 dark:bg-stone-800/20 rounded-full">
+                                                    <Search className="w-8 h-8 opacity-20" />
+                                                </div>
+                                                <p className="font-serif italic text-lg">No se encontraron movimientos</p>
+                                                <p className="text-xs uppercase tracking-widest max-w-[240px]">Prueba ajustando los filtros o realizando un nuevo registro</p>
                                             </div>
                                         </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                ) : (
+                                    filteredTransactions.map(tx => (
+                                        <tr key={tx.id} className="hover:bg-stone-50/50 dark:hover:bg-stone-800/20 group transition-all duration-300">
+                                            <td className="p-5 font-medium text-stone-900 dark:text-white flex items-center gap-4">
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 ${tx.type === 'income' ? 'bg-green-50 text-green-600 dark:bg-green-900/20' : 'bg-red-50 text-red-600 dark:bg-red-900/20'}`}>
+                                                    {tx.type === 'income' ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownLeft className="w-4 h-4" />}
+                                                </div>
+                                                <span className="uppercase tracking-wide text-xs">{tx.description}</span>
+                                            </td>
+                                            <td className="p-5 text-center">
+                                                <span className="text-[10px] font-bold bg-stone-100 dark:bg-stone-800 px-3 py-1 rounded-full text-stone-500 border border-stone-200 dark:border-stone-700 tracking-widest">
+                                                    {tx.category?.toUpperCase()}
+                                                </span>
+                                            </td>
+                                            <td className="p-5 text-center text-stone-500 font-serif text-xs">
+                                                {tx.date ? (() => {
+                                                    const [year, month, day] = tx.date.split('-').map(Number);
+                                                    return new Date(year, month - 1, day).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' });
+                                                })() : '-'}
+                                            </td>
+                                            <td className={`p-5 text-right font-medium text-lg font-serif ${tx.type === 'income' ? 'text-green-600' : 'text-red-700 dark:text-red-500'}`}>
+                                                {tx.type === 'income' ? '+' : '-'} {formatCurrency(Number(tx.amount))}
+                                            </td>
+                                            <td className="p-5">
+                                                <div className="flex items-center justify-center gap-1">
+                                                    <button
+                                                        onClick={() => handleEdit(tx)}
+                                                        className="p-2 text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-white dark:hover:bg-stone-800 rounded-lg shadow-sm border border-transparent hover:border-stone-200 dark:hover:border-stone-700 transition-all"
+                                                        title="Editar"
+                                                    >
+                                                        <Edit2 className="w-3.5 h-3.5" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(tx.id)}
+                                                        className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg shadow-sm border border-transparent hover:border-red-100 transition-all"
+                                                        title="Eliminar"
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -343,21 +447,9 @@ export const FinanceView: React.FC = () => {
                             className="w-full bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-md p-2 text-sm outline-none focus:border-stone-900 dark:focus:border-stone-500 transition-colors text-stone-900 dark:text-white"
                         >
                             <option value="">Seleccionar...</option>
-                            {modalType === 'income' ? (
-                                <>
-                                    <option value="Ventas">Ventas</option>
-                                    <option value="Servicios">Servicios</option>
-                                    <option value="Otros">Otros</option>
-                                </>
-                            ) : (
-                                <>
-                                    <option value="Insumos">Insumos</option>
-                                    <option value="Marketing">Marketing</option>
-                                    <option value="Logística">Logística</option>
-                                    <option value="Servicios">Servicios Básicos</option>
-                                    <option value="Otros">Otros</option>
-                                </>
-                            )}
+                            {(modalType === 'income' ? CATEGORIES.income : CATEGORIES.expense).map(cat => (
+                                <option key={cat} value={cat}>{cat}</option>
+                            ))}
                         </select>
                     </div>
 
@@ -379,56 +471,111 @@ export const FinanceView: React.FC = () => {
                 onClose={() => setIsBulkModalOpen(false)}
                 title="Carga Masiva de Datos"
             >
-                <form onSubmit={handleBulkSubmit} className="space-y-4">
-                    <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-stone-500">Tipo de Movimiento</label>
-                        <div className="flex gap-4">
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name="bulkType"
-                                    checked={modalType === 'income'}
-                                    onChange={() => setModalType('income')}
-                                    className="accent-green-600"
-                                />
-                                <span className="text-sm">Ingresos</span>
-                            </label>
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name="bulkType"
-                                    checked={modalType === 'expense'}
-                                    onChange={() => setModalType('expense')}
-                                    className="accent-red-600"
-                                />
-                                <span className="text-sm">Egresos</span>
-                            </label>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full max-h-[80vh]">
+                    <div className="space-y-6">
+                        <div className="bg-stone-50 dark:bg-stone-950 p-6 rounded-xl border border-stone-200 dark:border-stone-800 space-y-4">
+                            <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Paso 1: Configuración</h4>
+
+                            <div className="space-y-3">
+                                <label className="text-[11px] font-bold uppercase tracking-wider text-stone-500">Tipo de Movimiento</label>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => setModalType('income')}
+                                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg border text-xs font-bold transition-all ${modalType === 'income' ? 'bg-green-600 border-green-700 text-white shadow-lg' : 'bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 text-stone-500 hover:border-green-300'}`}
+                                    >
+                                        <ArrowUpRight className="w-4 h-4" /> INGRESOS
+                                    </button>
+                                    <button
+                                        onClick={() => setModalType('expense')}
+                                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg border text-xs font-bold transition-all ${modalType === 'expense' ? 'bg-red-600 border-red-700 text-white shadow-lg' : 'bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 text-stone-500 hover:border-red-300'}`}
+                                    >
+                                        <ArrowDownLeft className="w-4 h-4" /> EGRESOS
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3">
+                            <div className="flex justify-between items-center">
+                                <label className="text-[11px] font-bold uppercase tracking-[0.2em] text-stone-500">Paso 2: Entrada de Datos</label>
+                                <button
+                                    onClick={() => setBulkData(`Venta Anillo, 150000, Ventas, ${getLocalISODate()}\nVenta Collar, 85000, Ventas, ${getLocalISODate()}`)}
+                                    className="text-[10px] text-gold-600 hover:underline"
+                                >
+                                    Cargar Ejemplo
+                                </button>
+                            </div>
+                            <textarea
+                                className="w-full h-48 bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-xl p-4 text-xs font-mono outline-none focus:border-gold-400 transition-all text-stone-800 dark:text-stone-200 shadow-inner"
+                                placeholder={"Descripción, Monto, Categoría (opcional), Fecha (opcional) \nEj: Venta Anillo, 150000, Ventas, 2024-02-10"}
+                                value={bulkData}
+                                onChange={e => setBulkData(e.target.value)}
+                            />
+                            <div className="flex items-start gap-2 p-3 bg-stone-50 dark:bg-stone-950 rounded-lg text-[10px] text-stone-400 italic">
+                                <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                                <p>Un registro por línea. Formato: Descripción, Monto, Categoría, Fecha. Si omites la fecha se usará la de hoy.</p>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold uppercase tracking-wider text-stone-500">Datos (CSV)</label>
-                        <textarea
-                            className="w-full h-48 bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-md p-3 text-sm font-mono outline-none focus:border-stone-900 dark:focus:border-stone-500 transition-colors text-stone-900 dark:text-white"
-                            placeholder="Descripción, Monto, Categoría, YYYY-MM-DD&#10;Venta Anillo, 150000, Ventas, 2024-02-10"
-                            value={bulkData}
-                            onChange={e => setBulkData(e.target.value)}
-                        />
-                        <p className="text-[10px] text-stone-400 italic">
-                            Un movimiento por línea. Formato: Descripción, Monto, Categoría, Fecha
-                        </p>
-                    </div>
+                    <div className="flex flex-col border-l border-stone-100 dark:border-stone-800 pl-4 md:pl-8">
+                        <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-stone-500 mb-4 flex items-center gap-2">
+                            Paso 3: Vista Previa
+                            {bulkPreview.length > 0 && (
+                                <span className={`text-[9px] px-2 py-0.5 rounded-full ${bulkPreview.every(p => p.isValid) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                    {bulkPreview.filter(p => p.isValid).length} / {bulkPreview.length} VALIDOS
+                                </span>
+                            )}
+                        </h4>
 
-                    <div className="pt-4 flex justify-end gap-3">
-                        <Button type="button" variant="ghost" onClick={() => setIsBulkModalOpen(false)}>Cancelar</Button>
-                        <Button
-                            type="submit"
-                            className="bg-stone-900 dark:bg-white text-white dark:text-stone-900"
-                        >
-                            Importar Datos
-                        </Button>
+                        <div className="flex-1 overflow-y-auto min-h-[300px] border rounded-xl border-stone-100 dark:border-stone-800 bg-stone-50/50">
+                            {bulkPreview.length === 0 ? (
+                                <div className="h-full flex flex-col items-center justify-center p-8 opacity-20 text-center">
+                                    <FileText className="w-12 h-12 mb-2" />
+                                    <p className="text-sm font-serif italic text-balance">Los datos procesados aparecerán aquí para revisión</p>
+                                </div>
+                            ) : (
+                                <table className="w-full text-left text-[11px]">
+                                    <thead className="sticky top-0 bg-stone-100 dark:bg-stone-800 z-10">
+                                        <tr>
+                                            <th className="p-2 first:rounded-tl-xl last:rounded-tr-xl">Estado</th>
+                                            <th className="p-2">Detalle</th>
+                                            <th className="p-2 text-right">Monto</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-stone-100 dark:divide-stone-800">
+                                        {bulkPreview.map((item) => (
+                                            <tr key={item.id} className={item.isValid ? '' : 'bg-red-50 dark:bg-red-900/10'}>
+                                                <td className="p-2">
+                                                    {item.isValid ?
+                                                        <CheckCircle2 className="w-3.5 h-3.5 text-green-500" /> :
+                                                        <AlertCircle className="w-3.5 h-3.5 text-red-500" />
+                                                    }
+                                                </td>
+                                                <td className="p-2 font-medium truncate max-w-[120px]">{item.description}</td>
+                                                <td className="p-2 text-right font-serif">{formatCurrency(item.amount)}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+
+                        <div className="pt-6 mt-auto flex gap-3">
+                            <Button type="button" variant="ghost" className="flex-1" onClick={() => setIsBulkModalOpen(false)}>Cancelar</Button>
+                            <Button
+                                onClick={handleBulkSubmit}
+                                disabled={bulkPreview.filter(p => p.isValid).length === 0}
+                                className="flex-1 gap-2 bg-stone-900 dark:bg-white text-white dark:text-stone-900 relative group overflow-hidden"
+                            >
+                                <span className="relative z-10 flex items-center gap-2">
+                                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                    IMPORTAR {bulkPreview.filter(p => p.isValid).length} ITEMS
+                                </span>
+                            </Button>
+                        </div>
                     </div>
-                </form>
+                </div>
             </Modal>
         </div>
     );
