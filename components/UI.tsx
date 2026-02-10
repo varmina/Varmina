@@ -172,25 +172,14 @@ export const ToastContainer = () => {
 
 // --- LOADING SCREEN ---
 export const LoadingScreen: React.FC = () => (
-  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-50 dark:bg-stone-950 flex-col gap-8">
+  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-50 dark:bg-stone-950 flex-col gap-6">
     <div className="relative">
-      {/* Outer Spinner */}
-      <div className="w-20 h-20 border-2 border-stone-200 dark:border-stone-800 rounded-full" />
-      <div className="absolute inset-0 w-20 h-20 border-t-2 border-gold-400 rounded-full animate-spin" />
-
-      {/* Central Logo */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <img
-          src="/assets/no bg png.png"
-          alt="Varmina"
-          className="w-10 h-10 object-contain animate-pulse"
-        />
-      </div>
+      <div className="w-16 h-16 border-2 border-stone-200 dark:border-stone-800 rounded-full" />
+      <div className="absolute inset-0 w-16 h-16 border-t-2 border-gold-400 rounded-full animate-spin" />
     </div>
     <div className="text-center">
-      <h2 className="font-serif text-[10px] tracking-[0.5em] text-stone-400 dark:text-stone-500 uppercase">
-        Varmina Selection
-      </h2>
+      <h2 className="font-serif text-lg tracking-[0.3em] text-stone-900 dark:text-gold-200 uppercase mb-1">Varmina</h2>
+      <div className="w-12 h-[1px] bg-gold-200 mx-auto" />
     </div>
   </div>
 );

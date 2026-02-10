@@ -58,7 +58,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
             </main>
 
             {/* Footer */}
-            <footer className="border-t border-stone-100 dark:border-stone-800 py-16 px-6 bg-white dark:bg-[#0A0A0A]">
+            <footer className="relative border-t border-stone-100 dark:border-stone-800 py-16 px-6 bg-white dark:bg-[#0A0A0A]">
                 <div className="max-w-7xl mx-auto flex flex-col items-center gap-8">
                     {/* Social Links */}
                     <div className="flex items-center gap-6">
@@ -83,10 +83,11 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
                         </p>
                     </div>
 
-                    {/* Hidden Admin Access */}
+                    {/* Hidden Admin Access - Bottom Right Corner */}
                     <button
                         onClick={() => navigate('/admin')}
-                        className="absolute bottom-4 right-4 opacity-[0.02] hover:opacity-100 transition-opacity text-[8px] uppercase tracking-tighter"
+                        className="absolute bottom-2 right-2 p-4 opacity-0 hover:opacity-20 transition-opacity text-[8px] text-stone-300 cursor-default"
+                        title="Admin"
                     >
                         .
                     </button>
