@@ -42,11 +42,22 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
 }
 
-export const Input: React.FC<InputProps> = ({ label, error, className = '', ...props }) => {
+export const Input: React.FC<InputProps> = ({ label, error, className = '', id, ...props }) => {
+  const generatedId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
+
   return (
     <div className="w-full">
-      {label && <label className="block text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-stone-400 mb-2">{label}</label>}
+      {label && (
+        <label
+          htmlFor={generatedId}
+          className="block text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-stone-400 mb-2"
+        >
+          {label}
+        </label>
+      )}
       <input
+        id={generatedId}
+        name={props.name || generatedId}
         className={`w-full bg-transparent border-b border-stone-300 py-2.5 text-stone-900 font-serif text-lg focus:border-gold-400 focus:outline-none transition-colors dark:border-stone-700 dark:text-stone-100 ${error ? 'border-red-500' : ''} ${className}`}
         {...props}
       />
@@ -82,10 +93,19 @@ interface ModalProps {
   onClose: () => void;
   title?: string;
   children: ReactNode;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'md' }) => {
   if (!isOpen) return null;
+
+  const sizeClasses = {
+    sm: 'max-w-md',
+    md: 'max-w-2xl',
+    lg: 'max-w-4xl',
+    xl: 'max-w-6xl',
+    full: 'max-w-[95vw]'
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -93,7 +113,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
         className="absolute inset-0 bg-stone-900/40 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
-      <div className="relative bg-white dark:bg-stone-900 w-full max-w-2xl max-h-[95vh] overflow-y-auto shadow-2xl animate-in fade-in zoom-in-95 duration-300">
+      <div className={`relative bg-white dark:bg-stone-900 w-full ${sizeClasses[size]} max-h-[95vh] overflow-y-auto shadow-2xl animate-in fade-in zoom-in-95 duration-300 rounded-2xl`}>
         <div className="flex items-center justify-between p-8 border-b border-stone-100 dark:border-stone-800 sticky top-0 bg-white dark:bg-stone-900 z-10">
           {title && <h3 className="font-serif text-2xl uppercase tracking-[0.1em] text-stone-900 dark:text-white">{title}</h3>}
           <button onClick={onClose} className="p-1 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full transition-colors">

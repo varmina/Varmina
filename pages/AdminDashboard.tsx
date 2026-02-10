@@ -3,11 +3,13 @@ import { useStore } from '../context/StoreContext';
 import { Product, ProductStatus } from '../types';
 import { Button, Modal } from '../components/UI';
 import { supabaseProductService } from '../services/supabaseProductService';
-import { Plus, Edit2, Trash2, AlertCircle, Package, Copy, Check, X as CloseIcon, BarChart3 } from 'lucide-react';
+import { Plus, Edit2, Trash2, AlertCircle, Package, Copy, Check, X as CloseIcon, BarChart3, FileText } from 'lucide-react';
 import { ProductForm } from '../components/admin/ProductForm';
 import { AnalyticsDashboard } from '../components/admin/AnalyticsDashboard';
 import { SettingsView } from '../components/admin/SettingsView';
 import { FinanceView } from '../components/admin/FinanceView';
+import { AssetsView } from '../components/admin/AssetsView';
+import { ProductBulkImport } from '../components/admin/ProductBulkImport';
 import { useInventory } from '../hooks/useInventory';
 
 // --- MAIN ADMIN COMPONENT ---
@@ -17,6 +19,7 @@ export const AdminDashboard = () => {
 
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [isBulkImporting, setIsBulkImporting] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string[] | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [search, setSearch] = useState(''); // New search state
@@ -115,6 +118,8 @@ export const AdminDashboard = () => {
         return <SettingsView />;
       case 'finance':
         return <FinanceView />;
+      case 'erp':
+        return <AssetsView />;
       case 'inventory':
       default:
         return (
@@ -151,6 +156,14 @@ export const AdminDashboard = () => {
                   <option value={ProductStatus.MADE_TO_ORDER}>Por Encargo</option>
                   <option value={ProductStatus.SOLD_OUT}>Agotado</option>
                 </select>
+
+                <Button
+                  onClick={() => setIsBulkImporting(true)}
+                  variant="ghost"
+                  className="w-full sm:w-auto flex justify-center items-center gap-2 py-2.5 px-6 shrink-0 rounded-full text-[10px] font-bold tracking-widest border border-stone-200 dark:border-stone-800 text-stone-500 hover:text-stone-900 dark:hover:text-white"
+                >
+                  <FileText className="w-4 h-4" /> Carga Masiva
+                </Button>
 
                 <Button onClick={() => setIsCreating(true)} className="w-full sm:w-auto flex justify-center items-center gap-2 py-2.5 px-6 shrink-0 rounded-full text-xs font-bold tracking-widest shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95 bg-stone-900 text-white dark:bg-gold-500 dark:text-stone-900">
                   <Plus className="w-4 h-4" /> Nueva Pieza
@@ -371,6 +384,7 @@ export const AdminDashboard = () => {
       <Modal
         isOpen={isCreating || !!editingProduct}
         onClose={() => { setIsCreating(false); setEditingProduct(null); }}
+        size="xl"
         title={isCreating ? "Agregar Pieza" : "Editar Pieza"}
       >
         <ProductForm
@@ -379,6 +393,12 @@ export const AdminDashboard = () => {
           onCancel={() => { setIsCreating(false); setEditingProduct(null); }}
         />
       </Modal>
+
+      <ProductBulkImport
+        isOpen={isBulkImporting}
+        onClose={() => setIsBulkImporting(false)}
+        onSuccess={refreshInventory}
+      />
 
       <Modal isOpen={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Confirmar Eliminación">
         <div className="text-center py-8">

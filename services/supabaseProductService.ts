@@ -218,6 +218,36 @@ export const supabaseProductService = {
         }
     },
 
+    // Bulk Create
+    createBulk: async (inputs: CreateProductInput[]): Promise<Product[]> => {
+        if (!inputs.length) return [];
+
+        const sanitizedData = inputs.map(input => ({
+            name: input.name.trim().slice(0, 100),
+            description: input.description?.trim().slice(0, 2000) || null,
+            price: Math.max(0, input.price),
+            images: input.images || [],
+            status: input.status || ProductStatus.IN_STOCK,
+            category: input.category || null,
+            collection: input.collection || null,
+            badge: input.badge || null,
+            variants: input.variants || [],
+            stock: input.stock !== undefined ? Math.max(0, input.stock) : 0,
+        }));
+
+        const { data, error } = await (supabase as any)
+            .from('products')
+            .insert(sanitizedData)
+            .select();
+
+        if (error) {
+            console.error('Error in bulk create:', error);
+            throw new Error('Error al crear productos en lote.');
+        }
+
+        return (data as any as Product[]) || [];
+    },
+
     // Duplicate product
     duplicate: async (id: string): Promise<Product> => {
         const { data: original, error: fetchError } = await (supabase as any)

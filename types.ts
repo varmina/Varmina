@@ -47,6 +47,20 @@ export interface ToastMessage {
   message: string;
 }
 
+export interface InternalAsset {
+  id: string;
+  name: string;
+  category: string;
+  stock: number;
+  min_stock: number;
+  unit_cost: number;
+  location: string | null;
+  description: string | null;
+  images: string[];
+  created_at: string;
+  updated_at: string;
+}
+
 export type SortOption = 'newest' | 'price_asc' | 'price_desc';
 
 export interface FilterState {

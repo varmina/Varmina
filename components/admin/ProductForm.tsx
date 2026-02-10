@@ -175,15 +175,26 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
         <form onSubmit={handleSubmit} className="h-full flex flex-col relative bg-stone-50/50 dark:bg-black/20">
             {/* Header / Actions - Sticky Top - Optimized for Mobile */}
             <div className="sticky top-0 z-30 px-4 md:px-6 py-3 md:py-4 bg-white/80 dark:bg-stone-900/80 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 flex items-center justify-between shadow-sm transition-all pb-safe">
-                <h2 className="text-xs md:text-sm font-bold uppercase tracking-widest text-stone-900 dark:text-white flex items-center gap-2">
-                    {initialData ? <span className="text-gold-500">Editar</span> : <span className="text-stone-400">Nuevo</span>}
-                    <span>{initialData ? 'Producto' : 'Pieza'}</span>
+                <h2 className="text-[10px] md:text-sm font-bold uppercase tracking-[0.2em] text-stone-900 dark:text-white flex items-center gap-2 min-w-0 flex-1 truncate mr-4">
+                    {initialData ? <span className="text-gold-500 shrink-0">Editar</span> : <span className="text-stone-400 shrink-0">Nueva</span>}
+                    <span className="truncate">{initialData ? 'Producto' : 'Pieza'}</span>
                 </h2>
-                <div className="flex items-center gap-2 md:gap-3">
-                    <Button type="button" variant="ghost" size="sm" onClick={onCancel} className="text-[10px] md:text-xs">
+                <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={onCancel}
+                        className="text-[9px] md:text-xs px-2 md:px-4"
+                    >
                         Cancelar
                     </Button>
-                    <Button type="submit" isLoading={isSubmitting} size="sm" className="bg-stone-900 text-white hover:bg-stone-800 dark:bg-gold-500 dark:text-stone-900 hover:dark:bg-gold-400 text-[10px] md:text-xs px-4 md:px-6">
+                    <Button
+                        type="submit"
+                        isLoading={isSubmitting}
+                        size="sm"
+                        className="bg-stone-900 text-white hover:bg-stone-800 dark:bg-gold-500 dark:text-stone-900 hover:dark:bg-gold-400 text-[9px] md:text-xs px-3 md:px-6 rounded-full shadow-sm"
+                    >
                         Guardar
                     </Button>
                 </div>
@@ -207,8 +218,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                                     className="font-serif text-xl md:text-2xl py-3 border-b-2 border-x-0 border-t-0 rounded-none px-0 focus:ring-0 focus:border-gold-500 bg-transparent"
                                 />
                                 <div className="space-y-2">
-                                    <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-400">Descripción</label>
+                                    <label htmlFor="product-description" className="block text-[10px] font-bold uppercase tracking-widest text-stone-400">Descripción</label>
                                     <textarea
+                                        id="product-description"
+                                        name="description"
                                         className="w-full bg-stone-50 dark:bg-stone-950/30 border border-stone-200 dark:border-stone-800 rounded-lg p-4 text-stone-900 dark:text-stone-100 font-sans text-sm focus:border-gold-500 focus:ring-1 focus:ring-gold-500 focus:outline-none min-h-[160px] transition-all resize-y leading-relaxed placeholder:text-stone-300 dark:placeholder:text-stone-700"
                                         placeholder="Describe la pieza, materiales y detalles únicos..."
                                         value={formData.description || ''}
@@ -377,16 +390,20 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                             <h3 className="text-xs font-bold uppercase tracking-widest text-stone-900 dark:text-white mb-6 border-b border-stone-100 dark:border-stone-800 pb-2">Estado y Stock</h3>
 
                             <div className="mb-8">
-                                <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-2">Stock General</label>
-                                <div className="relative">
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={formData.stock || 0}
-                                        onChange={e => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })}
-                                        className="w-full bg-stone-50 dark:bg-stone-950/50 border border-stone-200 dark:border-stone-700 rounded-lg py-3 px-4 text-lg font-bold text-stone-900 dark:text-white focus:border-gold-500 focus:ring-1 focus:ring-gold-500 outline-none transition-all"
-                                    />
-                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-stone-400 uppercase tracking-wider">UNIDADES</div>
+                                <div className="space-y-2">
+                                    <label htmlFor="product-stock" className="block text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-2">Stock General</label>
+                                    <div className="relative">
+                                        <input
+                                            id="product-stock"
+                                            name="stock"
+                                            type="number"
+                                            min="0"
+                                            value={formData.stock || 0}
+                                            onChange={e => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })}
+                                            className="w-full bg-stone-50 dark:bg-stone-950/50 border border-stone-200 dark:border-stone-700 rounded-lg py-3 px-4 text-lg font-bold text-stone-900 dark:text-white focus:border-gold-500 focus:ring-1 focus:ring-gold-500 outline-none transition-all"
+                                        />
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-stone-400 uppercase tracking-wider">UNIDADES</div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -414,10 +431,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                         {/* Card 3: Pricing (Moved here for better flow on desktop, keeps context with stock) */}
                         <div className="bg-white dark:bg-stone-900 rounded-xl shadow-[0_2px_20px_-5px_rgba(0,0,0,0.05)] border border-stone-100 dark:border-stone-800 p-5 md:p-8">
                             <h3 className="text-xs font-bold uppercase tracking-widest text-stone-900 dark:text-white mb-6 border-b border-stone-100 dark:border-stone-800 pb-2">Precio Base</h3>
-                            <div>
+                            <div className="space-y-2">
+                                <label htmlFor="product-price" className="sr-only">Precio</label>
                                 <div className="relative">
                                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 font-serif text-lg">$</span>
                                     <input
+                                        id="product-price"
+                                        name="price"
                                         type="number"
                                         className="w-full bg-stone-50 dark:bg-stone-950/50 border border-stone-200 dark:border-stone-700 rounded-lg py-3 pl-10 pr-4 text-xl font-bold text-stone-900 dark:text-white focus:border-gold-500 focus:ring-1 focus:ring-gold-500 outline-none transition-all"
                                         placeholder="0"
@@ -434,9 +454,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                             <h3 className="text-xs font-bold uppercase tracking-widest text-stone-900 dark:text-white mb-6 border-b border-stone-100 dark:border-stone-800 pb-2">Organización</h3>
                             <div className="space-y-6">
                                 <div>
-                                    <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-2">Categoría</label>
+                                    <label htmlFor="product-category" className="block text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-2">Categoría</label>
                                     <div className="relative">
                                         <select
+                                            id="product-category"
+                                            name="category"
                                             value={formData.category || ''}
                                             onChange={e => setFormData({ ...formData, category: e.target.value })}
                                             className="w-full bg-stone-50 dark:bg-stone-950/50 border border-stone-200 dark:border-stone-700 rounded-lg py-3 px-4 text-sm font-medium text-stone-900 dark:text-white focus:border-gold-500 focus:ring-1 focus:ring-gold-500 outline-none appearance-none cursor-pointer"

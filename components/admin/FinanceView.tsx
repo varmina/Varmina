@@ -440,8 +440,10 @@ export const FinanceView: React.FC = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-stone-500 mb-1">Categoría</label>
+                        <label htmlFor="transaction-category" className="block text-xs font-bold uppercase tracking-wider text-stone-500 mb-1">Categoría</label>
                         <select
+                            id="transaction-category"
+                            name="category"
                             value={formData.category}
                             onChange={e => setFormData({ ...formData, category: e.target.value })}
                             className="w-full bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-md p-2 text-sm outline-none focus:border-stone-900 dark:focus:border-stone-500 transition-colors text-stone-900 dark:text-white"
@@ -469,6 +471,7 @@ export const FinanceView: React.FC = () => {
             <Modal
                 isOpen={isBulkModalOpen}
                 onClose={() => setIsBulkModalOpen(false)}
+                size="xl"
                 title="Carga Masiva de Datos"
             >
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full max-h-[80vh]">

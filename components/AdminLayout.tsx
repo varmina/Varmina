@@ -4,7 +4,7 @@ import { useStore } from '../context/StoreContext';
 import { useTheme } from '../context/ThemeContext'; // Added useTheme import
 import { useAuth } from '../context/AuthContext';
 import { APP_NAME } from '../constants';
-import { LayoutGrid, Sun, Moon, Store, LogOut, Award, BarChart3, DollarSign } from 'lucide-react';
+import { LayoutGrid, Sun, Moon, Store, LogOut, Award, BarChart3, DollarSign, Truck } from 'lucide-react';
 import { ToastContainer } from './UI';
 
 export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -101,6 +101,15 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                                 </li>
                                 <li>
                                     <button
+                                        onClick={() => setActiveAdminTab('erp')}
+                                        className={`w-full flex items-center gap-4 px-4 py-3 rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${activeAdminTab === 'erp' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
+                                    >
+                                        <Truck className={`w-4 h-4 ${activeAdminTab === 'erp' ? 'text-gold-400' : ''}`} />
+                                        <span>ERP Operación</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button
                                         onClick={() => setActiveAdminTab('settings')}
                                         className={`w-full flex items-center gap-4 px-4 py-3 rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${activeAdminTab === 'settings' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
                                     >
@@ -119,16 +128,6 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                                 </li>
                             </ul>
                         </nav>
-                    </div>
-                    {/* Simplified Logout in Sidebar Bottom */}
-                    <div className="p-8 border-t border-stone-50 dark:border-stone-800">
-                        <button
-                            onClick={handleLogout}
-                            className="w-full flex items-center gap-4 px-4 py-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all"
-                        >
-                            <LogOut className="w-4 h-4" />
-                            <span>Cerrar Sesión</span>
-                        </button>
                     </div>
                 </aside>
 
@@ -169,6 +168,15 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                         </li>
                         <li>
                             <button
+                                onClick={() => setActiveAdminTab('erp')}
+                                className={`flex flex-col items-center gap-1 p-2 transition-all ${activeAdminTab === 'erp' ? 'text-stone-900 dark:text-gold-400' : 'text-stone-400'}`}
+                            >
+                                <Truck className="w-5 h-5" />
+                                <span className="text-[9px] font-bold uppercase tracking-[0.1em]">ERP</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button
                                 onClick={() => setActiveAdminTab('settings')}
                                 className={`flex flex-col items-center gap-1 p-2 transition-all ${activeAdminTab === 'settings' ? 'text-stone-900 dark:text-gold-400' : 'text-stone-400'}`}
                             >
@@ -183,15 +191,6 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                             >
                                 <Store className="w-5 h-5" />
                                 <span className="text-[9px] font-bold uppercase tracking-[0.1em]">Tienda</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                onClick={handleLogout}
-                                className="flex flex-col items-center gap-1 p-2 text-red-500/70"
-                            >
-                                <LogOut className="w-5 h-5" />
-                                <span className="text-[9px] font-bold uppercase tracking-[0.1em]">Salir</span>
                             </button>
                         </li>
                     </ul>
