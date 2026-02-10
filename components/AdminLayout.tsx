@@ -5,7 +5,7 @@ import { useTheme } from '../context/ThemeContext'; // Added useTheme import
 import { useAuth } from '../context/AuthContext';
 import { APP_NAME } from '../constants';
 import { LayoutGrid, Sun, Moon, Store, LogOut, Award, BarChart3, DollarSign, Truck } from 'lucide-react';
-import { ToastContainer } from './UI';
+import { ToastContainer, Logo } from './UI';
 
 export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { darkMode, toggleDarkMode } = useTheme(); // Changed to useTheme
@@ -35,12 +35,7 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
 
                 {/* Logo & Indicator */}
                 <div className="flex items-center gap-4 md:gap-8">
-                    <h1
-                        className="font-serif text-lg md:text-2xl tracking-widest text-stone-900 dark:text-gold-200 cursor-pointer select-none"
-                        onClick={() => navigate('/')}
-                    >
-                        {APP_NAME}
-                    </h1>
+                    <Logo className="h-6 md:h-8" showText={false} />
                     <nav className="flex gap-3 md:gap-6 text-[10px] md:text-xs uppercase tracking-widest font-bold text-stone-500">
                         <span className="text-gold-500 py-2 px-1 border-b-2 border-gold-500 md:border-none">
                             Administración

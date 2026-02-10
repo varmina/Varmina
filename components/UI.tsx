@@ -1,4 +1,6 @@
 import React, { Fragment, ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useStore } from '../context/StoreContext';
 import { ProductStatus } from '../types';
 import { X, Check, Info, Loader2 } from 'lucide-react';
 
@@ -137,9 +139,60 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
   );
 };
 
-// --- TOAST CONTAINER ---
-import { useStore } from '../context/StoreContext';
+// --- LOADER ---
+export const AppLoader: React.FC = () => {
+  return (
+    <div className="fixed inset-0 z-[100] bg-white dark:bg-stone-950 flex flex-col items-center justify-center animate-in fade-in duration-700">
+      <div className="relative w-24 h-24 md:w-32 md:h-32 mb-8 group">
+        {/* Logo Image */}
+        <img
+          src="/assets/no bg png.png"
+          alt="Loading..."
+          className="w-full h-full object-contain animate-pulse duration-1000"
+        />
 
+        {/* Orbital Spinner */}
+        <div className="absolute inset-[-10px] border-t border-gold-400 rounded-full animate-spin duration-[2s]" />
+        <div className="absolute inset-[-20px] border-b border-stone-100 dark:border-stone-800 rounded-full animate-spin-reverse duration-[3s]" />
+      </div>
+
+      <p className="font-serif text-[10px] uppercase tracking-[0.5em] text-stone-400 animate-pulse">
+        Varmina Luxury Selection
+      </p>
+    </div>
+  );
+};
+
+// --- LOGO ---
+export const Logo: React.FC<{ className?: string, showText?: boolean }> = ({ className = "h-8 md:h-12", showText = true }) => {
+  const { settings, refreshProducts } = useStore();
+  const navigate = useNavigate();
+
+  return (
+    <div
+      className={`flex items-center gap-3 cursor-pointer group ${className}`}
+      onClick={() => {
+        navigate('/');
+        refreshProducts(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }}
+    >
+      <img
+        src="/assets/no bg png.png"
+        alt={settings?.brand_name || 'Varmina'}
+        className="h-full w-auto object-contain transition-transform group-hover:scale-105 duration-500"
+      />
+
+      {showText && (
+        <span className="font-serif text-sm md:text-xl tracking-[0.2em] text-stone-900 dark:text-gold-100 uppercase transition-colors group-hover:text-gold-500">
+          {settings?.brand_name || 'Varmina'}
+        </span>
+      )}
+    </div>
+  );
+};
+
+// --- TOAST CONTAINER ---
 export const ToastContainer = () => {
   const { toasts, removeToast } = useStore();
 

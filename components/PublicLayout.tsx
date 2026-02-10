@@ -4,15 +4,16 @@ import { useStore } from '../context/StoreContext';
 import { useTheme } from '../context/ThemeContext';
 import { APP_NAME } from '../constants';
 import { Sun, Moon } from 'lucide-react';
-import { ToastContainer } from './UI';
+import { ToastContainer, Logo, AppLoader } from './UI';
 
 export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { currency, toggleCurrency, settings } = useStore();
+    const { currency, toggleCurrency, settings, loading } = useStore();
     const { darkMode, toggleDarkMode } = useTheme();
     const navigate = useNavigate();
 
     return (
         <div className={`min-h-screen flex flex-col transition-colors duration-500 ${darkMode ? 'dark bg-stone-950' : 'bg-stone-50'}`}>
+            {loading && <AppLoader />}
 
             {/* Announcement Bar */}
             {settings?.announcement_text && (
@@ -32,12 +33,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
 
                 {/* Logo Area */}
                 <div className="flex items-center gap-4 md:gap-8">
-                    <h1
-                        className="font-serif text-lg md:text-2xl tracking-widest text-stone-900 dark:text-gold-200 cursor-pointer select-none uppercase"
-                        onClick={() => navigate('/')}
-                    >
-                        {settings?.brand_name || APP_NAME}
-                    </h1>
+                    <Logo />
                 </div>
 
                 {/* Public Actions */}

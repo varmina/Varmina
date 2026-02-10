@@ -89,17 +89,26 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     refreshProducts();
   }, [refreshSettings, refreshProducts]);
 
-  // Dynamic SEO Title
+  // Dynamic SEO & Brand Assets (Title, Description, Favicon)
   useEffect(() => {
     if (settings?.site_title) {
       document.title = settings.site_title;
     }
+
+    // Meta Description
     if (settings?.site_description) {
       const metaDesc = document.querySelector('meta[name="description"]');
-      if (metaDesc) {
-        metaDesc.setAttribute('content', settings.site_description);
-      }
+      if (metaDesc) metaDesc.setAttribute('content', settings.site_description);
     }
+
+    // Dynamic Favicon (Local Asset prioritized)
+    let link: HTMLLinkElement | null = document.querySelector("link[rel~='icon']");
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.head.appendChild(link);
+    }
+    link.href = "/assets/no bg png.png";
   }, [settings]);
 
   return (
