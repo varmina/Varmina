@@ -75,22 +75,16 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
                     </div>
 
                     <div className="flex flex-col items-center gap-2">
-                        <p className="text-[9px] text-stone-400 uppercase tracking-[0.4em] font-light">
+                        <p
+                            className="text-[9px] text-stone-400 uppercase tracking-[0.4em] font-light cursor-default"
+                            onClick={() => navigate('/admin')}
+                        >
                             &copy; {new Date().getFullYear()} {settings?.brand_name || APP_NAME}
                         </p>
                         <p className="text-[8px] text-stone-300 dark:text-stone-800 uppercase tracking-[0.2em]">
                             Santiago, Chile
                         </p>
                     </div>
-
-                    {/* Hidden Admin Access - Bottom Right Corner */}
-                    <button
-                        onClick={() => navigate('/admin')}
-                        className="absolute bottom-2 right-2 p-4 opacity-0 hover:opacity-20 transition-opacity text-[8px] text-stone-300 cursor-default"
-                        title="Admin"
-                    >
-                        .
-                    </button>
                 </div>
             </footer>
 
