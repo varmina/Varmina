@@ -22,7 +22,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
         category: '',
         collection: '',
         badge: '',
-        variants: []
+        variants: [],
+        stock: 0
     });
     const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -381,9 +382,21 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                     {/* RIGHT COLUMN - Sidebar */}
                     <div className="lg:col-span-1 space-y-6">
 
-                        {/* Card 5: Status */}
+                        {/* Card 5: Inventory & Status */}
                         <div className="bg-white dark:bg-stone-900 rounded-lg shadow-sm border border-stone-100 dark:border-stone-800 p-6">
-                            <h3 className="text-xs font-bold uppercase tracking-widest text-stone-900 dark:text-white mb-4">Estado</h3>
+                            <h3 className="text-xs font-bold uppercase tracking-widest text-stone-900 dark:text-white mb-4">Inventario y Estado</h3>
+
+                            <div className="mb-6">
+                                <label className="block text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-stone-400 mb-2">Stock Disponible</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    value={formData.stock || 0}
+                                    onChange={e => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })}
+                                    className="w-full bg-transparent border border-stone-200 dark:border-stone-700 rounded-md py-2 px-3 text-sm text-stone-900 dark:text-white focus:border-stone-900 outline-none transition-colors"
+                                />
+                            </div>
+
                             <div className="space-y-3">
                                 <label className="flex items-center justify-between p-3 rounded-md border border-stone-200 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-800/50 cursor-pointer">
                                     <span className="text-sm font-medium text-stone-700 dark:text-stone-300">Activo</span>

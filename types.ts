@@ -12,6 +12,7 @@ export interface ProductVariant {
   isPrimary?: boolean; // Whether this variant is shown by default
 }
 
+// ... existing code ...
 export interface Product {
   id: string;
   name: string;
@@ -26,9 +27,21 @@ export interface Product {
   whatsapp_clicks: number;
   created_at: string;
   updated_at: string;
+  stock?: number; // Optional for now to avoid breaking existing code immediately, but ideally required
+}
+
+export interface Transaction {
+  id: string;
+  description: string;
+  amount: number;
+  type: 'income' | 'expense';
+  category: string;
+  date: string;
+  created_at: string;
 }
 
 export interface ToastMessage {
+  // ... existing code ...
   id: string;
   type: 'success' | 'error' | 'info';
   message: string;

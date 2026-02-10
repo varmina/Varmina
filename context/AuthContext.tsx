@@ -32,8 +32,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     setSession(currentSession);
                     setUser(currentSession.user);
                 }
-            } catch (error) {
+            } catch (error: any) {
                 console.error('Auth init error:', error);
+                // Handle invalid refresh token specifically
+                if (error?.message?.includes('Refresh Token') || error?.code === 'refresh_token_not_found') {
+                    console.warn('Invalid refresh token, clearing session');
+                    await supabase.auth.signOut().catch(() => { });
+                    setSession(null);
+                    setUser(null);
+                    localStorage.removeItem('sb-kcqgowdeihvzkbbsyhji-auth-token'); // Clear Supabase token if needed
+                }
             } finally {
                 if (mounted) setLoading(false);
             }
@@ -45,9 +53,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Listen for changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
             if (!mounted) return;
+            // console.log('Auth event:', event); // Debug log
 
-            setSession(newSession);
-            setUser(newSession?.user ?? null);
+            if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+                setSession(null);
+                setUser(null);
+            } else {
+                setSession(newSession);
+                setUser(newSession?.user ?? null);
+            }
+
             setLoading(false);
         });
 

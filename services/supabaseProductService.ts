@@ -11,6 +11,7 @@ export interface CreateProductInput {
     collection?: string | null;
     badge?: string | null;
     variants?: any[];
+    stock?: number;
 }
 
 export interface UpdateProductInput {
@@ -23,6 +24,7 @@ export interface UpdateProductInput {
     collection?: string | null;
     badge?: string | null;
     variants?: any[];
+    stock?: number;
 }
 
 export const supabaseProductService = {
@@ -80,6 +82,7 @@ export const supabaseProductService = {
             collection: input.collection || null,
             badge: input.badge || null,
             variants: input.variants || [],
+            stock: input.stock !== undefined ? Math.max(0, input.stock) : 0,
         };
 
         const { data, error } = await (supabase as any)
@@ -111,6 +114,7 @@ export const supabaseProductService = {
         if (updates.collection !== undefined) sanitizedUpdates.collection = updates.collection;
         if (updates.badge !== undefined) sanitizedUpdates.badge = updates.badge;
         if (updates.variants !== undefined) sanitizedUpdates.variants = updates.variants;
+        if (updates.stock !== undefined) sanitizedUpdates.stock = Math.max(0, updates.stock);
 
         const { data, error } = await (supabase as any)
             .from('products')

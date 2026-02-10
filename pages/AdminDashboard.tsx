@@ -7,7 +7,7 @@ import { Plus, Edit2, Trash2, AlertCircle, Package, Copy, Check, X as CloseIcon,
 import { ProductForm } from '../components/admin/ProductForm';
 import { AnalyticsDashboard } from '../components/admin/AnalyticsDashboard';
 import { SettingsView } from '../components/admin/SettingsView';
-
+import { FinanceView } from '../components/admin/FinanceView';
 import { useInventory } from '../hooks/useInventory';
 
 // --- MAIN ADMIN COMPONENT ---
@@ -113,6 +113,8 @@ export const AdminDashboard = () => {
         return <AnalyticsDashboard />;
       case 'settings':
         return <SettingsView />;
+      case 'finance':
+        return <FinanceView />;
       case 'inventory':
       default:
         return (
@@ -208,7 +210,8 @@ export const AdminDashboard = () => {
                     </div>
                     <div className="col-span-1">Imagen</div>
                     <div className="col-span-4">Producto / Detalles</div>
-                    <div className="col-span-2 text-center">Precio</div>
+                    <div className="col-span-1 text-center">Stock</div>
+                    <div className="col-span-1 text-center">Precio</div>
                     <div className="col-span-2 text-center">Estado</div>
                     <div className="col-span-2 text-right">Acciones</div>
                   </div>
@@ -267,8 +270,15 @@ export const AdminDashboard = () => {
                           </div>
                         </div>
 
+                        {/* Desktop Stock */}
+                        <div className="hidden lg:block lg:col-span-1 text-center">
+                          <span className={`font-sans text-sm font-bold ${(!product.stock || product.stock === 0) ? 'text-red-500' : 'text-stone-600 dark:text-stone-300'}`}>
+                            {product.stock || 0}
+                          </span>
+                        </div>
+
                         {/* Desktop Price */}
-                        <div className="hidden lg:block lg:col-span-2 text-center">
+                        <div className="hidden lg:block lg:col-span-1 text-center">
                           {inlinePriceId === product.id ? (
                             <div className="flex items-center justify-center gap-2">
                               <input

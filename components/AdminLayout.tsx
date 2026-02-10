@@ -4,7 +4,7 @@ import { useStore } from '../context/StoreContext';
 import { useTheme } from '../context/ThemeContext'; // Added useTheme import
 import { useAuth } from '../context/AuthContext';
 import { APP_NAME } from '../constants';
-import { LayoutGrid, Sun, Moon, Store, LogOut, Award, BarChart3 } from 'lucide-react';
+import { LayoutGrid, Sun, Moon, Store, LogOut, Award, BarChart3, DollarSign } from 'lucide-react';
 import { ToastContainer } from './UI';
 
 export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -92,6 +92,15 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                                 </li>
                                 <li>
                                     <button
+                                        onClick={() => setActiveAdminTab('finance')}
+                                        className={`w-full flex items-center gap-4 px-4 py-3 rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${activeAdminTab === 'finance' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
+                                    >
+                                        <DollarSign className={`w-4 h-4 ${activeAdminTab === 'finance' ? 'text-gold-400' : ''}`} />
+                                        <span>Finanzas</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button
                                         onClick={() => setActiveAdminTab('settings')}
                                         className={`w-full flex items-center gap-4 px-4 py-3 rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${activeAdminTab === 'settings' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
                                     >
@@ -147,6 +156,15 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                             >
                                 <BarChart3 className="w-5 h-5" />
                                 <span className="text-[9px] font-bold uppercase tracking-[0.1em]">Analítica</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button
+                                onClick={() => setActiveAdminTab('finance')}
+                                className={`flex flex-col items-center gap-1 p-2 transition-all ${activeAdminTab === 'finance' ? 'text-stone-900 dark:text-gold-400' : 'text-stone-400'}`}
+                            >
+                                <DollarSign className="w-5 h-5" />
+                                <span className="text-[9px] font-bold uppercase tracking-[0.1em]">Finanzas</span>
                             </button>
                         </li>
                         <li>
