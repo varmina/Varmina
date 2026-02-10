@@ -45,7 +45,7 @@ export const supabaseProductService = {
             throw new Error('Failed to fetch products. Please try again later.');
         }
 
-        return data || [];
+        return (data as any as Product[]) || [];
     },
 
     // Get single product by ID
@@ -63,7 +63,7 @@ export const supabaseProductService = {
             return null;
         }
 
-        return data;
+        return data as any as Product;
     },
 
     // Create new product
@@ -96,7 +96,7 @@ export const supabaseProductService = {
             throw new Error('No se pudo crear el producto. Verifique su conexión.');
         }
 
-        return data;
+        return data as any as Product;
     },
 
     // Update existing product
@@ -128,7 +128,7 @@ export const supabaseProductService = {
             throw new Error('No se pudo actualizar el producto.');
         }
 
-        return data;
+        return data as any as Product;
     },
 
     // Delete product
@@ -242,6 +242,6 @@ export const supabaseProductService = {
             .single();
 
         if (error) throw new Error('Error al duplicar el producto');
-        return data;
+        return data as any as Product;
     }
 };
