@@ -118,7 +118,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
         if (e.target.files && e.target.files.length > 0) {
             setIsUploading(true);
             try {
-                const uploadPromises = Array.from(e.target.files).map((file: File) =>
+                // Optimization step
+                const optimizationPromises = Array.from(e.target.files).map(file => compressImage(file));
+                const optimizedFiles = await Promise.all(optimizationPromises);
+
+                const uploadPromises = optimizedFiles.map((file: File) =>
                     supabaseProductService.uploadImage(file)
                 );
 
@@ -316,8 +320,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                                                             type="text"
                                                             value={v.name}
                                                             onChange={e => updateVariant(v.id, 'name', e.target.value)}
-                                                            className="w-full bg-transparent border-b border-stone-200 dark:border-stone-700 py-1 text-sm font-medium focus:border-stone-900 outline-none"
+                                                            className="w-full bg-transparent border-b border-stone-200 dark:border-stone-700 py-1 text-sm font-medium text-stone-900 dark:text-white focus:border-stone-900 dark:focus:border-white outline-none placeholder:text-stone-400/50"
                                                             placeholder="Ej: Oro 18k"
+                                                            autoComplete="off"
                                                         />
                                                     </div>
 
@@ -328,7 +333,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                                                             type="number"
                                                             value={v.price}
                                                             onChange={e => updateVariant(v.id, 'price', Number(e.target.value))}
-                                                            className="w-full bg-transparent border-b border-stone-200 dark:border-stone-700 py-1 text-sm font-medium focus:border-stone-900 outline-none"
+                                                            className="w-full bg-transparent border-b border-stone-200 dark:border-stone-700 py-1 text-sm font-medium text-stone-900 dark:text-white focus:border-stone-900 dark:focus:border-white outline-none"
+                                                            autoComplete="off"
                                                         />
                                                     </div>
 

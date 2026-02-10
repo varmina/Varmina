@@ -13,7 +13,8 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         if (typeof window !== 'undefined') {
             const stored = localStorage.getItem('varmina_dark_mode');
             if (stored !== null) return stored === 'true';
-            return window.matchMedia('(prefers-color-scheme: dark)').matches;
+            // Default to light mode unless explicitly set to dark
+            return false;
         }
         return false;
     });
