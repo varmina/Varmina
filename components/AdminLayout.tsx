@@ -111,7 +111,7 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                                         className={`w-full flex items-center gap-4 px-4 py-3 rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${activeAdminTab === 'erp' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
                                     >
                                         <Truck className={`w-4 h-4 ${activeAdminTab === 'erp' ? 'text-gold-400' : ''}`} />
-                                        <span>ERP Operación</span>
+                                        <span>Gestión ERP y Operaciones</span>
                                     </button>
                                 </li>
                                 <li>
@@ -178,7 +178,7 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                                 className={`flex flex-col items-center gap-1 p-2 transition-all ${activeAdminTab === 'erp' ? 'text-stone-900 dark:text-gold-400' : 'text-stone-400'}`}
                             >
                                 <Truck className="w-5 h-5" />
-                                <span className="text-[9px] font-bold uppercase tracking-[0.1em]">ERP</span>
+                                <span className="text-[9px] font-bold uppercase tracking-[0.1em]">Operaciones</span>
                             </button>
                         </li>
                         <li>

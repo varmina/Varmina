@@ -3,7 +3,6 @@ import { settingsService, BrandSettings } from '../../services/settingsService';
 import { useStore } from '../../context/StoreContext';
 import { Button, Input, LoadingScreen } from '../UI';
 import { Globe, MessageCircle, Share2, Layout, Save, Bell, AlertTriangle, Activity } from 'lucide-react';
-import { AttributeManagerSection } from './AttributeManagerSection';
 
 // --- SETTINGS VIEW COMPONENT ---
 export const SettingsView: React.FC = () => {
@@ -271,8 +270,6 @@ export const SettingsView: React.FC = () => {
                     </section>
                 </div>
 
-                {/* 7. ATTRIBUTE MANAGEMENT (NEW) */}
-                <AttributeManagerSection />
 
                 <div className="sticky bottom-4 md:bottom-8 left-0 right-0 flex justify-center z-40 px-4">
                     <Button type="submit" isLoading={isSaving} size="lg" className="shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] w-full md:w-auto px-12 gap-3 bg-stone-900 text-white hover:bg-black dark:bg-gold-500 dark:text-stone-900 dark:hover:bg-gold-400 rounded-full h-14 text-xs font-bold tracking-widest uppercase transition-all hover:scale-105 active:scale-95">

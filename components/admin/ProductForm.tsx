@@ -482,7 +482,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                                             min="0"
                                             value={formData.stock === 0 ? '' : formData.stock}
                                             onChange={e => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })}
-                                            className="w-full bg-stone-50 dark:bg-stone-950/50 border border-stone-200 dark:border-stone-700 rounded-lg py-3 px-4 text-lg font-bold text-stone-900 dark:text-white focus:border-gold-500 focus:ring-1 focus:ring-gold-500 outline-none transition-all placeholder:text-stone-300"
+                                            className="w-full bg-stone-50 dark:bg-stone-950/50 border border-stone-200 dark:border-stone-700 rounded-lg py-3 pl-4 pr-24 text-lg font-bold text-stone-900 dark:text-white focus:border-gold-500 focus:ring-1 focus:ring-gold-500 outline-none transition-all placeholder:text-stone-300 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                             placeholder="0"
                                         />
                                         <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-stone-400 uppercase tracking-wider">UNIDADES</div>

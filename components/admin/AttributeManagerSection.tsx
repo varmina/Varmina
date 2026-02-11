@@ -36,8 +36,8 @@ export const AttributeManagerSection: React.FC = () => {
         }
     };
 
-    const handleAdd = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleAdd = async (e?: React.FormEvent | React.KeyboardEvent | React.MouseEvent) => {
+        if (e && 'preventDefault' in e) e.preventDefault();
         if (!newAttributeName.trim()) return;
 
         setIsAdding(true);
@@ -83,8 +83,8 @@ export const AttributeManagerSection: React.FC = () => {
                             key={type.type}
                             onClick={() => setActiveType(type.type)}
                             className={`flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wide transition-all whitespace-nowrap ${activeType === type.type
-                                    ? 'bg-stone-900 text-white dark:bg-gold-500 dark:text-stone-900 shadow-md'
-                                    : 'bg-stone-50 text-stone-500 dark:bg-stone-800 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700'
+                                ? 'bg-stone-900 text-white dark:bg-gold-500 dark:text-stone-900 shadow-md'
+                                : 'bg-stone-50 text-stone-500 dark:bg-stone-800 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700'
                                 }`}
                         >
                             {type.icon}
@@ -95,22 +95,29 @@ export const AttributeManagerSection: React.FC = () => {
 
                 {/* Content Area */}
                 <div className="w-full md:w-2/3 space-y-4">
-                    <form onSubmit={handleAdd} className="flex gap-2">
+                    <div className="flex gap-2">
                         <Input
                             placeholder={`Nueva ${activeType === 'collection' ? 'Colección' : 'Categoría'}...`}
                             value={newAttributeName}
                             onChange={e => setNewAttributeName(e.target.value)}
+                            onKeyDown={e => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleAdd(e);
+                                }
+                            }}
                             className="bg-stone-50 dark:bg-stone-950/50 border-stone-200 dark:border-stone-700 rounded-lg py-2 focus:border-gold-500 focus:ring-1 focus:ring-gold-500"
                         />
                         <Button
-                            type="submit"
+                            type="button"
+                            onClick={handleAdd}
                             isLoading={isAdding}
                             disabled={!newAttributeName.trim()}
                             className="bg-stone-900 text-white dark:bg-gold-500 dark:text-stone-900 rounded-lg px-4"
                         >
                             <Plus className="w-4 h-4" />
                         </Button>
-                    </form>
+                    </div>
 
                     <div className="bg-stone-50 dark:bg-stone-950/30 rounded-lg border border-stone-100 dark:border-stone-800 min-h-[200px] max-h-[400px] overflow-y-auto p-2">
                         {loading ? (
