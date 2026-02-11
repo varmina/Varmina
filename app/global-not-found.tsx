@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Home, ArrowLeft } from 'lucide-react';
 
-export default function NotFound() {
+export default function GlobalNotFound() {
     return (
         <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
             {/* Background Decor - Animated Orbs */}
