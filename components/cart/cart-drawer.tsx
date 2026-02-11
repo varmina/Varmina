@@ -5,7 +5,6 @@ import { useCart } from '@/context/CartContext';
 import { useStore } from '@/context/StoreContext';
 import { Button } from '@/components/ui/button';
 import { X, ShoppingBag, Plus, Minus, Trash2 } from 'lucide-react';
-import Image from 'next/image';
 
 export const CartDrawer: React.FC = () => {
     const { items, isOpen, setIsOpen, updateQuantity, removeItem, clearCart, totalItems, totalPrice } = useCart();
@@ -65,7 +64,7 @@ export const CartDrawer: React.FC = () => {
                     {items.length === 0 ? (
                         <div className="h-full flex flex-col items-center justify-center text-center space-y-4 text-stone-400">
                             <ShoppingBag className="w-16 h-16 opacity-20" />
-                            <p className="font-serif uppercase tracking-widest text-sm">Tu lista de interés está vacía</p>
+                            <p className="font-serif uppercase tracking-widest text-sm">Tu cotización está vacía</p>
                             <Button variant="outline" onClick={() => setIsOpen(false)}>
                                 Explorar Colección
                             </Button>
@@ -76,11 +75,10 @@ export const CartDrawer: React.FC = () => {
                                 {/* Image */}
                                 <div className="relative w-20 h-24 bg-stone-100 rounded-lg overflow-hidden flex-shrink-0 border border-stone-200 dark:border-stone-800">
                                     {item.product.images[0] && (
-                                        <Image
+                                        <img
                                             src={item.product.images[0]}
                                             alt={item.product.name}
-                                            fill
-                                            className="object-cover"
+                                            className="w-full h-full object-cover"
                                         />
                                     )}
                                 </div>

@@ -65,7 +65,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
 
                 {/* Public Actions */}
                 <div className="flex items-center gap-1 md:gap-2">
-                    <button onClick={() => setIsOpen(true)} className="relative p-2 md:p-3 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full text-stone-600 dark:text-stone-400 transition-colors" title="Ver Carrito">
+                    <button onClick={() => setIsOpen(true)} className="relative p-2 md:p-3 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full text-stone-600 dark:text-stone-400 transition-colors" title="Ver Cotización">
                         <ShoppingBag className="w-4 h-4" />
                         {totalItems > 0 && (
                             <span className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full text-[8px] font-bold text-white flex items-center justify-center">

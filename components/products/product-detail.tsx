@@ -75,7 +75,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency,
 
         let variantName = selectedVariant ? selectedVariant.name : undefined;
         addItem(product, 1, variantName);
-        addToast('success', 'Agregado a tu lista de interés');
+        addToast('success', 'Añadido a cotización');
         onClose(); // Optional: Close modal to show drawer better? Or keep open?
         // Context opens drawer automatically, so closing modal might be better UX to see the drawer.
         // But maybe user wants to continue reading. 
@@ -199,7 +199,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency,
                         disabled={product.status === ProductStatus.SOLD_OUT}
                         onClick={handleAddToCart}
                     >
-                        {product.status === ProductStatus.SOLD_OUT ? 'Agotado' : 'Agregar a mi lista'}
+                        {product.status === ProductStatus.SOLD_OUT ? 'Agotado' : 'Añadir a cotizar'}
                     </Button>
                     <div className="flex items-center justify-center mt-4 opacity-60">
                         <span className="text-[10px] uppercase tracking-widest text-stone-400">
