@@ -30,6 +30,22 @@
   scrollbar-color: #D4AF37 transparent;
 }
 
+@utility custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #e2e2e2;
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #d4af37;
+  }
+}
+
 /* ── CSS Variables ────────────────────────────── */
 :root {
   --background: #fafaf9;

@@ -17,7 +17,9 @@ export const OrdersView: React.FC = () => {
     const [assets, setAssets] = useState<InternalAsset[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [assetSearchTerm, setAssetSearchTerm] = useState('');
+    const [activeTab, setActiveTab] = useState<'products' | 'assets'>('products');
+    const [selectedCategory, setSelectedCategory] = useState('All');
+    const [categories, setCategories] = useState<string[]>([]);
 
     // Cart State
     interface OrderItem {
@@ -48,6 +50,10 @@ export const OrdersView: React.FC = () => {
             ]);
             setProducts(pData);
             setAssets(aData);
+
+            // Extract unique categories from products
+            const cats = Array.from(new Set(pData.map(p => p.category).filter(Boolean))) as string[];
+            setCategories(cats);
         } catch (error) {
             addToast('error', 'Error al cargar inventario');
         } finally {
@@ -155,109 +161,165 @@ export const OrdersView: React.FC = () => {
     };
 
     // Filter Products
-    const filteredProducts = products.filter(p =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (p.collection && p.collection.toLowerCase().includes(searchTerm.toLowerCase()))
+    const filteredProducts = products.filter(p => {
+        const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (p.collection && p.collection.toLowerCase().includes(searchTerm.toLowerCase()));
+        const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
+        return matchesSearch && matchesCategory;
+    });
+
+    const filteredAssets = assets.filter(a =>
+        a.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        a.category.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 min-h-[calc(100vh-100px)]">
-            {/* Left Col: Product Selector */}
-            <div className="lg:col-span-2 space-y-6">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-serif text-stone-900 dark:text-white">Nueva Orden</h2>
-                    <div className="relative w-64">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
-                        <Input
-                            placeholder="Buscar en inventario..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-9"
-                        />
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {filteredProducts.map(product => (
-                        <div key={product.id} className="bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-lg p-3 flex flex-col gap-2 group hover:border-gold-400 transition-colors">
-                            <div className="aspect-square bg-stone-100 dark:bg-stone-800 rounded-md overflow-hidden relative">
-                                <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
-                                {product.status === ProductStatus.SOLD_OUT && (
-                                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                                        <span className="text-[10px] font-bold text-white uppercase bg-red-500 px-2 py-1 rounded">Agotado</span>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="flex-1">
-                                <h4 className="text-xs font-bold text-stone-900 dark:text-white truncate">{product.name}</h4>
-                                <p className="text-xs text-stone-500">{formatPrice(product.price, 'CLP')}</p>
-                            </div>
-
-                            {/* Actions / Variants */}
-                            {product.variants && product.variants.length > 0 ? (
-                                <div className="flex flex-wrap gap-1">
-                                    {product.variants.map((v: any) => (
-                                        <button
-                                            key={v.name}
-                                            disabled={v.stock <= 0}
-                                            onClick={() => addToCart(product, v)}
-                                            className="text-[9px] px-2 py-1 bg-stone-100 dark:bg-stone-800 hover:bg-gold-500 hover:text-white rounded disabled:opacity-30 disabled:hover:bg-stone-100"
-                                            title={`Stock: ${v.stock}`}
-                                        >
-                                            {v.name}
-                                        </button>
-                                    ))}
-                                </div>
-                            ) : (
-                                <Button
-                                    size="sm"
-                                    variant="secondary"
-                                    className="w-full text-xs h-7"
-                                    disabled={product.status === ProductStatus.SOLD_OUT || (product.stock !== undefined && product.stock <= 0)}
-                                    onClick={() => addToCart(product)}
+            {/* Left Col: Product & Asset Selector */}
+            <div className="lg:col-span-2 flex flex-col h-[calc(100vh-140px)]">
+                <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl shadow-sm overflow-hidden flex flex-col h-full">
+                    {/* Header with Search and Tabs */}
+                    <div className="p-4 border-b border-stone-100 dark:border-stone-800 space-y-4">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div className="flex items-center gap-6">
+                                <button
+                                    onClick={() => setActiveTab('products')}
+                                    className={`relative py-2 text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'products' ? 'text-stone-900 dark:text-gold-400' : 'text-stone-400 hover:text-stone-600'}`}
                                 >
-                                    <Plus className="w-3 h-3 mr-1" /> Agregar
-                                </Button>
-                            )}
+                                    Joyas
+                                    <span className="ml-2 text-[8px] bg-stone-100 dark:bg-stone-800 px-1.5 py-0.5 rounded-full text-stone-500">{filteredProducts.length}</span>
+                                    {activeTab === 'products' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-stone-900 dark:bg-gold-500" />}
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('assets')}
+                                    className={`relative py-2 text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'assets' ? 'text-stone-900 dark:text-gold-400' : 'text-stone-400 hover:text-stone-600'}`}
+                                >
+                                    Insumos & Empaque
+                                    <span className="ml-2 text-[8px] bg-stone-100 dark:bg-stone-800 px-1.5 py-0.5 rounded-full text-stone-500">{filteredAssets.length}</span>
+                                    {activeTab === 'assets' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-stone-900 dark:bg-gold-500" />}
+                                </button>
+                            </div>
+                            <div className="relative flex-1 max-w-md">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                                <Input
+                                    placeholder={activeTab === 'products' ? "Buscar joyas..." : "Buscar insumos..."}
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="pl-9 bg-stone-50 dark:bg-stone-950 border-stone-200 h-9 text-xs"
+                                />
+                            </div>
                         </div>
-                    ))}
-                </div>
 
-                {/* Extras / Packaging Section */}
-                <div className="pt-8 border-t border-stone-100 dark:border-stone-800">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                            <Box className="w-5 h-5 text-gold-600" />
-                            <h2 className="text-xl font-serif text-stone-900 dark:text-white uppercase tracking-wider">Insumos & Empaque</h2>
-                        </div>
-                        <div className="relative w-64">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
-                            <Input
-                                placeholder="Buscar insumos..."
-                                value={assetSearchTerm}
-                                onChange={(e) => setAssetSearchTerm(e.target.value)}
-                                className="pl-9 h-8 text-xs"
-                            />
-                        </div>
+                        {/* Category Filter for Products */}
+                        {activeTab === 'products' && categories.length > 0 && (
+                            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                                <button
+                                    onClick={() => setSelectedCategory('All')}
+                                    className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest whitespace-nowrap transition-all border ${selectedCategory === 'All' ? 'bg-gold-500 text-white border-gold-600' : 'bg-white dark:bg-stone-900 text-stone-400 border-stone-200 dark:border-stone-800'}`}
+                                >
+                                    Todos
+                                </button>
+                                {categories.map(cat => (
+                                    <button
+                                        key={cat}
+                                        onClick={() => setSelectedCategory(cat)}
+                                        className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest whitespace-nowrap transition-all border ${selectedCategory === cat ? 'bg-gold-500 text-white border-gold-600' : 'bg-white dark:bg-stone-900 text-stone-400 border-stone-200 dark:border-stone-800'}`}
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {assets.filter(a => a.name.toLowerCase().includes(assetSearchTerm.toLowerCase())).map(asset => (
-                            <button
-                                key={asset.id}
-                                onClick={() => addToAssetCart(asset)}
-                                disabled={asset.stock <= 0}
-                                className={`text-left p-3 rounded-lg border transition-all flex flex-col gap-1 group ${asset.stock <= 0 ? 'opacity-40 cursor-not-allowed border-stone-100' : 'bg-white dark:bg-stone-900 border-stone-100 dark:border-stone-800 hover:border-gold-400'}`}
-                            >
-                                <div className="flex justify-between items-start">
-                                    <span className="text-[10px] font-bold text-stone-900 dark:text-white uppercase truncate">{asset.name}</span>
-                                    <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded ${asset.stock <= asset.min_stock ? 'bg-red-50 text-red-600' : 'bg-stone-100 text-stone-500'}`}>
-                                        {asset.stock}
-                                    </span>
-                                </div>
-                                <span className="text-[8px] text-stone-400 uppercase tracking-widest">{asset.category}</span>
-                            </button>
-                        ))}
+                    {/* Content Area */}
+                    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                        {activeTab === 'products' ? (
+                            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                                {filteredProducts.map(product => (
+                                    <div key={product.id} className="bg-stone-50 dark:bg-stone-950/50 border border-stone-100 dark:border-stone-800 rounded-xl p-2.5 flex flex-col gap-2 group hover:border-gold-400 transition-all shadow-sm">
+                                        <div className="aspect-square bg-white dark:bg-stone-900 rounded-lg overflow-hidden relative border border-stone-100 dark:border-stone-800">
+                                            <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                            {product.status === ProductStatus.SOLD_OUT && (
+                                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                                    <span className="text-[8px] font-bold text-white uppercase bg-red-500 px-1.5 py-0.5 rounded">Agotado</span>
+                                                </div>
+                                            )}
+                                            <div className="absolute bottom-1 right-1">
+                                                <div className="bg-white/90 dark:bg-stone-900/90 backdrop-blur-sm px-1.5 py-0.5 rounded text-[8px] font-bold text-stone-500 border border-stone-100/50">
+                                                    {product.stock ?? 1} disp.
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex-1 pt-1">
+                                            <h4 className="text-[10px] font-bold text-stone-900 dark:text-white truncate leading-tight">{product.name}</h4>
+                                            <p className="text-[10px] font-mono text-gold-600 font-bold">{formatPrice(product.price, 'CLP')}</p>
+                                        </div>
+
+                                        {product.variants && product.variants.length > 0 ? (
+                                            <div className="flex flex-wrap gap-1 mt-auto">
+                                                {product.variants.map((v: any) => (
+                                                    <button
+                                                        key={v.name}
+                                                        disabled={v.stock <= 0}
+                                                        onClick={() => addToCart(product, v)}
+                                                        className="text-[8px] font-bold px-2 py-1 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 hover:bg-gold-500 hover:text-white hover:border-gold-600 rounded-md disabled:opacity-30 transition-colors"
+                                                        title={`Stock: ${v.stock}`}
+                                                    >
+                                                        {v.name}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <Button
+                                                size="sm"
+                                                variant="secondary"
+                                                className="w-full text-[9px] font-bold uppercase tracking-wider h-7 mt-auto bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800"
+                                                disabled={product.status === ProductStatus.SOLD_OUT || (product.stock !== undefined && product.stock <= 0)}
+                                                onClick={() => addToCart(product)}
+                                            >
+                                                <Plus className="w-3 h-3 mr-1" /> Seleccionar
+                                            </Button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {filteredAssets.map(asset => (
+                                    <button
+                                        key={asset.id}
+                                        onClick={() => addToAssetCart(asset)}
+                                        disabled={asset.stock <= 0}
+                                        className={`text-left p-3 rounded-xl border transition-all flex flex-col gap-2 group shadow-sm ${asset.stock <= 0 ? 'opacity-40 cursor-not-allowed border-stone-100' : 'bg-stone-50 dark:bg-stone-950 border-stone-100 dark:border-stone-800 hover:border-gold-400 hover:bg-white dark:hover:bg-stone-900'}`}
+                                    >
+                                        <div className="flex justify-between items-start gap-2">
+                                            <div className="flex flex-col flex-1 min-w-0">
+                                                <span className="text-[10px] font-bold text-stone-900 dark:text-white uppercase truncate">{asset.name}</span>
+                                                <span className="text-[8px] text-stone-400 uppercase tracking-widest">{asset.category}</span>
+                                            </div>
+                                            <div className="p-1 px-2 rounded-lg bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800">
+                                                <span className={`text-[9px] font-mono font-bold ${asset.stock <= asset.min_stock ? 'text-red-500' : 'text-stone-600'}`}>
+                                                    {asset.stock}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="mt-auto flex justify-end">
+                                            <div className="p-1.5 rounded-full bg-stone-100 dark:bg-stone-800 group-hover:bg-gold-500 group-hover:text-white transition-colors">
+                                                <Plus className="w-3 h-3" />
+                                            </div>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {(activeTab === 'products' ? filteredProducts : filteredAssets).length === 0 && (
+                            <div className="h-64 flex flex-col items-center justify-center text-stone-400">
+                                <Search className="w-8 h-8 mb-2 opacity-20" />
+                                <p className="text-xs uppercase tracking-widest font-bold">No se encontraron resultados</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
