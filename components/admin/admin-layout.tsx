@@ -127,15 +127,6 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                                 </li>
                                 <li>
                                     <button
-                                        onClick={() => setActiveAdminTab('pricing')}
-                                        className={`w-full flex items-center gap-4 px-4 py-3 rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${activeAdminTab === 'pricing' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
-                                    >
-                                        <Calculator className={`w-4 h-4 ${activeAdminTab === 'pricing' ? 'text-gold-400' : ''}`} />
-                                        <span>Calculadora de Precios</span>
-                                    </button>
-                                </li>
-                                <li>
-                                    <button
                                         onClick={() => setActiveAdminTab('settings')}
                                         className={`w-full flex items-center gap-4 px-4 py-3 rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${activeAdminTab === 'settings' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
                                     >
@@ -202,8 +193,8 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                             </button>
                         </li>
                         <li className="relative">
-                            <MenuButton 
-                                activeAdminTab={activeAdminTab} 
+                            <MenuButton
+                                activeAdminTab={activeAdminTab}
                                 setActiveAdminTab={setActiveAdminTab}
                                 toggleDarkMode={toggleDarkMode}
                                 handleLogout={handleLogout}
@@ -230,7 +221,6 @@ const MenuButton = ({ activeAdminTab, setActiveAdminTab, toggleDarkMode, handleL
 
     const menuItems = [
         { id: 'analytics', label: 'Analítica', icon: BarChart3 },
-        { id: 'pricing', label: 'Precios', icon: Calculator },
         { id: 'settings', label: 'Ajustes', icon: Award },
     ];
 

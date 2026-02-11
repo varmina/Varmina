@@ -16,8 +16,8 @@ interface StoreContextType {
     removeToast: (id: string) => void;
     settings: BrandSettings | null;
     refreshSettings: () => Promise<void>;
-    activeAdminTab: 'inventory' | 'analytics' | 'finance' | 'settings' | 'erp' | 'orders' | 'pricing';
-    setActiveAdminTab: (tab: 'inventory' | 'analytics' | 'finance' | 'settings' | 'erp' | 'orders' | 'pricing') => void;
+    activeAdminTab: 'inventory' | 'analytics' | 'finance' | 'settings' | 'erp' | 'orders';
+    setActiveAdminTab: (tab: 'inventory' | 'analytics' | 'finance' | 'settings' | 'erp' | 'orders') => void;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -42,7 +42,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const [currency, setCurrency] = useState<'CLP' | 'USD'>('CLP');
     const [toasts, setToasts] = useState<ToastMessage[]>([]);
     const [settings, setSettings] = useState<BrandSettings | null>(null);
-    const [activeAdminTab, setActiveAdminTab] = useState<'inventory' | 'analytics' | 'finance' | 'settings' | 'erp' | 'orders' | 'pricing'>('inventory');
+    const [activeAdminTab, setActiveAdminTab] = useState<'inventory' | 'analytics' | 'finance' | 'settings' | 'erp' | 'orders'>('inventory');
 
     const lastRefreshRef = useRef(0);
 

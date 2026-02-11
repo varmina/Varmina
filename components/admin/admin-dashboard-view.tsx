@@ -14,7 +14,6 @@ import { FinanceView } from '@/components/admin/finance-view';
 import { AssetsView } from '@/components/admin/assets-view';
 import { ProductBulkImport } from '@/components/admin/product-bulk-import';
 import { OrdersView } from '@/components/admin/orders-view';
-import { PricingCalculator } from '@/components/admin/pricing-calculator';
 import { useInventory } from '@/hooks/use-inventory';
 
 // --- MAIN ADMIN COMPONENT ---
@@ -138,8 +137,6 @@ export const AdminDashboardView = () => {
                 return <AssetsView />;
             case 'orders':
                 return <OrdersView />;
-            case 'pricing':
-                return <PricingCalculator />;
             case 'inventory':
             default:
                 return (

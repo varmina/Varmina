@@ -11,6 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Search, Plus, Trash2, ShoppingCart, User, CreditCard, CheckCircle2, Box, Package } from 'lucide-react';
 import { formatPrice } from '@/lib/format';
 
+import { attributeService } from '@/services/attributeService';
+
 export const OrdersView: React.FC = () => {
     const { addToast, settings } = useStore();
     const [products, setProducts] = useState<Product[]>([]);
@@ -44,16 +46,16 @@ export const OrdersView: React.FC = () => {
 
     const loadData = async () => {
         try {
-            const [pData, aData] = await Promise.all([
+            const [pData, aData, attrCats] = await Promise.all([
                 supabaseProductService.getAll(),
-                internalAssetService.getAll()
+                internalAssetService.getAll(),
+                attributeService.getByType('category')
             ]);
             setProducts(pData);
             setAssets(aData);
 
-            // Extract unique categories from products
-            const cats = Array.from(new Set(pData.map(p => p.category).filter(Boolean))) as string[];
-            setCategories(cats);
+            // Use manual categories from master list
+            setCategories(attrCats.map(c => c.name));
         } catch (error) {
             addToast('error', 'Error al cargar inventario');
         } finally {
