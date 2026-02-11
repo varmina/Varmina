@@ -163,79 +163,52 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                 </div>
 
                 {/* Mobile Bottom Nav */}
-                <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-stone-900/90 backdrop-blur border-t border-stone-200 dark:border-stone-800 lg:hidden px-2 py-1">
-                    <ul className="flex items-center justify-around h-16">
+                <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-t border-stone-200 dark:border-stone-800 lg:hidden px-1">
+                    <ul className="flex items-center justify-around h-16 max-w-md mx-auto">
                         <li>
                             <button
                                 onClick={() => setActiveAdminTab('inventory')}
-                                className={`flex flex-col items-center gap-1 p-2 transition-all ${activeAdminTab === 'inventory' ? 'text-stone-900 dark:text-gold-400' : 'text-stone-400'}`}
+                                className={`flex flex-col items-center gap-1.5 p-2 transition-all ${activeAdminTab === 'inventory' ? 'text-stone-900 dark:text-gold-400 scale-110' : 'text-stone-400'}`}
                             >
                                 <LayoutGrid className="w-5 h-5" />
-                                <span className="text-[9px] font-bold uppercase tracking-[0.1em]">Piezas</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                onClick={() => setActiveAdminTab('analytics')}
-                                className={`flex flex-col items-center gap-1 p-2 transition-all ${activeAdminTab === 'analytics' ? 'text-stone-900 dark:text-gold-400' : 'text-stone-400'}`}
-                            >
-                                <BarChart3 className="w-5 h-5" />
-                                <span className="text-[9px] font-bold uppercase tracking-[0.1em]">Analítica</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                onClick={() => setActiveAdminTab('finance')}
-                                className={`flex flex-col items-center gap-1 p-2 transition-all ${activeAdminTab === 'finance' ? 'text-stone-900 dark:text-gold-400' : 'text-stone-400'}`}
-                            >
-                                <DollarSign className="w-5 h-5" />
-                                <span className="text-[9px] font-bold uppercase tracking-[0.1em]">Finanzas</span>
+                                <span className="text-[8px] font-bold uppercase tracking-[0.1em]">Piezas</span>
                             </button>
                         </li>
                         <li>
                             <button
                                 onClick={() => setActiveAdminTab('orders')}
-                                className={`flex flex-col items-center gap-1 p-2 transition-all ${activeAdminTab === 'orders' ? 'text-stone-900 dark:text-gold-400' : 'text-stone-400'}`}
+                                className={`flex flex-col items-center gap-1.5 p-2 transition-all ${activeAdminTab === 'orders' ? 'text-stone-900 dark:text-gold-400 scale-110' : 'text-stone-400'}`}
                             >
                                 <ShoppingCart className="w-5 h-5" />
-                                <span className="text-[9px] font-bold uppercase tracking-[0.1em]">Ventas</span>
+                                <span className="text-[8px] font-bold uppercase tracking-[0.1em]">Ventas</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button
+                                onClick={() => setActiveAdminTab('finance')}
+                                className={`flex flex-col items-center gap-1.5 p-2 transition-all ${activeAdminTab === 'finance' ? 'text-stone-900 dark:text-gold-400 scale-110' : 'text-stone-400'}`}
+                            >
+                                <DollarSign className="w-5 h-5" />
+                                <span className="text-[8px] font-bold uppercase tracking-[0.1em]">Finanzas</span>
                             </button>
                         </li>
                         <li>
                             <button
                                 onClick={() => setActiveAdminTab('erp')}
-                                className={`flex flex-col items-center gap-1 p-2 transition-all ${activeAdminTab === 'erp' ? 'text-stone-900 dark:text-gold-400' : 'text-stone-400'}`}
+                                className={`flex flex-col items-center gap-1.5 p-2 transition-all ${activeAdminTab === 'erp' ? 'text-stone-900 dark:text-gold-400 scale-110' : 'text-stone-400'}`}
                             >
                                 <Truck className="w-5 h-5" />
-                                <span className="text-[9px] font-bold uppercase tracking-[0.1em]">Operaciones</span>
+                                <span className="text-[8px] font-bold uppercase tracking-[0.1em]">Op</span>
                             </button>
                         </li>
-                        <li>
-                            <button
-                                onClick={() => setActiveAdminTab('pricing')}
-                                className={`flex flex-col items-center gap-1 p-2 transition-all ${activeAdminTab === 'pricing' ? 'text-stone-900 dark:text-gold-400' : 'text-stone-400'}`}
-                            >
-                                <Calculator className="w-5 h-5" />
-                                <span className="text-[9px] font-bold uppercase tracking-[0.1em]">Precios</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                onClick={() => setActiveAdminTab('settings')}
-                                className={`flex flex-col items-center gap-1 p-2 transition-all ${activeAdminTab === 'settings' ? 'text-stone-900 dark:text-gold-400' : 'text-stone-400'}`}
-                            >
-                                <Award className="w-5 h-5" />
-                                <span className="text-[9px] font-bold uppercase tracking-[0.1em]">Ajustes</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                onClick={() => window.open('/', '_blank')}
-                                className="flex flex-col items-center gap-1 p-2 text-stone-400 hover:text-stone-900 dark:hover:text-gold-400 transition-all"
-                            >
-                                <Store className="w-5 h-5" />
-                                <span className="text-[9px] font-bold uppercase tracking-[0.1em]">Tienda</span>
-                            </button>
+                        <li className="relative">
+                            <MenuButton 
+                                activeAdminTab={activeAdminTab} 
+                                setActiveAdminTab={setActiveAdminTab}
+                                toggleDarkMode={toggleDarkMode}
+                                handleLogout={handleLogout}
+                                darkMode={darkMode}
+                            />
                         </li>
                     </ul>
                 </nav>
@@ -247,6 +220,75 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
             </footer>
 
             <ToastContainer />
+        </div>
+    );
+};
+
+// --- Mobile More Menu Helper ---
+const MenuButton = ({ activeAdminTab, setActiveAdminTab, toggleDarkMode, handleLogout, darkMode }: any) => {
+    const [isOpen, setIsOpen] = React.useState(false);
+
+    const menuItems = [
+        { id: 'analytics', label: 'Analítica', icon: BarChart3 },
+        { id: 'pricing', label: 'Precios', icon: Calculator },
+        { id: 'settings', label: 'Ajustes', icon: Award },
+    ];
+
+    const isSecondaryActive = menuItems.find(item => item.id === activeAdminTab);
+
+    return (
+        <div className="relative">
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className={`flex flex-col items-center gap-1.5 p-2 transition-all ${isOpen || isSecondaryActive ? 'text-stone-900 dark:text-gold-400' : 'text-stone-400'}`}
+            >
+                <div className={`transition-transform duration-300 ${isOpen ? 'rotate-90' : ''}`}>
+                    <Sun className="w-5 h-5" />
+                </div>
+                <span className="text-[8px] font-bold uppercase tracking-[0.1em]">{isOpen ? 'Cerrar' : (isSecondaryActive ? 'Menú*' : 'Menú')}</span>
+            </button>
+
+            {isOpen && (
+                <>
+                    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[-1]" onClick={() => setIsOpen(false)} />
+                    <div className="absolute bottom-20 right-0 w-56 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl shadow-2xl animate-fade-in-up overflow-hidden">
+                        <div className="p-2 space-y-1">
+                            {menuItems.map(item => (
+                                <button
+                                    key={item.id}
+                                    onClick={() => { setActiveAdminTab(item.id as any); setIsOpen(false); }}
+                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-colors ${activeAdminTab === item.id ? 'bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-gold-400' : 'text-stone-500 hover:bg-stone-50 dark:hover:bg-stone-800/50'}`}
+                                >
+                                    <item.icon className="w-4 h-4" />
+                                    {item.label}
+                                </button>
+                            ))}
+                            <div className="h-px bg-stone-100 dark:bg-stone-800 my-1 mx-2" />
+                            <button
+                                onClick={() => { toggleDarkMode(); setIsOpen(false); }}
+                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[10px] font-bold uppercase tracking-wider text-stone-500 hover:bg-stone-50 dark:hover:bg-stone-800/50"
+                            >
+                                {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                                {darkMode ? 'Módo Claro' : 'Modo Oscuro'}
+                            </button>
+                            <button
+                                onClick={() => window.open('/', '_blank')}
+                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[10px] font-bold uppercase tracking-wider text-stone-500 hover:bg-stone-50 dark:hover:bg-stone-800/50"
+                            >
+                                <Store className="w-4 h-4" />
+                                Ver Tienda
+                            </button>
+                            <button
+                                onClick={handleLogout}
+                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[10px] font-bold uppercase tracking-wider text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10"
+                            >
+                                <LogOut className="w-4 h-4" />
+                                Salir
+                            </button>
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     );
 };

@@ -16,7 +16,7 @@ export interface CreateAssetInput {
 
 export const internalAssetService = {
     getAll: async (): Promise<InternalAsset[]> => {
-        const { data, error } = await (supabase as any)
+        const { data, error } = await supabase
             .from('internal_assets')
             .select('*')
             .order('name', { ascending: true });
@@ -30,7 +30,7 @@ export const internalAssetService = {
     },
 
     getById: async (id: string): Promise<InternalAsset | null> => {
-        const { data, error } = await (supabase as any)
+        const { data, error } = await supabase
             .from('internal_assets')
             .select('*')
             .eq('id', id)
@@ -45,9 +45,9 @@ export const internalAssetService = {
     },
 
     create: async (input: CreateAssetInput): Promise<InternalAsset> => {
-        const { data, error } = await (supabase as any)
+        const { data, error } = await supabase
             .from('internal_assets')
-            .insert(input as any)
+            .insert(input)
             .select()
             .single();
 
@@ -60,9 +60,9 @@ export const internalAssetService = {
     },
 
     update: async (id: string, updates: Partial<CreateAssetInput>): Promise<InternalAsset> => {
-        const { data, error } = await (supabase as any)
+        const { data, error } = await supabase
             .from('internal_assets')
-            .update(updates as any)
+            .update(updates)
             .eq('id', id)
             .select()
             .single();
@@ -76,7 +76,7 @@ export const internalAssetService = {
     },
 
     delete: async (id: string): Promise<void> => {
-        const { error } = await (supabase as any)
+        const { error } = await supabase
             .from('internal_assets')
             .delete()
             .eq('id', id);

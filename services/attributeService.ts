@@ -15,7 +15,7 @@ export interface ProductAttribute {
 export const attributeService = {
     // Get all attributes
     getAll: async (): Promise<ProductAttribute[]> => {
-        const { data, error } = await (supabase as any)
+        const { data, error } = await supabase
             .from('product_attributes')
             .select('*')
             .order('name', { ascending: true });
@@ -30,7 +30,7 @@ export const attributeService = {
 
     // Get attributes by type
     getByType: async (type: AttributeType): Promise<ProductAttribute[]> => {
-        const { data, error } = await (supabase as any)
+        const { data, error } = await supabase
             .from('product_attributes')
             .select('*')
             .eq('type', type)
@@ -50,7 +50,7 @@ export const attributeService = {
 
         const slug = name.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-');
 
-        const { data, error } = await (supabase as any)
+        const { data, error } = await supabase
             .from('product_attributes')
             .insert({ type, name: name.trim(), slug })
             .select()
@@ -66,7 +66,7 @@ export const attributeService = {
 
     // Delete attribute
     delete: async (id: string): Promise<void> => {
-        const { error } = await (supabase as any)
+        const { error } = await supabase
             .from('product_attributes')
             .delete()
             .eq('id', id);

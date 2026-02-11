@@ -38,7 +38,7 @@ export interface UpdateProductInput {
 export const supabaseProductService = {
     // Increment interest analytics
     incrementWhatsappClicks: async (id: string): Promise<void> => {
-        const { error } = await (supabase as any).rpc('increment_whatsapp_clicks', { product_id: id });
+        const { error } = await supabase.rpc('increment_whatsapp_clicks', { product_id: id });
         if (error) console.error('Error incrementing clicks:', error);
     },
     // Get all products
@@ -96,7 +96,7 @@ export const supabaseProductService = {
             erp_category: input.erp_category?.trim() || null,
         };
 
-        const { data, error } = await (supabase as any)
+        const { data, error } = await supabase
             .from('products')
             .insert(sanitizedData)
             .select()
@@ -107,7 +107,7 @@ export const supabaseProductService = {
             throw new Error('No se pudo crear el producto. Verifique su conexión.');
         }
 
-        return data as any as Product;
+        return data as Product;
     },
 
     // Update existing product
@@ -173,7 +173,7 @@ export const supabaseProductService = {
     // Bulk Update Status
     updateStatusBulk: async (ids: string[], status: ProductStatus): Promise<void> => {
         if (!ids.length) return;
-        const { error } = await (supabase.from('products') as any).update({ status }).in('id', ids);
+        const { error } = await supabase.from('products').update({ status }).in('id', ids);
         if (error) {
             console.error('Error in bulk status update:', error);
             throw new Error('Error al actualizar productos en lote.');
