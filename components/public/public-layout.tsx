@@ -24,9 +24,9 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
         setMounted(true);
     }, []);
 
-    // Force Dark Mode on Public Layout (User Preference)
+    // Default to Light Mode on Public Layout
     useEffect(() => {
-        setDarkMode(true);
+        setDarkMode(false);
     }, [setDarkMode]);
 
     // Use a stable year value for SSR consistency

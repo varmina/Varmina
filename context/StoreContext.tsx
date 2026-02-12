@@ -61,7 +61,13 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         setTimeout(() => removeToast(id), 4000);
     }, [removeToast]);
 
-    const toggleCurrency = useCallback(() => setCurrency(prev => prev === 'CLP' ? 'USD' : 'CLP'), []);
+    const toggleCurrency = useCallback(() => {
+        setCurrency(prev => {
+            const next = prev === 'CLP' ? 'USD' : 'CLP';
+            addToast('info', `Moneda cambiada a ${next}`);
+            return next;
+        });
+    }, [addToast]);
 
     // Data Fetching
     const refreshSettings = useCallback(async () => {
