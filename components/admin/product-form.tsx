@@ -206,6 +206,32 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
         }));
     };
 
+    const setPrimaryVariant = (variantId: string) => {
+        setFormData(prev => {
+            const variants = prev.variants?.map(v => ({
+                ...v,
+                isPrimary: v.id === variantId
+            })) || [];
+
+            const primaryV = variants.find(v => v.id === variantId);
+            let newImages = [...(prev.images || [])];
+
+            // If primary variant has images, move the first one to the front (Logic matching user request for 'Main Variant = Main Picture')
+            if (primaryV && primaryV.images && primaryV.images.length > 0) {
+                const mainImg = primaryV.images[0];
+                // Remove from current position and add to start
+                newImages = newImages.filter(img => img !== mainImg);
+                newImages.unshift(mainImg);
+            }
+
+            return {
+                ...prev,
+                variants,
+                images: newImages
+            };
+        });
+    };
+
     return (
         <form onSubmit={handleSubmit} className="flex flex-col h-full bg-stone-50 dark:bg-stone-900 md:bg-transparent overflow-hidden">
             {/* Top Desktop Actions (Visible only on non-mobile or when integrated elsewhere) */}
@@ -387,13 +413,23 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                                                         </div>
                                                     </div>
 
-                                                    <button
-                                                        onClick={() => removeVariant(v.id)}
-                                                        className="text-stone-400 hover:text-red-500 p-2 hover:bg-white dark:hover:bg-stone-900 rounded-md transition-colors mt-1"
-                                                        title="Eliminar variante"
-                                                    >
-                                                        <X className="w-4 h-4" />
-                                                    </button>
+                                                    <div className="flex flex-col gap-2 mt-1">
+                                                        <button
+                                                            onClick={() => removeVariant(v.id)}
+                                                            className="text-stone-400 hover:text-red-500 p-2 hover:bg-white dark:hover:bg-stone-900 rounded-md transition-colors"
+                                                            title="Eliminar variante"
+                                                        >
+                                                            <X className="w-4 h-4" />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setPrimaryVariant(v.id)}
+                                                            className={`p-2 rounded-md transition-colors ${v.isPrimary ? 'text-gold-500 bg-gold-50 dark:bg-gold-900/20' : 'text-stone-300 hover:text-gold-500 hover:bg-white dark:hover:bg-stone-900'}`}
+                                                            title={v.isPrimary ? "Variante Principal" : "Marcar como Principal"}
+                                                        >
+                                                            <Star className={`w-4 h-4 ${v.isPrimary ? 'fill-gold-500' : ''}`} />
+                                                        </button>
+                                                    </div>
                                                 </div>
 
                                                 {/* Variant Images Selection */}

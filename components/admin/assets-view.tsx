@@ -22,13 +22,16 @@ import {
     X,
     List,
     Warehouse,
-    AlertCircle
+    AlertCircle,
+    ArrowUpDown
 } from 'lucide-react';
 import { AttributeManagerSection } from './attribute-manager';
 
 import { createClient } from '@/utils/supabase/client';
 
 const supabase = createClient();
+
+type SortOption = 'name_asc' | 'name_desc' | 'stock_asc' | 'stock_desc' | 'status' | 'category' | 'collection';
 
 export const AssetsView: React.FC = () => {
     const { addToast, attributes } = useStore();
@@ -47,6 +50,7 @@ export const AssetsView: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string>('All');
+    const [sortConfig, setSortConfig] = useState<SortOption>('name_asc');
 
     // MODAL / EDIT STATE (Internal Assets)
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -234,18 +238,43 @@ export const AssetsView: React.FC = () => {
     };
 
     // --- FILTERS & STATS ---
-    const filteredAssets = assets.filter(a => {
+    const getSortedData = <T extends InternalAsset | Product>(data: T[]): T[] => {
+        return [...data].sort((a, b) => {
+            switch (sortConfig) {
+                case 'name_asc': return a.name.localeCompare(b.name);
+                case 'name_desc': return b.name.localeCompare(a.name);
+                case 'stock_asc': return (a.stock || 0) - (b.stock || 0);
+                case 'stock_desc': return (b.stock || 0) - (a.stock || 0);
+                case 'category': return (a.category || '').localeCompare(b.category || '');
+                case 'collection': {
+                    if ('collection' in a && 'collection' in b) {
+                        return (a.collection || '').localeCompare(b.collection || '');
+                    }
+                    return 0;
+                }
+                case 'status': {
+                    if ('status' in a && 'status' in b) {
+                        return (a.status || '').localeCompare(b.status || '');
+                    }
+                    return 0;
+                }
+                default: return 0;
+            }
+        });
+    };
+
+    const filteredAssets = getSortedData(assets.filter(a => {
         const matchesSearch = a.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             a.category.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesCategory = selectedCategory === 'All' || a.category === selectedCategory;
         return matchesSearch && matchesCategory;
-    });
+    }));
 
-    const filteredProducts = products.filter(p => {
+    const filteredProducts = getSortedData(products.filter(p => {
         const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesType = selectedCategory === 'All' || p.category === selectedCategory;
         return matchesSearch && matchesType;
-    });
+    }));
 
     const totalValue = activeTab === 'internal'
         ? assets.reduce((acc, curr) => acc + (curr.stock * curr.unit_cost), 0)
@@ -422,6 +451,24 @@ export const AssetsView: React.FC = () => {
                                     <div className="p-2 bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-100 dark:border-stone-700 shrink-0">
                                         <Filter className="w-3 h-3 text-stone-400" />
                                     </div>
+
+                                    {/* Sort Dropdown */}
+                                    <div className="relative">
+                                        <select
+                                            value={sortConfig}
+                                            onChange={(e) => setSortConfig(e.target.value as SortOption)}
+                                            className="px-4 py-2 pr-8 rounded-full border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-[9px] font-bold uppercase tracking-widest text-stone-900 dark:text-stone-300 focus:ring-1 focus:ring-gold-500 appearance-none cursor-pointer"
+                                        >
+                                            <option value="name_asc">Nombre (A-Z)</option>
+                                            <option value="name_desc">Nombre (Z-A)</option>
+                                            <option value="stock_desc">Stock (Mayor)</option>
+                                            <option value="stock_asc">Stock (Menor)</option>
+                                            <option value="category">Categoría</option>
+                                            {activeTab === 'store' && <option value="collection">Colección</option>}
+                                            {activeTab === 'store' && <option value="status">Disponibilidad</option>}
+                                        </select>
+                                        <ArrowUpDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-stone-400 pointer-events-none" />
+                                    </div>
                                     <button onClick={() => setSelectedCategory('All')} className={`px-4 py-2 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all border ${selectedCategory === 'All' ? 'bg-stone-900 text-white border-stone-900 shadow-sm' : 'bg-white dark:bg-stone-900 text-stone-400 border-stone-200 dark:border-stone-800'}`}>Todos</button>
 
                                     {activeTab === 'internal' ? (
@@ -552,7 +599,7 @@ export const AssetsView: React.FC = () => {
 
                                                         {/* Total */}
                                                         <td className="p-5 text-right text-xs font-mono font-bold text-stone-900 dark:text-white">
-                                                            {formatCurrency((product.stock || 0) * (editForm.unit_cost || product.unit_cost || 0))}
+                                                            {formatCurrency((product.stock || 0) * (isEditing ? editForm.unit_cost : (product.unit_cost || 0)))}
                                                         </td>
 
                                                         {/* Actions */}
