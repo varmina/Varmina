@@ -63,14 +63,36 @@ export const AnalyticsDashboard: React.FC = () => {
     const engagementRate = products.length > 0 ? (totalClicks / products.length).toFixed(1) : '0';
 
     // 2. Inventory Valuation (EXCLUSIVELY JEWELRY)
-    const totalInventoryCost = products.reduce((acc, p) => acc + ((p.unit_cost || 0) * (p.stock || 0)), 0);
-    const totalPotentialSales = products.reduce((acc, p) => acc + (p.price * (p.stock || 0)), 0);
-    const totalUnits = products.reduce((acc, p) => acc + (p.stock || 0), 0);
+    const totalInventoryCost = products.reduce((acc, p) => {
+        if (p.variants && p.variants.length > 0) {
+            return acc + p.variants.reduce((vAcc, v) => vAcc + ((v.unit_cost || 0) * (v.stock || 0)), 0);
+        }
+        return acc + ((p.unit_cost || 0) * (p.stock || 0));
+    }, 0);
+
+    const totalPotentialSales = products.reduce((acc, p) => {
+        if (p.variants && p.variants.length > 0) {
+            return acc + p.variants.reduce((vAcc, v) => vAcc + ((v.price || 0) * (v.stock || 0)), 0);
+        }
+        return acc + ((p.price || 0) * (p.stock || 0));
+    }, 0);
+
+    const totalUnits = products.reduce((acc, p) => {
+        if (p.variants && p.variants.length > 0) {
+            return acc + p.variants.reduce((vAcc, v) => vAcc + (v.stock || 0), 0);
+        }
+        return acc + (p.stock || 0);
+    }, 0);
 
     // 3. Categories & Performance (ONLY MASTER LIST CATEGORIES)
     const categoryStats = masterCategories.map(cat => {
         const items = products.filter(p => p.category === cat);
-        const value = items.reduce((acc, p) => acc + (p.price * (p.stock || 0)), 0);
+        const value = items.reduce((acc, p) => {
+            if (p.variants && p.variants.length > 0) {
+                return acc + p.variants.reduce((vAcc, v) => vAcc + ((v.price || 0) * (v.stock || 0)), 0);
+            }
+            return acc + ((p.price || 0) * (p.stock || 0));
+        }, 0);
         const clicks = items.reduce((acc, p) => acc + (p.whatsapp_clicks || 0), 0);
         return { name: cat, value, clicks, count: items.length };
     }).filter(c => c.count > 0 || c.clicks > 0).sort((a, b) => b.value - a.value);
