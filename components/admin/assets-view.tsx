@@ -585,15 +585,23 @@ export const AssetsView: React.FC = () => {
                                                             </td>
                                                             <td className="p-5">
                                                                 <div className="flex items-center gap-3">
-                                                                    <div className="relative">
-                                                                        <img src={product.images[0]} className="w-8 h-8 rounded object-cover bg-stone-100" />
-                                                                        {hasVariants && (
-                                                                            <div className="absolute -top-1 -right-1 bg-gold-500 text-[7px] font-bold px-1 rounded-full text-stone-900">V</div>
-                                                                        )}
-                                                                    </div>
+                                                                    {product.images?.[0] && (
+                                                                        <div className="relative flex-shrink-0">
+                                                                            <img src={product.images[0]} className="w-8 h-8 rounded object-cover bg-stone-100" alt="" />
+                                                                            {hasVariants && (
+                                                                                <div className="absolute -top-1 -right-1 bg-gold-500 text-[7px] font-bold px-1 rounded-full text-stone-900">V</div>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+                                                                    {!product.images?.[0] && hasVariants && (
+                                                                        <div className="w-8 h-8 rounded bg-gold-100 dark:bg-gold-900/20 flex items-center justify-center flex-shrink-0">
+                                                                            <span className="text-[9px] font-bold text-gold-600">V</span>
+                                                                        </div>
+                                                                    )}
                                                                     <div>
                                                                         <div className="font-medium text-xs uppercase text-stone-900 dark:text-white max-w-[150px] truncate" title={product.name}>{product.name}</div>
                                                                         <div className="text-[9px] text-stone-400">{product.category}</div>
+                                                                        {hasVariants && <span className="text-[9px] text-stone-400">Ver Múltiples</span>}
                                                                     </div>
                                                                 </div>
                                                             </td>
@@ -663,10 +671,7 @@ export const AssetsView: React.FC = () => {
                                                                 <tr key={variant.id} className="bg-stone-50/20 dark:bg-stone-950/10 border-l-2 border-gold-500/50">
                                                                     <td />
                                                                     <td className="p-3 pl-10 border-b border-stone-100/50 dark:border-stone-800/20">
-                                                                        <div className="flex items-center gap-2">
-                                                                            <List className="w-3 h-3 text-stone-300" />
-                                                                            <span className="text-[10px] uppercase font-bold text-stone-500">{variant.name}</span>
-                                                                        </div>
+                                                                        <span className="text-[10px] uppercase font-bold text-stone-500">— {variant.name}</span>
                                                                     </td>
                                                                     <td className="p-3 border-b border-stone-100/50 dark:border-stone-800/20 text-stone-400 italic">
                                                                         {isEditing ? (

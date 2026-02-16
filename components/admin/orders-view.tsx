@@ -329,7 +329,7 @@ export const OrdersView: React.FC = () => {
                                             </div>
                                         </div>
                                         <div className="flex-1 pt-1">
-                                            <h4 className="text-[10px] font-bold text-stone-900 dark:text-white truncate leading-tight">{product.name}</h4>
+                                            <h4 className="text-[10px] font-bold text-stone-900 dark:text-white leading-tight line-clamp-2">{product.name}</h4>
                                             <p className="text-[10px] font-mono text-gold-600 font-bold">{formatPrice(product.price, 'CLP')}</p>
                                         </div>
 
@@ -349,7 +349,7 @@ export const OrdersView: React.FC = () => {
                                                                 </button>
                                                                 <div className="flex flex-col items-center leading-none px-1">
                                                                     <span className="text-[9px] font-bold">{q}</span>
-                                                                    <span className="text-[6px] uppercase tracking-tighter opacity-70 truncate max-w-[30px]">{v.name || 'S/T'}</span>
+                                                                    <span className="text-[6px] uppercase tracking-tighter opacity-70 truncate max-w-[50px]" title={v.name}>{v.name || 'S/T'}</span>
                                                                 </div>
                                                                 <button
                                                                     disabled={v.stock <= 0}
@@ -404,10 +404,10 @@ export const OrdersView: React.FC = () => {
                                         >
                                             <div className="flex justify-between items-start gap-2">
                                                 <div className="flex flex-col flex-1 min-w-0">
-                                                    <span className="text-[10px] font-bold text-stone-900 dark:text-white uppercase truncate">{asset.name}</span>
+                                                    <span className="text-[10px] font-bold text-stone-900 dark:text-white uppercase leading-tight">{asset.name}</span>
                                                     <span className="text-[8px] text-stone-400 uppercase tracking-widest">{asset.category}</span>
                                                 </div>
-                                                <div className="p-1 px-2 rounded-lg bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800">
+                                                <div className="p-1 px-2 rounded-lg bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 flex-shrink-0">
                                                     <span className={`text-[9px] font-mono font-bold ${asset.stock <= asset.min_stock ? 'text-red-500' : 'text-stone-600'}`}>
                                                         {asset.stock}
                                                     </span>

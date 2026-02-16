@@ -28,33 +28,32 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "Varmina Joyas — Joyería Artesanal Premium",
+    default: "Varmina Joyas — Joyería de Tendencia",
     template: "%s | Varmina Joyas",
   },
-  description: "Descubre piezas únicas de joyería artesanal. Collares, anillos, aros y pulseras hechos a mano con materiales de primera calidad. Envíos a todo Chile.",
-  keywords: ["joyería artesanal", "joyas", "collares", "anillos", "aros", "pulseras", "joyería chilena", "Varmina"],
+  description: "Descubre piezas únicas de joyería de tendencia. Collares, anillos, aros y pulseras con estilo y calidad. Envíos a todo Chile.",
+  keywords: ["joyería de tendencia", "joyas", "collares", "anillos", "aros", "pulseras", "joyería chilena", "Varmina"],
   authors: [{ name: "Varmina Joyas" }],
   creator: "Varmina Joyas",
   metadataBase: new URL("https://varmina.cl"),
   openGraph: {
     type: "website",
-    title: "Varmina Joyas — Joyería Artesanal Premium",
-    description: "Descubre piezas únicas de joyería artesanal. Envíos a todo Chile.",
+    title: "Varmina Joyas — Joyería de Tendencia",
+    description: "Descubre piezas únicas de joyería de tendencia. Envíos a todo Chile.",
     siteName: "Varmina Joyas",
     locale: "es_CL",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Varmina Joyas — Joyería Artesanal Premium",
-    description: "Joyería artesanal hecha a mano en Chile.",
+    title: "Varmina Joyas — Joyería de Tendencia",
+    description: "Joyería de tendencia hecha en Chile.",
   },
   robots: {
     index: true,
     follow: true,
   },
   icons: {
-    icon: "/assets/no bg png.png",
-    apple: "/assets/no bg png.png",
+    icon: "/file.svg",
   },
 };
 

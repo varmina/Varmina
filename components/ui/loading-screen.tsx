@@ -9,11 +9,7 @@ export const LoadingScreen: React.FC = () => {
             <div className="relative">
                 <div className="w-20 h-20 border border-gold-400/40 rounded-full animate-spin-slow" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                    <img
-                        src="/assets/no bg png.png"
-                        alt="Loading"
-                        className="w-10 h-10 object-contain opacity-80"
-                    />
+                    <div className="w-4 h-4 rotate-45 border-2 border-gold-400 opacity-80" />
                 </div>
             </div>
 
