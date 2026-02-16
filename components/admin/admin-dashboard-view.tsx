@@ -300,8 +300,11 @@ export const AdminDashboardView = () => {
                                                                 </span>
                                                             )}
                                                         </div>
-                                                        <div className="lg:hidden mt-1">
+                                                        <div className="lg:hidden mt-1 flex items-center gap-3">
                                                             <span className="font-serif text-xl text-stone-900 dark:text-gold-200">${product.price?.toLocaleString('es-CL')}</span>
+                                                            <span className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded-md ${(!product.stock || product.stock === 0) ? 'bg-red-50 text-red-500 dark:bg-red-900/20 dark:text-red-400' : 'bg-stone-100 text-stone-500 dark:bg-stone-800 dark:text-stone-400'}`}>
+                                                                Stock: {product.stock || 0}
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 </div>

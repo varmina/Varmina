@@ -85,6 +85,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, currency, lay
                     </div>
                 )}
 
+                {/* Por Encargo Badge */}
+                {product.status === ProductStatus.MADE_TO_ORDER && (
+                    <div className={`absolute ${product.badge ? 'top-8' : 'top-0'} left-0 z-10`}>
+                        <span className="bg-blue-600/90 text-white text-[8px] font-bold uppercase tracking-[0.15em] px-3 py-1.5 backdrop-blur-md">
+                            Por Encargo
+                        </span>
+                    </div>
+                )}
+
                 {/* Sold Out Overlay */}
                 {isSoldOut && (
                     <div className="absolute inset-0 bg-white/40 dark:bg-black/60 backdrop-grayscale flex items-center justify-center">

@@ -12,9 +12,9 @@ import { ToastContainer } from '@/components/ui/toast-container';
 export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { darkMode, toggleDarkMode, setDarkMode } = useTheme();
 
-    // Force Light Mode on Admin Layout (User Preference)
+    // Force Dark Mode on Admin Layout (User Preference)
     React.useEffect(() => {
-        setDarkMode(false);
+        setDarkMode(true);
     }, [setDarkMode]);
 
     const {

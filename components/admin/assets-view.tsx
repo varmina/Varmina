@@ -585,15 +585,12 @@ export const AssetsView: React.FC = () => {
                                                             </td>
                                                             <td className="p-5">
                                                                 <div className="flex items-center gap-3">
-                                                                    {product.images?.[0] && (
+                                                                    {!hasVariants && product.images?.[0] && (
                                                                         <div className="relative flex-shrink-0">
                                                                             <img src={product.images[0]} className="w-8 h-8 rounded object-cover bg-stone-100" alt="" />
-                                                                            {hasVariants && (
-                                                                                <div className="absolute -top-1 -right-1 bg-gold-500 text-[7px] font-bold px-1 rounded-full text-stone-900">V</div>
-                                                                            )}
                                                                         </div>
                                                                     )}
-                                                                    {!product.images?.[0] && hasVariants && (
+                                                                    {hasVariants && (
                                                                         <div className="w-8 h-8 rounded bg-gold-100 dark:bg-gold-900/20 flex items-center justify-center flex-shrink-0">
                                                                             <span className="text-[9px] font-bold text-gold-600">V</span>
                                                                         </div>
