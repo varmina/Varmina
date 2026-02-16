@@ -90,7 +90,6 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency,
             try {
                 await navigator.share({
                     title: product.name,
-                    text: product.description || `Mira esta pieza: ${product.name}`,
                     url,
                 });
             } catch {

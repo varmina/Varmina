@@ -41,9 +41,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
 
     return {
-        title: `${product.name} | Varmina Joyas`,
+        title: product.name,
         description: product.description || `Detalles de ${product.name}`,
         openGraph: {
+            title: product.name,
+            description: product.description || `Detalles de ${product.name}`,
             images: product.images && product.images.length > 0 ? [product.images[0]] : [],
         },
     };
