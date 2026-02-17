@@ -278,7 +278,7 @@ export const AdminDashboardView = () => {
                                                 <div className="w-full flex lg:contents gap-4 items-center">
                                                     {/* Image */}
                                                     <div className="col-span-1 flex-shrink-0">
-                                                        <div className="relative w-20 h-24 lg:w-12 lg:h-14 overflow-hidden bg-stone-100 border border-stone-200 dark:border-stone-800 rounded-lg shadow-sm">
+                                                        <div className="relative w-24 h-28 lg:w-16 lg:h-20 overflow-hidden bg-stone-100 border border-stone-200 dark:border-stone-800 rounded-lg shadow-sm">
                                                             <img src={product.images[0]} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                                                         </div>
                                                     </div>

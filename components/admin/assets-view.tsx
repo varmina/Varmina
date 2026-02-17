@@ -587,11 +587,11 @@ export const AssetsView: React.FC = () => {
                                                                 <div className="flex items-center gap-3">
                                                                     {product.images?.[0] ? (
                                                                         <div className="relative flex-shrink-0">
-                                                                            <img src={product.images[0]} className="w-8 h-8 rounded object-cover bg-stone-100" alt="" />
+                                                                            <img src={product.images[0]} className="w-14 h-16 rounded object-cover bg-stone-100" alt="" />
                                                                         </div>
                                                                     ) : (
-                                                                        <div className="w-8 h-8 rounded bg-stone-100 dark:bg-stone-800 flex items-center justify-center flex-shrink-0">
-                                                                            <Package className="w-4 h-4 text-stone-400" />
+                                                                        <div className="w-14 h-16 rounded bg-stone-100 dark:bg-stone-800 flex items-center justify-center flex-shrink-0">
+                                                                            <Package className="w-6 h-6 text-stone-400" />
                                                                         </div>
                                                                     )}
                                                                     <div>
