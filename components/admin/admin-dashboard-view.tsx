@@ -244,11 +244,11 @@ export const AdminDashboardView = () => {
                                         <div className="col-span-1">
                                             <input type="checkbox" checked={selectedIds.length === filteredInventory.length && filteredInventory.length > 0} onChange={toggleSelectAll} className="w-4 h-4 accent-gold-500 rounded-sm cursor-pointer" />
                                         </div>
-                                        <div className="col-span-2">Imagen</div>
-                                        <div className="col-span-3">Producto / Detalles</div>
+                                        <div className="col-span-2 pl-4">Vista Previa</div>
+                                        <div className="col-span-4">Detalles del Producto</div>
                                         <div className="col-span-1 text-center">Stock</div>
                                         <div className="col-span-1 text-center">Precio</div>
-                                        <div className="col-span-2 text-center">Estado</div>
+                                        <div className="col-span-1 text-center">Estado</div>
                                         <div className="col-span-2 text-right">Acciones</div>
                                     </div>
 
@@ -284,7 +284,7 @@ export const AdminDashboardView = () => {
                                                     </div>
 
                                                     {/* Product Info */}
-                                                    <div className="col-span-1 lg:col-span-3 flex flex-col gap-1.5 flex-grow lg:ml-4 min-w-0">
+                                                    <div className="col-span-1 lg:col-span-4 flex flex-col gap-1 flex-grow lg:ml-4 min-w-0">
                                                         <div className="flex flex-wrap items-center gap-2">
                                                             <h3 className="font-serif text-lg lg:text-sm text-stone-900 dark:text-white leading-tight uppercase tracking-wide truncate pr-4">{product.name}</h3>
                                                             {product.badge && (
@@ -295,8 +295,13 @@ export const AdminDashboardView = () => {
                                                         </div>
                                                         <div className="flex flex-wrap items-center gap-2">
                                                             {product.category && (
-                                                                <span className="text-[9px] text-stone-400 font-bold uppercase tracking-widest">
+                                                                <span className="text-[10px] text-gold-600 dark:text-gold-400 font-bold uppercase tracking-widest bg-gold-50 dark:bg-gold-900/10 px-2 py-0.5 rounded">
                                                                     {product.category}
+                                                                </span>
+                                                            )}
+                                                            {product.collection && (
+                                                                <span className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">
+                                                                    {product.collection}
                                                                 </span>
                                                             )}
                                                         </div>
@@ -342,7 +347,7 @@ export const AdminDashboardView = () => {
                                                 </div>
 
                                                 {/* Desktop Status */}
-                                                <div className="hidden lg:block lg:col-span-2 text-center">
+                                                <div className="hidden lg:block lg:col-span-1 text-center">
                                                     <div className="relative inline-block">
                                                         <select
                                                             value={product.status}
