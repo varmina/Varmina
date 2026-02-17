@@ -240,24 +240,24 @@ export const AdminDashboardView = () => {
                             ) : (
                                 <>
                                     {/* Desktop Header */}
-                                    <div className="grid grid-cols-12 px-6 py-4 border-b border-stone-100 dark:border-stone-800 text-[9px] font-bold uppercase tracking-[0.2em] text-stone-400 hidden lg:grid bg-stone-50/50 dark:bg-stone-900/50 items-center">
-                                        <div className="col-span-1 flex justify-center">
+                                    <div className="hidden lg:grid lg:grid-cols-[50px_120px_1fr_80px_120px_160px_120px] gap-x-4 px-6 py-4 border-b border-stone-100 dark:border-stone-800 text-[9px] font-bold uppercase tracking-[0.2em] text-stone-400 bg-stone-50/50 dark:bg-stone-900/50 items-center">
+                                        <div className="flex justify-center">
                                             <input type="checkbox" checked={selectedIds.length === filteredInventory.length && filteredInventory.length > 0} onChange={toggleSelectAll} className="w-4 h-4 accent-gold-500 rounded-sm cursor-pointer" />
                                         </div>
-                                        <div className="col-span-2 text-center">Vista Previa</div>
-                                        <div className="col-span-4 pl-4">Detalles del Producto</div>
-                                        <div className="col-span-1 text-center">Stock</div>
-                                        <div className="col-span-1 text-center">Precio</div>
-                                        <div className="col-span-1 flex justify-center text-center">Estado</div>
-                                        <div className="col-span-2 text-center">Acciones</div>
+                                        <div className="text-center">Vista Previa</div>
+                                        <div className="pl-4">Detalles del Producto</div>
+                                        <div className="text-center">Stock</div>
+                                        <div className="text-center">Precio</div>
+                                        <div className="text-center">Estado</div>
+                                        <div className="text-center">Acciones</div>
                                     </div>
 
                                     <div className="divide-y divide-stone-100 dark:divide-stone-800">
                                         {filteredInventory.map((product: Product) => (
-                                            <div key={product.id} className="flex flex-col lg:grid lg:grid-cols-12 items-center px-4 md:px-6 py-6 md:py-5 hover:bg-stone-50 dark:hover:bg-stone-800/30 transition-colors group relative">
+                                            <div key={product.id} className="flex flex-col lg:grid lg:grid-cols-[50px_120px_1fr_80px_120px_160px_120px] gap-x-4 items-center px-4 md:px-6 py-6 md:py-5 hover:bg-stone-50 dark:hover:bg-stone-800/30 transition-colors group relative">
 
                                                 {/* Desktop Checkbox */}
-                                                <div className="col-span-1 hidden lg:flex justify-center">
+                                                <div className="hidden lg:flex justify-center items-center">
                                                     <input type="checkbox" checked={selectedIds.includes(product.id)} onChange={() => toggleSelect(product.id)} className="w-4 h-4 accent-gold-500 rounded-sm cursor-pointer" />
                                                 </div>
 
@@ -277,16 +277,16 @@ export const AdminDashboardView = () => {
 
                                                 <div className="w-full flex lg:contents gap-4 items-center">
                                                     {/* Image */}
-                                                    <div className="col-span-2 flex justify-center flex-shrink-0">
-                                                        <div className="relative w-28 h-36 lg:w-24 lg:h-32 overflow-hidden bg-stone-100 border border-stone-200 dark:border-stone-800 rounded-lg shadow-sm">
+                                                    <div className="flex justify-center items-center flex-shrink-0">
+                                                        <div className="relative w-28 h-36 lg:w-20 lg:h-24 overflow-hidden bg-stone-100 border border-stone-200 dark:border-stone-800 rounded-lg shadow-sm">
                                                             <img src={product.images[0]} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                                                         </div>
                                                     </div>
 
                                                     {/* Product Info */}
-                                                    <div className="col-span-1 lg:col-span-4 flex flex-col gap-1 flex-grow lg:pl-4 min-w-0">
+                                                    <div className="flex flex-col gap-1 lg:pl-4 min-w-0">
                                                         <div className="flex flex-wrap items-center gap-2">
-                                                            <h3 className="font-serif text-lg lg:text-sm text-stone-900 dark:text-white leading-tight uppercase tracking-wide truncate pr-4">{product.name}</h3>
+                                                            <h3 className="font-serif text-lg lg:text-[13px] text-stone-900 dark:text-white leading-tight uppercase tracking-wide truncate max-w-full">{product.name}</h3>
                                                             {product.badge && (
                                                                 <span className="text-[8px] bg-gold-500 text-stone-900 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider shadow-sm">
                                                                     {product.badge}
@@ -305,24 +305,18 @@ export const AdminDashboardView = () => {
                                                                 </span>
                                                             )}
                                                         </div>
-                                                        <div className="lg:hidden mt-1 flex items-center gap-3">
-                                                            <span className="font-serif text-xl text-stone-900 dark:text-gold-200">${product.price?.toLocaleString('es-CL')}</span>
-                                                            <span className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded-md ${(!product.stock || product.stock === 0) ? 'bg-red-50 text-red-500 dark:bg-red-900/20 dark:text-red-400' : 'bg-stone-100 text-stone-500 dark:bg-stone-800 dark:text-stone-400'}`}>
-                                                                Stock: {product.stock || 0}
-                                                            </span>
-                                                        </div>
                                                     </div>
                                                 </div>
 
                                                 {/* Desktop Stock */}
-                                                <div className="hidden lg:flex lg:col-span-1 justify-center">
+                                                <div className="hidden lg:flex justify-center items-center">
                                                     <span className={`font-mono text-xs font-bold px-2 py-1 rounded-md ${(!product.stock || product.stock === 0) ? 'bg-red-50 text-red-500 dark:bg-red-900/20' : 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300'}`}>
                                                         {product.stock || 0}
                                                     </span>
                                                 </div>
 
                                                 {/* Desktop Price */}
-                                                <div className="hidden lg:flex lg:col-span-1 justify-center">
+                                                <div className="hidden lg:flex justify-center items-center">
                                                     {inlinePriceId === product.id ? (
                                                         <div className="flex items-center justify-center gap-1">
                                                             <input
@@ -339,7 +333,7 @@ export const AdminDashboardView = () => {
                                                     ) : (
                                                         <span
                                                             onClick={() => { setInlinePriceId(product.id); setInlinePrice(product.price); }}
-                                                            className="font-serif text-sm font-medium text-stone-900 dark:text-stone-200 cursor-pointer hover:text-gold-600 border-b border-dashed border-stone-300 hover:border-gold-600 transition-all"
+                                                            className="font-serif text-sm font-medium text-stone-900 dark:text-stone-200 cursor-pointer hover:text-gold-600 border-b border-dashed border-stone-300 hover:border-gold-600 transition-all whitespace-nowrap"
                                                         >
                                                             ${product.price ? product.price.toLocaleString('es-CL') : '0'}
                                                         </span>
@@ -347,7 +341,7 @@ export const AdminDashboardView = () => {
                                                 </div>
 
                                                 {/* Desktop Status */}
-                                                <div className="hidden lg:flex lg:col-span-1 justify-center">
+                                                <div className="hidden lg:flex justify-center items-center">
                                                     <div className="relative inline-block">
                                                         <select
                                                             value={product.status}
@@ -367,7 +361,7 @@ export const AdminDashboardView = () => {
                                                 </div>
 
                                                 {/* Actions */}
-                                                <div className="w-full lg:w-auto mt-6 lg:mt-0 flex items-center justify-between lg:justify-center gap-2 lg:col-span-2 lg:opacity-0 group-hover:lg:opacity-100 transition-opacity">
+                                                <div className="hidden lg:flex justify-center items-center gap-2 lg:opacity-0 group-hover:lg:opacity-100 transition-opacity">
                                                     <div className="flex gap-2">
                                                         <button onClick={() => handleDuplicate(product.id)} className="p-2 text-stone-400 hover:text-gold-600 hover:bg-gold-50 dark:hover:bg-gold-900/10 rounded-full transition-all flex items-center gap-2 border border-transparent hover:border-gold-200" title="Duplicar">
                                                             <Copy className="w-4 h-4" />
