@@ -404,123 +404,134 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                                             onDragStart={() => handleVariantDragStart(i)}
                                             onDragOver={handleDragOver}
                                             onDrop={() => handleVariantDrop(i)}
-                                            className={`p-4 md:p-5 bg-stone-50 dark:bg-stone-950/30 rounded-lg border border-stone-100 dark:border-stone-800 transition-all hover:bg-stone-100/50 dark:hover:bg-stone-800/30 ${draggedVariantIdx === i ? 'opacity-30 ring-2 ring-gold-500' : ''}`}
+                                            className={`group/v p-5 md:p-6 bg-white dark:bg-stone-900 rounded-xl border border-stone-100 dark:border-stone-800 transition-all hover:shadow-md hover:border-stone-200 dark:hover:border-stone-700 ${draggedVariantIdx === i ? 'opacity-30 ring-2 ring-gold-500' : ''}`}
                                         >
-                                            <div className="flex flex-col gap-4">
-                                                <div className="flex items-start gap-3 md:gap-4">
-                                                    {/* Drag Handle */}
-                                                    <div className="cursor-grab active:cursor-grabbing p-2 -ml-2">
-                                                        <GripVertical className="w-5 h-5 text-stone-300" />
-                                                    </div>
-
-                                                    <div className="flex-1 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-12 gap-3">
-                                                        <div className="space-y-1 col-span-2 md:col-span-2 lg:col-span-3">
-                                                            <label className="text-[9px] uppercase tracking-wider text-stone-400 font-bold block">Nombre Opción</label>
+                                            <div className="flex flex-col gap-6">
+                                                {/* Header & Main Actions */}
+                                                <div className="flex items-start justify-between gap-4">
+                                                    <div className="flex items-start gap-3 flex-1">
+                                                        <div className="cursor-grab active:cursor-grabbing p-2 -ml-2 text-stone-300 hover:text-stone-500 transition-colors">
+                                                            <GripVertical className="w-5 h-5" />
+                                                        </div>
+                                                        <div className="flex-1 max-w-md">
+                                                            <label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold mb-1.5 block">Nombre de Variante</label>
                                                             <input
                                                                 type="text"
                                                                 value={v.name}
                                                                 onChange={e => updateVariant(v.id, 'name', e.target.value)}
-                                                                className="w-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-md py-2 px-3 text-sm font-medium text-stone-900 dark:text-white focus:border-gold-500 focus:ring-1 focus:ring-gold-500 outline-none"
-                                                                placeholder="Ej: Oro 18k"
-                                                                autoComplete="off"
-                                                            />
-                                                        </div>
-
-                                                        <div className="space-y-1 col-span-1 md:col-span-1 lg:col-span-2">
-                                                            <label className="text-[9px] uppercase tracking-wider text-stone-400 font-bold block">Precio</label>
-                                                            <div className="relative">
-                                                                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-stone-400 text-xs">$</span>
-                                                                <input
-                                                                    type="number"
-                                                                    value={v.price === 0 ? '' : v.price}
-                                                                    onChange={e => updateVariant(v.id, 'price', Number(e.target.value) || 0)}
-                                                                    onFocus={(e) => e.target.select()}
-                                                                    className="w-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-md py-2 pl-5 pr-2 text-sm font-medium text-stone-900 dark:text-white focus:border-gold-500 focus:ring-1 focus:ring-gold-500 outline-none"
-                                                                    autoComplete="off"
-                                                                    placeholder="0"
-                                                                />
-                                                            </div>
-                                                        </div>
-
-                                                        <div className="space-y-1 col-span-1 md:col-span-1 lg:col-span-2">
-                                                            <label className="text-[9px] uppercase tracking-wider text-stone-400 font-bold block">Costo</label>
-                                                            <div className="relative">
-                                                                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-stone-400 text-xs">$</span>
-                                                                <input
-                                                                    type="number"
-                                                                    value={v.unit_cost === 0 || v.unit_cost === undefined ? '' : v.unit_cost}
-                                                                    onChange={e => updateVariant(v.id, 'unit_cost', Number(e.target.value) || 0)}
-                                                                    className="w-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-md py-2 pl-5 pr-2 text-sm font-medium text-stone-900 dark:text-white focus:border-gold-500 focus:ring-1 focus:ring-gold-500 outline-none"
-                                                                    placeholder="0"
-                                                                />
-                                                            </div>
-                                                        </div>
-
-                                                        <div className="space-y-1 col-span-1 md:col-span-1 lg:col-span-2">
-                                                            <label className="text-[9px] uppercase tracking-wider text-stone-400 font-bold block">Stock</label>
-                                                            <input
-                                                                type="number"
-                                                                min="0"
-                                                                value={(v.stock === 0 || v.stock === undefined) ? '' : v.stock}
-                                                                onChange={e => updateVariant(v.id, 'stock', parseInt(e.target.value) || 0)}
-                                                                className="w-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-md py-2 px-3 text-sm font-medium text-stone-900 dark:text-white focus:border-gold-500 focus:ring-1 focus:ring-gold-500 outline-none text-center"
-                                                                autoComplete="off"
-                                                                placeholder="0"
-                                                            />
-                                                        </div>
-
-                                                        <div className="space-y-1 col-span-1 md:col-span-3 lg:col-span-3">
-                                                            <label className="text-[9px] uppercase tracking-wider text-stone-400 font-bold block">Ubicación</label>
-                                                            <input
-                                                                type="text"
-                                                                value={v.location || ''}
-                                                                onChange={e => updateVariant(v.id, 'location', e.target.value)}
-                                                                className="w-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-md py-2 px-3 text-sm font-medium text-stone-900 dark:text-white focus:border-gold-500 focus:ring-1 focus:ring-gold-500 outline-none"
-                                                                placeholder="Ej: A-1"
+                                                                className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-700 rounded-lg py-2.5 px-4 text-sm font-bold text-stone-900 dark:text-white focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 outline-none transition-all"
+                                                                placeholder="Ej: Oro 18k, Talla 14, etc."
                                                             />
                                                         </div>
                                                     </div>
 
-                                                    <div className="flex flex-col gap-2 mt-1">
-                                                        <button
-                                                            onClick={() => removeVariant(v.id)}
-                                                            className="text-stone-400 hover:text-red-500 p-2 hover:bg-white dark:hover:bg-stone-900 rounded-md transition-colors"
-                                                            title="Eliminar variante"
-                                                        >
-                                                            <X className="w-4 h-4" />
-                                                        </button>
+                                                    <div className="flex items-center gap-1">
                                                         <button
                                                             type="button"
                                                             onClick={() => setPrimaryVariant(v.id)}
-                                                            className={`p-2 rounded-md transition-colors ${v.isPrimary ? 'text-gold-500 bg-gold-50 dark:bg-gold-900/20' : 'text-stone-300 hover:text-gold-500 hover:bg-white dark:hover:bg-stone-900'}`}
+                                                            className={`p-2.5 rounded-lg transition-all ${v.isPrimary ? 'text-gold-500 bg-gold-50 dark:bg-gold-900/20' : 'text-stone-300 hover:text-gold-500 hover:bg-stone-50 dark:hover:bg-stone-800'}`}
                                                             title={v.isPrimary ? "Variante Principal" : "Marcar como Principal"}
                                                         >
-                                                            <Star className={`w-4 h-4 ${v.isPrimary ? 'fill-gold-500' : ''}`} />
+                                                            <Star className={`w-5 h-5 ${v.isPrimary ? 'fill-gold-500' : ''}`} />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeVariant(v.id)}
+                                                            className="text-stone-300 hover:text-red-500 p-2.5 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-all"
+                                                            title="Eliminar variante"
+                                                        >
+                                                            <X className="w-5 h-5" />
                                                         </button>
                                                     </div>
                                                 </div>
 
+                                                {/* Financial & Inventory Grid */}
+                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold block">Precio Venta</label>
+                                                        <div className="relative group/input">
+                                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 font-serif">$</span>
+                                                            <input
+                                                                type="number"
+                                                                value={v.price === 0 ? '' : v.price}
+                                                                onChange={e => updateVariant(v.id, 'price', Number(e.target.value) || 0)}
+                                                                onFocus={(e) => e.target.select()}
+                                                                className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-700 rounded-lg py-2.5 pl-7 pr-3 text-sm font-bold text-stone-900 dark:text-white focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 outline-none transition-all"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold block">Costo (COGS)</label>
+                                                        <div className="relative group/input">
+                                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 font-serif">$</span>
+                                                            <input
+                                                                type="number"
+                                                                value={v.unit_cost === 0 || v.unit_cost === undefined ? '' : v.unit_cost}
+                                                                onChange={e => updateVariant(v.id, 'unit_cost', Number(e.target.value) || 0)}
+                                                                className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-700 rounded-lg py-2.5 pl-7 pr-3 text-sm font-bold text-stone-900 dark:text-white focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 outline-none transition-all"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold block">Stock</label>
+                                                        <input
+                                                            type="number"
+                                                            min="0"
+                                                            value={(v.stock === 0 || v.stock === undefined) ? '' : v.stock}
+                                                            onChange={e => updateVariant(v.id, 'stock', parseInt(e.target.value) || 0)}
+                                                            className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-700 rounded-lg py-2.5 px-4 text-sm font-bold text-stone-900 dark:text-white focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 outline-none text-center transition-all"
+                                                            placeholder="0"
+                                                        />
+                                                    </div>
+
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold block">Ubicación</label>
+                                                        <input
+                                                            type="text"
+                                                            value={v.location || ''}
+                                                            onChange={e => updateVariant(v.id, 'location', e.target.value)}
+                                                            className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-700 rounded-lg py-2.5 px-4 text-sm font-medium text-stone-900 dark:text-white focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 outline-none transition-all"
+                                                            placeholder="Ej: Cajón A"
+                                                        />
+                                                    </div>
+                                                </div>
+
                                                 {/* Variant Images Selection */}
-                                                <div className="pl-8 md:pl-9 pt-2 border-t border-stone-200/50 dark:border-stone-800/50 mt-2">
-                                                    <p className="text-[9px] font-bold text-stone-400 uppercase tracking-wider mb-3">Vincular Imagen</p>
-                                                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                                                <div className="pt-5 border-t border-stone-100 dark:border-stone-800/50">
+                                                    <div className="flex items-center justify-between mb-3">
+                                                        <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Vincular Imágenes de Galería</p>
+                                                        {v.images && v.images.length > 0 && (
+                                                            <span className="text-[9px] font-bold text-gold-600 dark:text-gold-400 uppercase bg-gold-50 dark:bg-gold-900/20 px-2 py-0.5 rounded">
+                                                                {v.images.length} seleccionada(s)
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
                                                         {formData.images?.map((img, idx) => (
                                                             <button
                                                                 key={idx}
                                                                 type="button"
                                                                 onClick={() => toggleVariantImage(v.id, img)}
-                                                                className={`w-12 h-12 rounded-lg border-2 overflow-hidden transition-all flex-shrink-0 relative ${v.images?.includes(img) ? 'border-gold-500 ring-2 ring-gold-200 dark:ring-gold-900/30' : 'border-stone-200 dark:border-stone-800 opacity-60 hover:opacity-100 hover:border-stone-300'}`}
+                                                                className={`w-14 h-14 rounded-xl border-2 overflow-hidden transition-all flex-shrink-0 relative group/img ${v.images?.includes(img) ? 'border-gold-500 scale-105 shadow-md shadow-gold-500/10' : 'border-stone-100 dark:border-stone-800 opacity-60 hover:opacity-100 hover:border-stone-200'}`}
                                                             >
                                                                 <img src={img} className="w-full h-full object-cover" />
                                                                 {v.images?.includes(img) && (
-                                                                    <div className="absolute top-0 right-0 bg-gold-500 text-stone-900 text-[8px] font-bold w-4 h-4 flex items-center justify-center rounded-bl-lg">
+                                                                    <div className="absolute inset-0 bg-gold-500/10" />
+                                                                )}
+                                                                {v.images?.includes(img) && (
+                                                                    <div className="absolute top-0 right-0 bg-gold-500 text-stone-900 text-[9px] font-black w-5 h-5 flex items-center justify-center rounded-bl-xl shadow-sm">
                                                                         {v.images.indexOf(img) + 1}
                                                                     </div>
                                                                 )}
+                                                                <div className="absolute inset-0 border border-white/20 rounded-xl" />
                                                             </button>
                                                         ))}
                                                         {(!formData.images || formData.images.length === 0) && (
-                                                            <span className="text-[10px] text-stone-400 italic py-2">Primero sube imágenes a la galería.</span>
+                                                            <div className="w-full py-4 text-center bg-stone-50 dark:bg-stone-900/50 rounded-lg border border-dashed border-stone-200 dark:border-stone-800">
+                                                                <span className="text-[10px] text-stone-400 italic">Sube imágenes a la galería primero</span>
+                                                            </div>
                                                         )}
                                                     </div>
                                                 </div>
