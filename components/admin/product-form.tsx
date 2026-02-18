@@ -456,6 +456,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                                                                 value={v.price === 0 ? '' : v.price}
                                                                 onChange={e => updateVariant(v.id, 'price', Number(e.target.value) || 0)}
                                                                 onFocus={(e) => e.target.select()}
+                                                                onWheel={(e) => (e.target as HTMLInputElement).blur()}
                                                                 className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-700 rounded-lg py-2.5 pl-7 pr-3 text-sm font-bold text-stone-900 dark:text-white focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 outline-none transition-all"
                                                             />
                                                         </div>
@@ -469,6 +470,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                                                                 type="number"
                                                                 value={v.unit_cost === 0 || v.unit_cost === undefined ? '' : v.unit_cost}
                                                                 onChange={e => updateVariant(v.id, 'unit_cost', Number(e.target.value) || 0)}
+                                                                onFocus={(e) => e.target.select()}
+                                                                onWheel={(e) => (e.target as HTMLInputElement).blur()}
                                                                 className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-700 rounded-lg py-2.5 pl-7 pr-3 text-sm font-bold text-stone-900 dark:text-white focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 outline-none transition-all"
                                                             />
                                                         </div>
@@ -481,6 +484,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                                                             min="0"
                                                             value={(v.stock === 0 || v.stock === undefined) ? '' : v.stock}
                                                             onChange={e => updateVariant(v.id, 'stock', parseInt(e.target.value) || 0)}
+                                                            onFocus={(e) => e.target.select()}
+                                                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
                                                             className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-700 rounded-lg py-2.5 px-4 text-sm font-bold text-stone-900 dark:text-white focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 outline-none text-center transition-all"
                                                             placeholder="0"
                                                         />
@@ -578,6 +583,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                                             }
                                             onChange={e => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })}
                                             onFocus={(e) => e.target.select()}
+                                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
                                             className="w-full bg-stone-50 dark:bg-stone-950/50 border border-stone-200 dark:border-stone-700 rounded-lg py-3 pl-4 pr-24 text-lg font-bold text-stone-900 dark:text-white focus:border-gold-500 focus:ring-1 focus:ring-gold-500 outline-none transition-all placeholder:text-stone-300 disabled:opacity-50"
                                             placeholder="0"
                                         />
@@ -626,6 +632,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                                         value={formData.price === 0 ? '' : formData.price}
                                         onChange={e => setFormData({ ...formData, price: Number(e.target.value) || 0 })}
                                         onFocus={(e) => e.target.select()}
+                                        onWheel={(e) => (e.target as HTMLInputElement).blur()}
                                     />
                                 </div>
                                 {errors.price && <p className="mt-2 text-[10px] font-bold text-red-500">{errors.price}</p>}

@@ -345,3 +345,15 @@ a {
 .dark .prose-brand {
   color: #a8a29e;
 }
+
+/* ── Input Number Styling ────────────────────── */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}

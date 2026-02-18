@@ -323,8 +323,10 @@ export const AdminDashboardView = () => {
                                                                 type="number"
                                                                 autoFocus
                                                                 className="w-20 bg-white dark:bg-stone-800 border p-1 text-xs text-stone-900 dark:text-white rounded-md outline-none border-gold-500 focus:ring-1 focus:ring-gold-500"
-                                                                value={inlinePrice}
-                                                                onChange={(e) => setInlinePrice(Number(e.target.value))}
+                                                                value={inlinePrice === 0 ? '' : inlinePrice}
+                                                                onChange={(e) => setInlinePrice(Number(e.target.value) || 0)}
+                                                                onFocus={(e) => e.target.select()}
+                                                                onWheel={(e) => (e.target as HTMLInputElement).blur()}
                                                                 onKeyDown={(e) => e.key === 'Enter' && handleInlinePriceSave(product.id)}
                                                             />
                                                             <button onClick={() => handleInlinePriceSave(product.id)} className="p-1 text-green-500 hover:bg-green-50 rounded"><Check className="w-3 h-3" /></button>

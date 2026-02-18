@@ -229,6 +229,8 @@ export const PricingCalculator: React.FC = () => {
                                         min={0}
                                         value={item.value || ''}
                                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCostItem(item.id, Number(e.target.value))}
+                                        onFocus={(e) => e.target.select()}
+                                        onWheel={(e) => (e.target as HTMLInputElement).blur()}
                                         placeholder="0"
                                         className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg pl-7 pr-3 py-2 text-sm text-right outline-none focus:border-gold-400 transition-colors dark:text-white"
                                     />
@@ -252,6 +254,8 @@ export const PricingCalculator: React.FC = () => {
                                         min={0}
                                         value={item.value || ''}
                                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCustomCost(item.id, 'value', Number(e.target.value))}
+                                        onFocus={(e) => e.target.select()}
+                                        onWheel={(e) => (e.target as HTMLInputElement).blur()}
                                         placeholder="0"
                                         className="w-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-lg pl-7 pr-3 py-2 text-sm text-right outline-none focus:border-gold-400 dark:text-white"
                                     />
@@ -335,8 +339,10 @@ export const PricingCalculator: React.FC = () => {
                                     <input
                                         type="number"
                                         min={0}
-                                        value={targetPrice}
+                                        value={targetPrice || ''}
                                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTargetPrice(e.target.value ? Number(e.target.value) : '')}
+                                        onFocus={(e) => e.target.select()}
+                                        onWheel={(e) => (e.target as HTMLInputElement).blur()}
                                         placeholder="Ej: 250000"
                                         className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg pl-7 pr-4 py-3 text-lg font-serif text-right outline-none focus:border-gold-400 dark:text-white"
                                     />

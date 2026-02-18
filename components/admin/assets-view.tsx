@@ -628,8 +628,10 @@ export const AssetsView: React.FC = () => {
                                                                         <input
                                                                             type="number"
                                                                             className="w-20 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded p-1 text-right"
-                                                                            value={editForm.unit_cost}
-                                                                            onChange={e => setEditForm({ ...editForm, unit_cost: Number(e.target.value) })}
+                                                                            value={editForm.unit_cost === 0 ? '' : editForm.unit_cost}
+                                                                            onChange={e => setEditForm({ ...editForm, unit_cost: Number(e.target.value) || 0 })}
+                                                                            onFocus={(e) => e.target.select()}
+                                                                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
                                                                         />
                                                                     )
                                                                 ) : (
@@ -689,8 +691,10 @@ export const AssetsView: React.FC = () => {
                                                                             <input
                                                                                 type="number"
                                                                                 className="w-16 text-[10px] bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded p-1 text-center font-bold"
-                                                                                value={vEdit?.stock || 0}
-                                                                                onChange={e => updateVariantEdit(variant.id, 'stock', Number(e.target.value))}
+                                                                                value={(vEdit?.stock === 0 || vEdit?.stock === undefined) ? '' : vEdit.stock}
+                                                                                onChange={e => updateVariantEdit(variant.id, 'stock', Number(e.target.value) || 0)}
+                                                                                onFocus={(e) => e.target.select()}
+                                                                                onWheel={(e) => (e.target as HTMLInputElement).blur()}
                                                                             />
                                                                         ) : (
                                                                             <span className={`text-[10px] font-mono font-bold ${variant.stock <= 2 ? 'text-red-500 underline decoration-dotted' : 'text-stone-500'}`}>{variant.stock}</span>
@@ -701,8 +705,10 @@ export const AssetsView: React.FC = () => {
                                                                             <input
                                                                                 type="number"
                                                                                 className="w-20 text-[10px] bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded p-1 text-right"
-                                                                                value={vEdit?.unit_cost || 0}
-                                                                                onChange={e => updateVariantEdit(variant.id, 'unit_cost', Number(e.target.value))}
+                                                                                value={(vEdit?.unit_cost === 0 || vEdit?.unit_cost === undefined) ? '' : vEdit.unit_cost}
+                                                                                onChange={e => updateVariantEdit(variant.id, 'unit_cost', Number(e.target.value) || 0)}
+                                                                                onFocus={(e) => e.target.select()}
+                                                                                onWheel={(e) => (e.target as HTMLInputElement).blur()}
                                                                             />
                                                                         ) : (
                                                                             <span className="text-[10px] font-mono text-stone-400">{formatCurrency(variant.unit_cost || 0)}</span>
