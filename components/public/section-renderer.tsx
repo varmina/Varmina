@@ -227,7 +227,7 @@ const CatalogSection: React.FC<{ config: Record<string, any> }> = ({ config }) =
             </div>
 
             {/* Product Detail Modal */}
-            <Modal isOpen={!!selectedProduct} onClose={handleCloseProduct} size="xl">
+            <Modal isOpen={!!selectedProduct} onClose={handleCloseProduct} showCloseButton={false} size="xl">
                 {selectedProduct && <ProductDetail product={selectedProduct} onClose={handleCloseProduct} currency={currency} />}
             </Modal>
 
@@ -321,7 +321,7 @@ const FeaturedSection: React.FC<{ config: Record<string, any> }> = ({ config }) 
                     <ProductCard key={product.id} product={product} layout="grid" currency={currency} onClick={() => setSelectedProduct(product)} />
                 ))}
             </div>
-            <Modal isOpen={!!selectedProduct} onClose={() => { setSelectedProduct(null); window.history.pushState(null, '', '/'); }} size="xl">
+            <Modal isOpen={!!selectedProduct} onClose={() => { setSelectedProduct(null); window.history.pushState(null, '', '/'); }} showCloseButton={false} size="xl">
                 {selectedProduct && <ProductDetail product={selectedProduct} onClose={() => { setSelectedProduct(null); window.history.pushState(null, '', '/'); }} currency={currency} />}
             </Modal>
         </div>
