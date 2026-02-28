@@ -113,16 +113,16 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
             </main>
 
             {/* Footer */}
-            <footer className="relative border-t border-stone-100 dark:border-stone-800 py-20 px-6 bg-white dark:bg-[#0A0A0A]">
-                <div className="max-w-7xl mx-auto flex flex-col items-center gap-10">
-                    <div className="premium-divider w-16" />
+            <footer className="relative border-t border-stone-100 dark:border-stone-800 py-12 md:py-20 px-6 bg-white dark:bg-[#0A0A0A]">
+                <div className="max-w-7xl mx-auto flex flex-col items-center gap-8 md:gap-10">
+                    <div className="premium-divider w-12 md:w-16" />
 
-                    <h3 className="font-serif text-xl tracking-[0.4em] text-stone-300 dark:text-stone-700 uppercase select-none">
+                    <h3 className="font-serif text-lg md:text-xl tracking-[0.3em] md:tracking-[0.4em] text-stone-300 dark:text-stone-700 uppercase select-none">
                         {settings?.brand_name || APP_NAME}
                     </h3>
 
                     {/* Social Links */}
-                    <div className="flex items-center gap-8">
+                    <div className="flex items-center gap-6 md:gap-8 flex-wrap justify-center">
                         {settings?.instagram_url && (
                             <a
                                 href={settings.instagram_url}
@@ -146,9 +146,9 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
                     </div>
 
                     {/* Copyright */}
-                    <div className="flex flex-col items-center gap-3 pt-4">
+                    <div className="flex flex-col items-center gap-2 md:gap-3 pt-2 md:pt-4">
                         <Link href="/admin">
-                            <p className="text-[9px] text-stone-400 uppercase tracking-[0.4em] font-light cursor-pointer hover:text-stone-600 transition-colors">
+                            <p className="text-[9px] text-stone-400 uppercase tracking-[0.3em] md:tracking-[0.4em] font-light cursor-pointer hover:text-stone-600 transition-colors">
                                 &copy; {year} {settings?.brand_name || APP_NAME}
                             </p>
                         </Link>

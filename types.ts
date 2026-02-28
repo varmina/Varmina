@@ -64,19 +64,11 @@ export interface InternalAsset {
     updated_at: string;
 }
 
-export type SortOption = 'newest' | 'price_asc' | 'price_desc';
-
-export interface FilterState {
-    search: string;
-    minPrice: number;
-    maxPrice: number;
-    status: ProductStatus | 'All';
-    sort: SortOption;
-}
 
 export interface ProductAttribute {
     id: string;
-    type: 'category' | 'collection' | 'asset_category';
+    type: 'category' | 'collection' | 'asset_category' | 'erp_category';
     name: string;
+    slug: string;
     created_at: string;
 }

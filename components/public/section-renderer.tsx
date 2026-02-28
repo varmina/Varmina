@@ -24,28 +24,34 @@ const HeroSection: React.FC<{ config: Record<string, any> }> = ({ config }) => {
 
     if (imageUrl) {
         return (
-            <div className="relative w-full h-[60vh] md:h-[80vh] min-h-[400px] overflow-hidden group">
-                <img src={imageUrl} alt={title || 'Hero'} className="w-full h-full object-cover transition-transform duration-[20s] ease-linear group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-stone-900/60 flex flex-col items-center justify-center text-center p-6 md:p-12">
+            <div className="relative w-full h-[70vh] md:h-[85vh] min-h-[400px] overflow-hidden group">
+                <img
+                    src={imageUrl}
+                    alt={title || 'Hero'}
+                    className="w-full h-full object-cover transition-transform duration-[20s] ease-linear group-hover:scale-110"
+                    loading="eager"
+                    fetchPriority="high"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/10 to-stone-900/70 flex flex-col items-center justify-center text-center p-6 md:p-12">
                     <div className="max-w-4xl space-y-6 animate-fade-in-up">
                         {title && (
-                            <h1 className="font-serif text-4xl md:text-7xl text-white drop-shadow-2xl tracking-[0.25em] uppercase leading-tight font-light">{title}</h1>
+                            <h1 className="font-serif text-3xl sm:text-5xl md:text-7xl text-white drop-shadow-2xl tracking-[0.2em] md:tracking-[0.25em] uppercase leading-tight font-light">{title}</h1>
                         )}
                         {subtitle && (
-                            <div className="flex flex-col items-center gap-6">
-                                <div className="w-12 h-[1px] bg-gold-400/60" />
-                                <p className="font-sans text-xs md:text-sm text-white/90 max-w-xl drop-shadow-md tracking-[0.4em] uppercase font-bold">{subtitle}</p>
-                                <div className="w-12 h-[1px] bg-gold-400/60" />
+                            <div className="flex flex-col items-center gap-4 md:gap-6">
+                                <div className="w-10 md:w-12 h-[1px] bg-gold-400/60" />
+                                <p className="font-sans text-[10px] md:text-sm text-white/90 max-w-xl drop-shadow-md tracking-[0.3em] md:tracking-[0.4em] uppercase font-bold">{subtitle}</p>
+                                <div className="w-10 md:w-12 h-[1px] bg-gold-400/60" />
                             </div>
                         )}
                         {ctaText && (
-                            <a href={ctaLink} className="inline-block mt-4 px-8 py-3 bg-white/10 backdrop-blur border border-white/30 text-white text-xs uppercase tracking-[0.3em] font-bold hover:bg-white hover:text-stone-900 transition-all duration-300">
+                            <a href={ctaLink} className="inline-block mt-4 px-6 md:px-8 py-2.5 md:py-3 bg-white/10 backdrop-blur border border-white/30 text-white text-[10px] md:text-xs uppercase tracking-[0.3em] font-bold hover:bg-white hover:text-stone-900 transition-all duration-300">
                                 {ctaText}
                             </a>
                         )}
                     </div>
-                    <div className="absolute bottom-12 left-1/2 -translate-x-1/2 animate-bounce opacity-50">
-                        <div className="w-[1px] h-12 bg-white/60" />
+                    <div className="absolute bottom-8 md:bottom-12 left-1/2 -translate-x-1/2 animate-bounce opacity-40">
+                        <div className="w-[1px] h-8 md:h-12 bg-white/60" />
                     </div>
                 </div>
             </div>
@@ -53,10 +59,10 @@ const HeroSection: React.FC<{ config: Record<string, any> }> = ({ config }) => {
     }
 
     return (
-        <div className="w-full py-20 md:py-32 bg-gradient-to-br from-stone-50 to-stone-100 dark:from-stone-950 dark:to-stone-900 flex flex-col items-center justify-center text-center px-6 border-b border-stone-100 dark:border-stone-800">
+        <div className="w-full py-16 md:py-32 bg-gradient-to-br from-stone-50 to-stone-100 dark:from-stone-950 dark:to-stone-900 flex flex-col items-center justify-center text-center px-6 border-b border-stone-100 dark:border-stone-800">
             <div className="max-w-3xl space-y-4 animate-fade-in-up">
-                {title && <h1 className="font-serif text-3xl md:text-5xl text-stone-900 dark:text-white tracking-[0.2em] uppercase">{title}</h1>}
-                {subtitle && <p className="text-[10px] md:text-xs font-bold text-gold-600 dark:text-gold-400 uppercase tracking-[0.3em]">{subtitle}</p>}
+                {title && <h1 className="font-serif text-2xl sm:text-3xl md:text-5xl text-stone-900 dark:text-white tracking-[0.15em] md:tracking-[0.2em] uppercase">{title}</h1>}
+                {subtitle && <p className="text-[10px] md:text-xs font-bold text-gold-600 dark:text-gold-400 uppercase tracking-[0.2em] md:tracking-[0.3em]">{subtitle}</p>}
                 {!title && !subtitle && (
                     <h1 className="font-serif text-2xl md:text-4xl tracking-[0.2em] text-stone-300 dark:text-stone-700 uppercase italic">Varmina</h1>
                 )}
@@ -208,7 +214,7 @@ const CatalogSection: React.FC<{ config: Record<string, any> }> = ({ config }) =
             )}
 
             {/* Product Grid */}
-            <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-12">
+            <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 py-6 md:py-12">
                 {loading ? (
                     <div className={`grid ${gridClass} gap-4 md:gap-6`}>
                         {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-xl" />)}
@@ -309,7 +315,7 @@ const FeaturedSection: React.FC<{ config: Record<string, any> }> = ({ config }) 
     if (filteredProducts.length === 0) return null;
 
     return (
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-20">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 py-10 md:py-20">
             {config.title && (
                 <div className="text-center mb-10">
                     <h2 className="font-serif text-2xl md:text-4xl tracking-[0.2em] text-stone-900 dark:text-white uppercase">{config.title}</h2>
@@ -419,12 +425,15 @@ const SECTION_COMPONENTS: Record<string, React.FC<{ config: Record<string, any> 
 
 // ─── Main Section Renderer ────────────────────────────────────────────
 
-export const SectionRenderer: React.FC = () => {
-    const [sections, setSections] = useState<PageSection[]>([]);
-    const [loading, setLoading] = useState(true);
+export const SectionRenderer: React.FC<{ prefetchedSections?: PageSection[] }> = ({ prefetchedSections }) => {
+    const [sections, setSections] = useState<PageSection[]>(prefetchedSections || []);
+    const [loading, setLoading] = useState(!prefetchedSections);
     const [error, setError] = useState(false);
 
     useEffect(() => {
+        // Skip fetch if sections were passed as props
+        if (prefetchedSections) return;
+
         const fetchSections = async () => {
             try {
                 const data = await pageLayoutService.getSections('home');
@@ -437,7 +446,7 @@ export const SectionRenderer: React.FC = () => {
             }
         };
         fetchSections();
-    }, []);
+    }, [prefetchedSections]);
 
     if (loading) {
         return (

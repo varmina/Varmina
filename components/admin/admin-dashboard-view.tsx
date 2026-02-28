@@ -15,6 +15,7 @@ import { AssetsView } from '@/components/admin/assets-view';
 import { ProductBulkImport } from '@/components/admin/product-bulk-import';
 import { OrdersView } from '@/components/admin/orders-view';
 import { SectionManager } from '@/components/admin/section-manager';
+import { AdminHomeView } from '@/components/admin/admin-home-view';
 import { useInventory } from '@/hooks/use-inventory';
 
 // --- MAIN ADMIN COMPONENT ---
@@ -128,6 +129,8 @@ export const AdminDashboardView = () => {
 
     const renderContent = () => {
         switch (activeAdminTab) {
+            case 'overview':
+                return <AdminHomeView />;
             case 'analytics':
                 return <AnalyticsDashboard />;
             case 'settings':

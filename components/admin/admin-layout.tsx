@@ -6,7 +6,7 @@ import { useStore } from '@/context/StoreContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
 import { APP_NAME } from '@/lib/constants';
-import { LayoutGrid, Sun, Moon, Store, LogOut, Award, BarChart3, DollarSign, Truck, ShoppingCart, Calculator, Paintbrush } from 'lucide-react';
+import { LayoutGrid, Sun, Moon, Store, LogOut, Award, BarChart3, DollarSign, Truck, ShoppingCart, Calculator, Paintbrush, Home, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ToastContainer } from '@/components/ui/toast-container';
 
 export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -23,6 +23,7 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
     } = useStore();
     const { signOut } = useAuth();
     const router = useRouter();
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
 
     const handleLogout = async () => {
         try {
@@ -43,6 +44,13 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
 
                 {/* Logo & Indicator */}
                 <div className="flex items-center gap-4 md:gap-8">
+                    <button
+                        onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                        className="hidden lg:flex p-2 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full text-stone-600 dark:text-stone-400 transition-colors"
+                        title="Alternar Menú"
+                    >
+                        {isSidebarCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+                    </button>
                     <h1
                         className="font-serif text-lg md:text-2xl tracking-widest text-stone-900 dark:text-gold-200 cursor-pointer select-none"
                         onClick={() => router.push('/')}
@@ -75,81 +83,99 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
             <div className="flex flex-1 min-h-[calc(100vh-64px)] overflow-hidden">
 
                 {/* Desktop Sidebar */}
-                <aside className="w-72 border-r border-stone-100 dark:border-stone-800 bg-white dark:bg-[#0A0A0A] hidden lg:flex flex-col justify-between transition-colors">
-                    <div className="p-8">
-                        <div className="text-[10px] font-bold text-stone-300 uppercase tracking-[0.2em] mb-8">Administración</div>
+                <aside className={`${isSidebarCollapsed ? 'w-20' : 'w-72'} border-r border-stone-100 dark:border-stone-800 bg-white dark:bg-[#0A0A0A] hidden lg:flex flex-col justify-between transition-all duration-300`}>
+                    <div className={`p-4 ${isSidebarCollapsed ? 'mt-4' : 'p-8'}`}>
+                        {!isSidebarCollapsed && <div className="text-[10px] font-bold text-stone-300 uppercase tracking-[0.2em] mb-8">Administración</div>}
                         <nav>
                             <ul className="space-y-4">
                                 <li>
                                     <button
+                                        onClick={() => setActiveAdminTab('overview')}
+                                        className={`w-full flex items-center ${isSidebarCollapsed ? 'justify-center p-3' : 'gap-4 px-4 py-3'} rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${activeAdminTab === 'overview' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
+                                        title={isSidebarCollapsed ? "Inicio" : ""}
+                                    >
+                                        <Home className={`w-4 h-4 ${activeAdminTab === 'overview' ? 'text-gold-400' : ''}`} />
+                                        {!isSidebarCollapsed && <span>Inicio</span>}
+                                    </button>
+                                </li>
+                                <li>
+                                    <button
                                         onClick={() => setActiveAdminTab('inventory')}
-                                        className={`w-full flex items-center gap-4 px-4 py-3 rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${activeAdminTab === 'inventory' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
+                                        className={`w-full flex items-center ${isSidebarCollapsed ? 'justify-center p-3' : 'gap-4 px-4 py-3'} rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${activeAdminTab === 'inventory' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
+                                        title={isSidebarCollapsed ? "Inventario" : ""}
                                     >
                                         <LayoutGrid className={`w-4 h-4 ${activeAdminTab === 'inventory' ? 'text-gold-400' : ''}`} />
-                                        <span>Inventario</span>
+                                        {!isSidebarCollapsed && <span>Inventario</span>}
                                     </button>
                                 </li>
                                 <li>
                                     <button
                                         onClick={() => setActiveAdminTab('analytics')}
-                                        className={`w-full flex items-center gap-4 px-4 py-3 rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${activeAdminTab === 'analytics' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
+                                        className={`w-full flex items-center ${isSidebarCollapsed ? 'justify-center p-3' : 'gap-4 px-4 py-3'} rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${activeAdminTab === 'analytics' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
+                                        title={isSidebarCollapsed ? "Analítica" : ""}
                                     >
                                         <BarChart3 className={`w-4 h-4 ${activeAdminTab === 'analytics' ? 'text-gold-400' : ''}`} />
-                                        <span>Analítica</span>
+                                        {!isSidebarCollapsed && <span>Analítica</span>}
                                     </button>
                                 </li>
                                 <li>
                                     <button
                                         onClick={() => setActiveAdminTab('finance')}
-                                        className={`w-full flex items-center gap-4 px-4 py-3 rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${activeAdminTab === 'finance' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
+                                        className={`w-full flex items-center ${isSidebarCollapsed ? 'justify-center p-3' : 'gap-4 px-4 py-3'} rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${activeAdminTab === 'finance' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
+                                        title={isSidebarCollapsed ? "Finanzas" : ""}
                                     >
                                         <DollarSign className={`w-4 h-4 ${activeAdminTab === 'finance' ? 'text-gold-400' : ''}`} />
-                                        <span>Finanzas</span>
+                                        {!isSidebarCollapsed && <span>Finanzas</span>}
                                     </button>
                                 </li>
                                 <li>
                                     <button
                                         onClick={() => setActiveAdminTab('orders')}
-                                        className={`w-full flex items-center gap-4 px-4 py-3 rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${activeAdminTab === 'orders' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
+                                        className={`w-full flex items-center ${isSidebarCollapsed ? 'justify-center p-3' : 'gap-4 px-4 py-3'} rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${activeAdminTab === 'orders' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
+                                        title={isSidebarCollapsed ? "Ventas" : ""}
                                     >
                                         <ShoppingCart className={`w-4 h-4 ${activeAdminTab === 'orders' ? 'text-gold-400' : ''}`} />
-                                        <span>Ventas</span>
+                                        {!isSidebarCollapsed && <span>Ventas</span>}
                                     </button>
                                 </li>
                                 <li>
                                     <button
                                         onClick={() => setActiveAdminTab('erp')}
-                                        className={`w-full flex items-center gap-4 px-4 py-3 rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${activeAdminTab === 'erp' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
+                                        className={`w-full flex items-center ${isSidebarCollapsed ? 'justify-center p-3' : 'gap-4 px-4 py-3'} rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${activeAdminTab === 'erp' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
+                                        title={isSidebarCollapsed ? "Logística" : ""}
                                     >
                                         <Truck className={`w-4 h-4 ${activeAdminTab === 'erp' ? 'text-gold-400' : ''}`} />
-                                        <span>Logística</span>
+                                        {!isSidebarCollapsed && <span>Logística</span>}
                                     </button>
                                 </li>
                                 <li>
                                     <button
                                         onClick={() => setActiveAdminTab('settings')}
-                                        className={`w-full flex items-center gap-4 px-4 py-3 rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${activeAdminTab === 'settings' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
+                                        className={`w-full flex items-center ${isSidebarCollapsed ? 'justify-center p-3' : 'gap-4 px-4 py-3'} rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${activeAdminTab === 'settings' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
+                                        title={isSidebarCollapsed ? "Configuración" : ""}
                                     >
                                         <Award className={`w-4 h-4 ${activeAdminTab === 'settings' ? 'text-gold-400' : ''}`} />
-                                        <span>Configuración</span>
+                                        {!isSidebarCollapsed && <span>Configuración</span>}
                                     </button>
                                 </li>
                                 <li>
                                     <button
                                         onClick={() => setActiveAdminTab('designer')}
-                                        className={`w-full flex items-center gap-4 px-4 py-3 rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${activeAdminTab === 'designer' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
+                                        className={`w-full flex items-center ${isSidebarCollapsed ? 'justify-center p-3' : 'gap-4 px-4 py-3'} rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${activeAdminTab === 'designer' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
+                                        title={isSidebarCollapsed ? "Diseñador" : ""}
                                     >
                                         <Paintbrush className={`w-4 h-4 ${activeAdminTab === 'designer' ? 'text-gold-400' : ''}`} />
-                                        <span>Diseñador</span>
+                                        {!isSidebarCollapsed && <span>Diseñador</span>}
                                     </button>
                                 </li>
                                 <li>
                                     <button
                                         onClick={() => window.open('/', '_blank')}
-                                        className="w-full flex items-center gap-4 px-4 py-3 text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-50 dark:hover:bg-stone-900 rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all group"
+                                        className={`w-full flex items-center ${isSidebarCollapsed ? 'justify-center p-3' : 'gap-4 px-4 py-3'} text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-50 dark:hover:bg-stone-900 rounded-sm text-[11px] font-bold uppercase tracking-[0.15em] transition-all group`}
+                                        title={isSidebarCollapsed ? "Ver Tienda" : ""}
                                     >
                                         <Store className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                                        <span>Ver Tienda</span>
+                                        {!isSidebarCollapsed && <span>Ver Tienda</span>}
                                     </button>
                                 </li>
                             </ul>
@@ -165,6 +191,15 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                 {/* Mobile Bottom Nav */}
                 <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-t border-stone-200 dark:border-stone-800 lg:hidden px-1">
                     <ul className="flex items-center justify-around h-16 max-w-md mx-auto">
+                        <li>
+                            <button
+                                onClick={() => setActiveAdminTab('overview')}
+                                className={`flex flex-col items-center gap-1.5 p-2 transition-all ${activeAdminTab === 'overview' ? 'text-stone-900 dark:text-gold-400 scale-110' : 'text-stone-400'}`}
+                            >
+                                <Home className="w-5 h-5" />
+                                <span className="text-[8px] font-bold uppercase tracking-[0.1em]">Inicio</span>
+                            </button>
+                        </li>
                         <li>
                             <button
                                 onClick={() => setActiveAdminTab('inventory')}
@@ -190,15 +225,6 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                             >
                                 <DollarSign className="w-5 h-5" />
                                 <span className="text-[8px] font-bold uppercase tracking-[0.1em]">Finanzas</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                onClick={() => setActiveAdminTab('erp')}
-                                className={`flex flex-col items-center gap-1.5 p-2 transition-all ${activeAdminTab === 'erp' ? 'text-stone-900 dark:text-gold-400 scale-110' : 'text-stone-400'}`}
-                            >
-                                <Truck className="w-5 h-5" />
-                                <span className="text-[8px] font-bold uppercase tracking-[0.1em]">Op</span>
                             </button>
                         </li>
                         <li className="relative">
@@ -230,6 +256,7 @@ const MenuButton = ({ activeAdminTab, setActiveAdminTab, toggleDarkMode, handleL
 
     const menuItems = [
         { id: 'analytics', label: 'Analítica', icon: BarChart3 },
+        { id: 'erp', label: 'Logística', icon: Truck },
         { id: 'designer', label: 'Diseñador', icon: Paintbrush },
         { id: 'settings', label: 'Ajustes', icon: Award },
     ];

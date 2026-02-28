@@ -6,6 +6,10 @@ import { createClient } from '../utils/supabase/client';
 
 const supabase = createClient();
 
+// Cache durations
+const CACHE_MIN_INTERVAL = 5000;       // Min 5s between fetches
+const REALTIME_DEBOUNCE_MS = 2000;     // Debounce realtime events by 2s
+
 interface StoreContextType {
     products: Product[];
     loading: boolean;
@@ -19,8 +23,8 @@ interface StoreContextType {
     removeToast: (id: string) => void;
     settings: BrandSettings | null;
     refreshSettings: () => Promise<void>;
-    activeAdminTab: 'inventory' | 'analytics' | 'finance' | 'settings' | 'erp' | 'orders' | 'designer';
-    setActiveAdminTab: (tab: 'inventory' | 'analytics' | 'finance' | 'settings' | 'erp' | 'orders' | 'designer') => void;
+    activeAdminTab: 'overview' | 'inventory' | 'analytics' | 'finance' | 'settings' | 'erp' | 'orders' | 'designer';
+    setActiveAdminTab: (tab: 'overview' | 'inventory' | 'analytics' | 'finance' | 'settings' | 'erp' | 'orders' | 'designer') => void;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -46,9 +50,15 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const [currency, setCurrency] = useState<'CLP' | 'USD'>('CLP');
     const [toasts, setToasts] = useState<ToastMessage[]>([]);
     const [settings, setSettings] = useState<BrandSettings | null>(null);
-    const [activeAdminTab, setActiveAdminTab] = useState<'inventory' | 'analytics' | 'finance' | 'settings' | 'erp' | 'orders' | 'designer'>('inventory');
+    const [activeAdminTab, setActiveAdminTab] = useState<'overview' | 'inventory' | 'analytics' | 'finance' | 'settings' | 'erp' | 'orders' | 'designer'>('overview');
 
-    const lastRefreshRef = useRef(0);
+    // Cache & debounce refs
+    const lastProductsFetch = useRef(0);
+    const lastAttrFetch = useRef(0);
+    const lastSettingsFetch = useRef(0);
+    const productDebounceTimer = useRef<any>(null);
+    const attrDebounceTimer = useRef<any>(null);
+    const settingsDebounceTimer = useRef<any>(null);
 
     // UI Helpers
     const removeToast = useCallback((id: string) => {
@@ -69,8 +79,11 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         });
     }, [addToast]);
 
-    // Data Fetching
+    // Data Fetching with cache guard
     const refreshSettings = useCallback(async () => {
+        const now = Date.now();
+        if (now - lastSettingsFetch.current < CACHE_MIN_INTERVAL) return;
+        lastSettingsFetch.current = now;
         try {
             const data = await withTimeout(settingsService.getSettings(), 5000, null);
             if (data) setSettings(data);
@@ -80,6 +93,9 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }, []);
 
     const refreshAttributes = useCallback(async () => {
+        const now = Date.now();
+        if (now - lastAttrFetch.current < CACHE_MIN_INTERVAL) return;
+        lastAttrFetch.current = now;
         try {
             const { data } = await supabase.from('product_attributes').select('*').order('name');
             if (data) setAttributes(data);
@@ -89,11 +105,14 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }, []);
 
     const refreshProducts = useCallback(async (force = false, silent = false) => {
+        const now = Date.now();
+        if (!force && now - lastProductsFetch.current < CACHE_MIN_INTERVAL) return;
+        lastProductsFetch.current = now;
+
         if (!silent) setDataLoading(true);
         try {
             const data = await withTimeout(supabaseProductService.getAll(), 15000, []);
             setProducts(data);
-            lastRefreshRef.current = Date.now();
         } catch (e) {
             console.error('Products Fetch Fail:', e);
             if (!silent) addToast('error', 'Error al cargar productos');
@@ -102,35 +121,60 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         }
     }, [addToast]);
 
-    // REALTIME SUBSCRIPTIONS
+    // Debounced refresh helpers for realtime
+    const debouncedRefreshProducts = useCallback(() => {
+        if (productDebounceTimer.current) clearTimeout(productDebounceTimer.current);
+        productDebounceTimer.current = setTimeout(() => {
+            refreshProducts(true, true);
+        }, REALTIME_DEBOUNCE_MS);
+    }, [refreshProducts]);
+
+    const debouncedRefreshAttributes = useCallback(() => {
+        if (attrDebounceTimer.current) clearTimeout(attrDebounceTimer.current);
+        attrDebounceTimer.current = setTimeout(() => {
+            refreshAttributes();
+        }, REALTIME_DEBOUNCE_MS);
+    }, [refreshAttributes]);
+
+    const debouncedRefreshSettings = useCallback(() => {
+        if (settingsDebounceTimer.current) clearTimeout(settingsDebounceTimer.current);
+        settingsDebounceTimer.current = setTimeout(() => {
+            refreshSettings();
+        }, REALTIME_DEBOUNCE_MS);
+    }, [refreshSettings]);
+
+    // REALTIME SUBSCRIPTIONS (debounced)
     useEffect(() => {
         const productSub = supabase
             .channel('public:products')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
-                refreshProducts(true, true);
+                debouncedRefreshProducts();
             })
             .subscribe();
 
         const attrSub = supabase
             .channel('public:product_attributes')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'product_attributes' }, () => {
-                refreshAttributes();
+                debouncedRefreshAttributes();
             })
             .subscribe();
 
         const settingsSub = supabase
             .channel('public:brand_settings')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'brand_settings' }, () => {
-                refreshSettings();
+                debouncedRefreshSettings();
             })
             .subscribe();
 
         return () => {
+            if (productDebounceTimer.current) clearTimeout(productDebounceTimer.current);
+            if (attrDebounceTimer.current) clearTimeout(attrDebounceTimer.current);
+            if (settingsDebounceTimer.current) clearTimeout(settingsDebounceTimer.current);
             supabase.removeChannel(productSub);
             supabase.removeChannel(attrSub);
             supabase.removeChannel(settingsSub);
         };
-    }, [refreshProducts, refreshAttributes, refreshSettings]);
+    }, [debouncedRefreshProducts, debouncedRefreshAttributes, debouncedRefreshSettings]);
 
     // Initial Data Load
     useEffect(() => {
