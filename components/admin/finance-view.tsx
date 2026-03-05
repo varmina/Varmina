@@ -56,7 +56,9 @@ export const FinanceView: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [viewType, setViewType] = useState<'all' | 'income' | 'expense'>('all');
-    const [dateFilter, setDateFilter] = useState<'day' | 'week' | 'month' | 'year' | 'all'>('month');
+    const [dateFilter, setDateFilter] = useState<'day' | 'week' | 'month' | 'year' | 'all' | 'custom'>('month');
+    const [customStartDate, setCustomStartDate] = useState(getLocalISODate());
+    const [customEndDate, setCustomEndDate] = useState(getLocalISODate());
 
     interface BulkPreviewItem {
         id: number;
@@ -74,7 +76,7 @@ export const FinanceView: React.FC = () => {
 
     useEffect(() => {
         loadData();
-    }, [dateFilter]);
+    }, [dateFilter, customStartDate, customEndDate]);
 
     const loadData = async () => {
         try {
@@ -101,6 +103,9 @@ export const FinanceView: React.FC = () => {
             } else if (dateFilter === 'year') {
                 startDate = `${now.getFullYear()}-01-01`;
                 endDate = `${now.getFullYear()}-12-31`;
+            } else if (dateFilter === 'custom') {
+                startDate = customStartDate;
+                endDate = customEndDate;
             }
 
             const [txs, bal] = await Promise.all([
@@ -223,7 +228,8 @@ export const FinanceView: React.FC = () => {
         'week': 'Esta Semana',
         'month': 'Este Mes',
         'year': 'Este Año',
-        'all': 'Histórico Total'
+        'all': 'Histórico Total',
+        'custom': `${customStartDate.split('-').reverse().join('/')} al ${customEndDate.split('-').reverse().join('/')}`
     }[dateFilter];
 
     const filteredTransactions = transactions.filter(tx => {
@@ -322,10 +328,12 @@ export const FinanceView: React.FC = () => {
             </div>
 
             {/* List Header & Controls */}
-            <div className="flex flex-col gap-6">
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-stone-50 dark:bg-stone-950/50 p-3 md:p-4 rounded-xl border border-stone-200 dark:border-stone-800">
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
-                        <div className="relative flex-1">
+            <div className="flex flex-col gap-4">
+                <div className="bg-stone-50 dark:bg-stone-950/50 p-4 rounded-xl border border-stone-200 dark:border-stone-800 space-y-4">
+
+                    {/* Top Row: Search and Date Filter Buttons */}
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div className="relative flex-1 max-w-md">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
                             <input
                                 type="text"
@@ -335,19 +343,16 @@ export const FinanceView: React.FC = () => {
                                 className="w-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-lg pl-10 pr-4 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-gold-400 dark:text-white placeholder:text-stone-400 transition-all font-medium"
                             />
                         </div>
-                        <div className="flex bg-white dark:bg-stone-900 p-1 rounded-lg border border-stone-200 dark:border-stone-800 shrink-0 hidden sm:flex">
-                            {/* Filters removed as requested */}
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-2 px-2 pt-2 lg:pt-0 scrollbar-hide shrink-0 w-full lg:w-auto">
-                        <div className="flex items-center gap-1 border-r border-stone-200 dark:border-stone-800 pr-2 mr-1">
-                            <CalendarDays className="w-3.5 h-3.5 text-stone-400 mr-1" />
+
+                        <div className="flex items-center gap-1 overflow-x-auto pb-2 lg:pb-0 scrollbar-hide shrink-0">
+                            <CalendarDays className="w-4 h-4 text-stone-400 mr-2 shrink-0" />
                             {[
                                 { label: 'DÍA', value: 'day' },
                                 { label: 'SEM', value: 'week' },
                                 { label: 'MES', value: 'month' },
                                 { label: 'AÑO', value: 'year' },
                                 { label: 'TODO', value: 'all' },
+                                { label: 'RANGO', value: 'custom' },
                             ].map((item) => (
                                 <button
                                     key={`date-${item.value}`}
@@ -361,42 +366,69 @@ export const FinanceView: React.FC = () => {
                                 </button>
                             ))}
                         </div>
-                        <div className="p-2 bg-white dark:bg-stone-900 rounded-lg border border-stone-200 dark:border-stone-800 shrink-0">
-                            <Filter className="w-3.5 h-3.5 text-stone-400" />
-                        </div>
-                        {[
-                            { label: 'TODO', value: 'All', type: 'all' },
-                            { label: 'INGRESOS', value: 'All', type: 'income' },
-                            { label: 'GASTOS', value: 'All', type: 'expense' },
-                            ...[...CATEGORIES.income, ...CATEGORIES.expense].map(c => ({ label: c.toUpperCase(), value: c, type: 'all' }))
-                        ].map((item, idx) => {
-                            const isActive = (item.label === 'TODO' && viewType === 'all' && selectedCategory === 'All') ||
-                                (item.label === 'INGRESOS' && viewType === 'income' && selectedCategory === 'All') ||
-                                (item.label === 'GASTOS' && viewType === 'expense' && selectedCategory === 'All') ||
-                                (selectedCategory === item.value && item.value !== 'All');
+                    </div>
 
-                            return (
-                                <button
-                                    key={`${item.label}-${idx}`}
-                                    onClick={() => {
-                                        if (item.label === 'TODO') { setViewType('all'); setSelectedCategory('All'); }
-                                        else if (item.label === 'INGRESOS') { setViewType('income'); setSelectedCategory('All'); }
-                                        else if (item.label === 'GASTOS') { setViewType('expense'); setSelectedCategory('All'); }
-                                        else {
-                                            setSelectedCategory(item.value);
-                                            // Optional: infer type if needed, or keep 'all' to show in global context
-                                            setViewType('all');
-                                        }
-                                    }}
-                                    className={`px-4 py-2 rounded-full text-[9px] font-bold whitespace-nowrap transition-all border ${isActive
-                                        ? 'bg-stone-900 text-white border-stone-900 dark:bg-white dark:text-stone-900'
-                                        : 'bg-white dark:bg-stone-900 text-stone-400 border-stone-200 dark:border-stone-800 hover:border-stone-300'
-                                        }`}
-                                >
-                                    {item.label}
-                                </button>
-                            );
-                        })}
+                    {/* Custom Date Range Row */}
+                    {dateFilter === 'custom' && (
+                        <div className="flex items-center gap-4 bg-white dark:bg-stone-900 p-3 rounded-lg border border-stone-200 dark:border-stone-800 animate-in fade-in slide-in-from-top-2 w-fit">
+                            <div className="flex items-center gap-2">
+                                <label className="text-[10px] font-bold uppercase tracking-widest text-stone-500">Desde:</label>
+                                <input
+                                    type="date"
+                                    value={customStartDate}
+                                    onChange={(e) => setCustomStartDate(e.target.value)}
+                                    className="bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-700 rounded p-1.5 text-xs outline-none focus:border-gold-500 text-stone-900 dark:text-white"
+                                />
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <label className="text-[10px] font-bold uppercase tracking-widest text-stone-500">Hasta:</label>
+                                <input
+                                    type="date"
+                                    value={customEndDate}
+                                    onChange={(e) => setCustomEndDate(e.target.value)}
+                                    className="bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-700 rounded p-1.5 text-xs outline-none focus:border-gold-500 text-stone-900 dark:text-white"
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Bottom Row: Category Filters */}
+                    <div className="flex items-center gap-2 overflow-x-auto pb-2 pt-1 scrollbar-hide border-t border-stone-200 dark:border-stone-800">
+                        <Filter className="w-4 h-4 text-stone-400 mr-2 shrink-0 mt-2" />
+                        <div className="flex items-center gap-2 mt-2">
+                            {[
+                                { label: 'TODO', value: 'All', type: 'all' },
+                                { label: 'INGRESOS', value: 'All', type: 'income' },
+                                { label: 'GASTOS', value: 'All', type: 'expense' },
+                                ...[...CATEGORIES.income, ...CATEGORIES.expense].map(c => ({ label: c.toUpperCase(), value: c, type: 'all' }))
+                            ].map((item, idx) => {
+                                const isActive = (item.label === 'TODO' && viewType === 'all' && selectedCategory === 'All') ||
+                                    (item.label === 'INGRESOS' && viewType === 'income' && selectedCategory === 'All') ||
+                                    (item.label === 'GASTOS' && viewType === 'expense' && selectedCategory === 'All') ||
+                                    (selectedCategory === item.value && item.value !== 'All');
+
+                                return (
+                                    <button
+                                        key={`${item.label}-${idx}`}
+                                        onClick={() => {
+                                            if (item.label === 'TODO') { setViewType('all'); setSelectedCategory('All'); }
+                                            else if (item.label === 'INGRESOS') { setViewType('income'); setSelectedCategory('All'); }
+                                            else if (item.label === 'GASTOS') { setViewType('expense'); setSelectedCategory('All'); }
+                                            else {
+                                                setSelectedCategory(item.value);
+                                                setViewType('all');
+                                            }
+                                        }}
+                                        className={`px-3 py-1.5 rounded-full text-[9px] font-bold whitespace-nowrap transition-all border shrink-0 ${isActive
+                                            ? 'bg-stone-900 text-white border-stone-900 dark:bg-white dark:text-stone-900'
+                                            : 'bg-white dark:bg-stone-900 text-stone-400 border-stone-200 dark:border-stone-800 hover:border-stone-300'
+                                            }`}
+                                    >
+                                        {item.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
 
