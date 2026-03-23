@@ -8,7 +8,6 @@ import { useCart } from '@/context/CartContext';
 import { APP_NAME } from '@/lib/constants';
 import { Sun, Moon, ShoppingBag } from 'lucide-react';
 import { CartDrawer } from '@/components/cart/cart-drawer';
-import { ToastContainer } from '@/components/ui/toast-container';
 import { LoadingScreen } from '@/components/ui/loading-screen';
 import { cn } from '@/lib/utils';
 
@@ -160,7 +159,6 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
             </footer>
 
             <CartDrawer />
-            <ToastContainer />
         </div>
     );
 };

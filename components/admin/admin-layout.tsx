@@ -7,7 +7,6 @@ import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
 import { APP_NAME } from '@/lib/constants';
 import { LayoutGrid, Sun, Moon, Store, LogOut, Award, BarChart3, DollarSign, Truck, ShoppingCart, Calculator, Paintbrush, Home, ChevronLeft, ChevronRight } from 'lucide-react';
-import { ToastContainer } from '@/components/ui/toast-container';
 
 export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { darkMode, toggleDarkMode, setDarkMode } = useTheme();
@@ -245,7 +244,6 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                 &copy; {new Date().getFullYear()} {APP_NAME} Admin
             </footer>
 
-            <ToastContainer />
         </div>
     );
 };
