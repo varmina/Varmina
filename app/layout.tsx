@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   keywords: ["joyería de tendencia", "joyas", "collares", "anillos", "aros", "pulseras", "joyería chilena", "Varmina"],
   authors: [{ name: "Varmina Joyas" }],
   creator: "Varmina Joyas",
-  metadataBase: new URL("https://varmina.cl"),
+  metadataBase: new URL("https://varmina.vercel.app"),
   openGraph: {
     type: "website",
     title: "Varmina Joyas — Joyería de Tendencia",
