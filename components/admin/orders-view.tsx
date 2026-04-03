@@ -17,6 +17,11 @@ import { createClient } from '@/utils/supabase/client';
 
 const supabase = createClient();
 
+const getLocalISODate = () => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+};
+
 export const OrdersView: React.FC = () => {
     const { addToast, settings, products: globalProducts, attributes } = useStore();
     const [assets, setAssets] = useState<InternalAsset[]>([]);
@@ -193,7 +198,7 @@ export const OrdersView: React.FC = () => {
                 amount: totalAmount,
                 type: 'income',
                 category: 'Ventas',
-                date: new Date().toISOString().split('T')[0]
+                date: getLocalISODate()
             });
 
             addToast('success', 'Venta registrada y stock actualizado');
@@ -210,8 +215,9 @@ export const OrdersView: React.FC = () => {
         }
     };
 
-    // Filter Products
+    // Filter Products (exclude sold out)
     const filteredProducts = products.filter(p => {
+        if (p.status === ProductStatus.SOLD_OUT) return false;
         const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (p.collections && p.collections.some(c => c.toLowerCase().includes(searchTerm.toLowerCase())));
         const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;

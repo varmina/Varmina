@@ -34,7 +34,7 @@ const supabase = createClient();
 type SortOption = 'name_asc' | 'name_desc' | 'stock_asc' | 'stock_desc' | 'status' | 'category' | 'collection';
 
 export const AssetsView: React.FC = () => {
-    const { addToast, attributes } = useStore();
+    const { addToast, attributes, dataVersion } = useStore();
 
     // TABS
     const [activeTab, setActiveTab] = useState<'internal' | 'store' | 'attributes'>('internal');
@@ -82,7 +82,7 @@ export const AssetsView: React.FC = () => {
         return () => {
             supabase.removeChannel(sub);
         };
-    }, []);
+    }, [dataVersion]);
 
     const resetSelection = () => {
         setSelectedAssetIds([]);
@@ -317,8 +317,8 @@ export const AssetsView: React.FC = () => {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4 md:px-0">
                 <div>
-                    <h2 className="text-xl md:text-2xl font-serif text-stone-900 dark:text-white uppercase tracking-widest">Logística</h2>
-                    <p className="text-stone-500 text-[10px] md:text-sm uppercase tracking-widest">Control de inventario, costos y ubicación física de piezas.</p>
+                    <h1 className="font-serif text-xl md:text-3xl text-stone-900 dark:text-gold-200 tracking-wider mb-1 uppercase">Logística</h1>
+                    <p className="text-stone-400 text-[10px] md:text-xs font-sans tracking-[0.2em] uppercase font-bold">Control de inventario, costos y ubicación física de piezas.</p>
                 </div>
 
                 {activeTab === 'internal' && (

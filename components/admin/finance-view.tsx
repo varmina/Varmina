@@ -36,7 +36,7 @@ const CATEGORIES = {
 };
 
 export const FinanceView: React.FC = () => {
-    const { addToast } = useStore();
+    const { addToast, dataVersion } = useStore();
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [balance, setBalance] = useState({ income: 0, expense: 0, balance: 0 });
     const [loading, setLoading] = useState(true);
@@ -76,7 +76,7 @@ export const FinanceView: React.FC = () => {
 
     useEffect(() => {
         loadData();
-    }, [dateFilter, customStartDate, customEndDate]);
+    }, [dateFilter, customStartDate, customEndDate, dataVersion]);
 
     const loadData = async () => {
         try {
@@ -246,8 +246,8 @@ export const FinanceView: React.FC = () => {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4 md:px-0">
                 <div>
-                    <h2 className="text-xl md:text-3xl font-serif text-stone-900 dark:text-white uppercase tracking-wider">Finanzas</h2>
-                    <p className="text-stone-500 text-[10px] md:text-sm uppercase tracking-widest">Resumen de ingresos y egresos</p>
+                    <h1 className="font-serif text-xl md:text-3xl text-stone-900 dark:text-gold-200 tracking-wider mb-1 uppercase">Finanzas</h1>
+                    <p className="text-stone-400 text-[10px] md:text-xs font-sans tracking-[0.2em] uppercase font-bold">Resumen de ingresos y egresos</p>
                 </div>
                 <div className="flex flex-wrap gap-3">
                     <Button

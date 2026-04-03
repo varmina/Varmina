@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 export const AdminHomeView: React.FC = () => {
-    const { products, setActiveAdminTab } = useStore();
+    const { products, setActiveAdminTab, dataVersion } = useStore();
 
     const [balance, setBalance] = useState({ income: 0, expense: 0, balance: 0 });
     const [todayBalance, setTodayBalance] = useState({ income: 0, expense: 0, balance: 0 });
@@ -41,24 +41,19 @@ export const AdminHomeView: React.FC = () => {
     const CACHE_TTL = 30000; // 30s
 
     useEffect(() => {
+        // Invalidate cache when dataVersion changes (realtime update)
+        if (cacheRef.current) {
+            cacheRef.current = null;
+        }
         const load = async () => {
-            // Use cached data if fresh enough
-            if (cacheRef.current && Date.now() - cacheRef.current.timestamp < CACHE_TTL) {
-                const { monthBal, dayBal, recent } = cacheRef.current.data;
-                setBalance(monthBal);
-                setTodayBalance(dayBal);
-                setRecentTransactions(recent);
-                setLoading(false);
-                return;
-            }
-
             try {
-                const today = new Date().toISOString().split('T')[0];
-                const firstOfMonth = today.substring(0, 8) + '01';
+                const today = new Date();
+                const isoToday = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                const firstOfMonth = isoToday.substring(0, 8) + '01';
 
                 const [monthBal, dayBal, recent] = await Promise.all([
-                    financeService.getBalance(firstOfMonth, today),
-                    financeService.getBalance(today, today),
+                    financeService.getBalance(firstOfMonth, isoToday),
+                    financeService.getBalance(isoToday, isoToday),
                     financeService.getAll(8),
                 ]);
 
@@ -73,7 +68,7 @@ export const AdminHomeView: React.FC = () => {
             }
         };
         load();
-    }, []);
+    }, [dataVersion]);
 
     const StatCard = ({ icon: Icon, label, value, sub, color, onClick }: {
         icon: React.ElementType; label: string; value: string; sub?: string; color: string; onClick?: () => void
@@ -100,8 +95,8 @@ export const AdminHomeView: React.FC = () => {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
                 <div>
-                    <h2 className="text-3xl md:text-4xl font-serif text-stone-900 dark:text-white mb-1">Panel de Control</h2>
-                    <p className="text-stone-400 text-xs uppercase tracking-[0.2em]">
+                    <h1 className="font-serif text-xl md:text-3xl text-stone-900 dark:text-gold-200 tracking-wider mb-1 uppercase">Panel de Control</h1>
+                    <p className="text-stone-400 text-[10px] md:text-xs font-sans tracking-[0.2em] uppercase font-bold">
                         {new Date().toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                     </p>
                 </div>

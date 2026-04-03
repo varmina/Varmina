@@ -111,8 +111,8 @@ export const AnalyticsDashboard: React.FC = () => {
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 mb-8 md:mb-12 border-b border-stone-100 dark:border-stone-800 pb-8 md:pb-12">
                 <div>
-                    <h1 className="font-serif text-2xl md:text-4xl text-stone-900 dark:text-gold-200 tracking-[0.1em] mb-1 md:mb-2 uppercase">Analítica</h1>
-                    <p className="text-stone-400 text-[9px] md:text-[10px] font-sans tracking-[0.2em] md:tracking-[0.3em] uppercase font-bold">Rendimiento de Joyería e Inventario</p>
+                    <h1 className="font-serif text-xl md:text-3xl text-stone-900 dark:text-gold-200 tracking-wider mb-1 uppercase">Analítica</h1>
+                    <p className="text-stone-400 text-[10px] md:text-xs font-sans tracking-[0.2em] uppercase font-bold">Rendimiento de Joyería e Inventario</p>
                 </div>
             </div>
 

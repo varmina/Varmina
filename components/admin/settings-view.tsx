@@ -48,8 +48,8 @@ export const SettingsView: React.FC = () => {
         <div className="max-w-4xl mx-auto animate-in fade-in duration-500 pt-6 pb-32 px-4 md:px-8">
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h2 className="text-xl md:text-2xl font-serif text-stone-900 dark:text-white mb-2">Configuración</h2>
-                    <p className="text-xs text-stone-500">Gestiona la identidad y funciones de tu marca.</p>
+                    <h1 className="font-serif text-xl md:text-3xl text-stone-900 dark:text-gold-200 tracking-wider mb-1 uppercase">Configuración</h1>
+                    <p className="text-stone-400 text-[10px] md:text-xs font-sans tracking-[0.2em] uppercase font-bold">Gestiona la identidad y funciones de tu marca.</p>
                 </div>
             </div>
 

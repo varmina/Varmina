@@ -282,8 +282,8 @@ export const SectionManager: React.FC = () => {
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h2 className="text-xl md:text-2xl font-serif text-stone-900 dark:text-white mb-2">Diseñador de Página</h2>
-                    <p className="text-xs text-stone-500">Agrega, reordena y configura las secciones de tu tienda.</p>
+                    <h1 className="font-serif text-xl md:text-3xl text-stone-900 dark:text-gold-200 tracking-wider mb-1 uppercase">Diseñador de Página</h1>
+                    <p className="text-stone-400 text-[10px] md:text-xs font-sans tracking-[0.2em] uppercase font-bold">Agrega, reordena y configura las secciones de tu tienda.</p>
                 </div>
                 <button
                     onClick={() => window.open('/', '_blank')}

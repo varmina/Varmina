@@ -6,7 +6,7 @@ import { Product, ProductStatus } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { supabaseProductService } from '@/services/supabaseProductService';
-import { Plus, Edit2, Trash2, AlertCircle, Package, Copy, Check, X as CloseIcon, FileText, Search } from 'lucide-react';
+import { Plus, Edit2, Trash2, AlertCircle, Package, Copy, Check, X as CloseIcon, FileText, Search, MapPin } from 'lucide-react';
 import { ProductForm } from '@/components/admin/product-form';
 import { AnalyticsDashboard } from '@/components/admin/analytics-dashboard';
 import { SettingsView } from '@/components/admin/settings-view';
@@ -246,7 +246,7 @@ export const AdminDashboardView = () => {
                             ) : (
                                 <>
                                     {/* Desktop Header */}
-                                    <div className="hidden lg:grid lg:grid-cols-[50px_120px_1fr_80px_120px_160px_120px] gap-x-4 px-6 py-4 border-b border-stone-100 dark:border-stone-800 text-[9px] font-bold uppercase tracking-[0.2em] text-stone-400 bg-stone-50/50 dark:bg-stone-900/50 items-center">
+                                    <div className="hidden lg:grid lg:grid-cols-[50px_120px_1fr_80px_120px_130px_160px_120px] gap-x-4 px-6 py-4 border-b border-stone-100 dark:border-stone-800 text-[9px] font-bold uppercase tracking-[0.2em] text-stone-400 bg-stone-50/50 dark:bg-stone-900/50 items-center">
                                         <div className="flex justify-center">
                                             <input type="checkbox" checked={selectedIds.length === filteredInventory.length && filteredInventory.length > 0} onChange={toggleSelectAll} className="w-4 h-4 accent-gold-500 rounded-sm cursor-pointer" />
                                         </div>
@@ -254,13 +254,14 @@ export const AdminDashboardView = () => {
                                         <div className="pl-4">Detalles del Producto</div>
                                         <div className="text-center">Stock</div>
                                         <div className="text-center">Precio</div>
+                                        <div className="text-center">Ubicación</div>
                                         <div className="text-center">Estado</div>
                                         <div className="text-center">Acciones</div>
                                     </div>
 
                                     <div className="divide-y divide-stone-100 dark:divide-stone-800">
                                         {filteredInventory.map((product: Product) => (
-                                            <div key={product.id} className="flex flex-col lg:grid lg:grid-cols-[50px_120px_1fr_80px_120px_160px_120px] gap-x-4 items-center px-4 md:px-6 py-6 md:py-5 hover:bg-stone-50 dark:hover:bg-stone-800/30 transition-colors group relative">
+                                            <div key={product.id} className="flex flex-col lg:grid lg:grid-cols-[50px_120px_1fr_80px_120px_130px_160px_120px] gap-x-4 items-center px-4 md:px-6 py-6 md:py-5 hover:bg-stone-50 dark:hover:bg-stone-800/30 transition-colors group relative">
 
                                                 {/* Desktop Checkbox */}
                                                 <div className="hidden lg:flex justify-center items-center">
@@ -365,6 +366,14 @@ export const AdminDashboardView = () => {
                                                         <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-current opacity-50">
                                                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                                                         </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Desktop Location */}
+                                                <div className="hidden lg:flex justify-center items-center">
+                                                    <div className="flex items-center gap-1 text-[10px] text-stone-500 italic">
+                                                        <MapPin className="w-3 h-3 text-stone-400" />
+                                                        <span className="truncate max-w-[100px]">{product.location || 'Sin definir'}</span>
                                                     </div>
                                                 </div>
 

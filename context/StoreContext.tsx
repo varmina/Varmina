@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef, useMemo } from 'react';
 import { Product, ToastMessage } from '../types';
 import { supabaseProductService } from '../services/supabaseProductService';
 import { settingsService, BrandSettings } from '../services/settingsService';
@@ -25,6 +25,7 @@ interface StoreContextType {
     refreshSettings: () => Promise<void>;
     activeAdminTab: 'overview' | 'inventory' | 'analytics' | 'finance' | 'settings' | 'erp' | 'orders' | 'designer';
     setActiveAdminTab: (tab: 'overview' | 'inventory' | 'analytics' | 'finance' | 'settings' | 'erp' | 'orders' | 'designer') => void;
+    dataVersion: number; // Increments on any realtime data change, helps consumers invalidate their caches
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -51,6 +52,8 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const [toasts, setToasts] = useState<ToastMessage[]>([]);
     const [settings, setSettings] = useState<BrandSettings | null>(null);
     const [activeAdminTab, setActiveAdminTab] = useState<'overview' | 'inventory' | 'analytics' | 'finance' | 'settings' | 'erp' | 'orders' | 'designer'>('overview');
+    const [dataVersion, setDataVersion] = useState(0);
+    const transactionDebounceTimer = useRef<any>(null);
 
     // Cache & debounce refs
     const lastProductsFetch = useRef(0);
@@ -143,12 +146,25 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         }, REALTIME_DEBOUNCE_MS);
     }, [refreshSettings]);
 
+    // Bump data version so consumers know to re-check their caches
+    const bumpDataVersion = useCallback(() => {
+        setDataVersion(v => v + 1);
+    }, []);
+
+    const debouncedBumpVersion = useCallback(() => {
+        if (transactionDebounceTimer.current) clearTimeout(transactionDebounceTimer.current);
+        transactionDebounceTimer.current = setTimeout(() => {
+            bumpDataVersion();
+        }, REALTIME_DEBOUNCE_MS);
+    }, [bumpDataVersion]);
+
     // REALTIME SUBSCRIPTIONS (debounced)
     useEffect(() => {
         const productSub = supabase
             .channel('public:products')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
                 debouncedRefreshProducts();
+                bumpDataVersion();
             })
             .subscribe();
 
@@ -166,15 +182,32 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             })
             .subscribe();
 
+        const transactionSub = supabase
+            .channel('public:transactions')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, () => {
+                debouncedBumpVersion();
+            })
+            .subscribe();
+
+        const assetSub = supabase
+            .channel('public:internal_assets_global')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'internal_assets' }, () => {
+                bumpDataVersion();
+            })
+            .subscribe();
+
         return () => {
             if (productDebounceTimer.current) clearTimeout(productDebounceTimer.current);
             if (attrDebounceTimer.current) clearTimeout(attrDebounceTimer.current);
             if (settingsDebounceTimer.current) clearTimeout(settingsDebounceTimer.current);
+            if (transactionDebounceTimer.current) clearTimeout(transactionDebounceTimer.current);
             supabase.removeChannel(productSub);
             supabase.removeChannel(attrSub);
             supabase.removeChannel(settingsSub);
+            supabase.removeChannel(transactionSub);
+            supabase.removeChannel(assetSub);
         };
-    }, [debouncedRefreshProducts, debouncedRefreshAttributes, debouncedRefreshSettings]);
+    }, [debouncedRefreshProducts, debouncedRefreshAttributes, debouncedRefreshSettings, debouncedBumpVersion, bumpDataVersion]);
 
     // Initial Data Load
     useEffect(() => {
@@ -204,7 +237,8 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             refreshAttributes,
             toasts, addToast, removeToast,
             settings, refreshSettings,
-            activeAdminTab, setActiveAdminTab
+            activeAdminTab, setActiveAdminTab,
+            dataVersion
         }}>
             {children}
         </StoreContext.Provider>
