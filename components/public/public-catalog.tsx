@@ -142,6 +142,7 @@ export const PublicCatalog = () => {
                         src={settings.hero_image_url}
                         alt={settings.hero_title || "Varmina Collection"}
                         className="w-full h-full object-cover transition-transform duration-[20s] ease-linear group-hover:scale-110"
+                        fetchPriority="high"
                     />
                     {/* Deep Premium Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-stone-900/60 flex flex-col items-center justify-center text-center p-6 md:p-12">
@@ -238,6 +239,26 @@ export const PublicCatalog = () => {
                                 </button>
                             </div>
                         </div>
+
+                        {/* Desktop Quick Category Pills */}
+                        {categories.length > 1 && (
+                            <div className="hidden md:flex items-center gap-2 overflow-x-auto scrollbar-hide border-t border-stone-50 dark:border-stone-900/50 pt-3">
+                                {categories.map(cat => (
+                                    <button
+                                        key={cat}
+                                        onClick={() => setCategoryFilter(cat)}
+                                        className={cn(
+                                            "px-4 py-1.5 text-[10px] uppercase tracking-wider font-bold border rounded-full transition-all whitespace-nowrap shrink-0",
+                                            categoryFilter === cat
+                                                ? 'bg-stone-900 text-white border-stone-900 dark:bg-white dark:text-stone-900 dark:border-white'
+                                                : 'border-stone-200 dark:border-stone-800 text-stone-400 hover:border-stone-400 dark:hover:border-stone-600 hover:text-stone-600 dark:hover:text-stone-300'
+                                        )}
+                                    >
+                                        {cat === 'All' ? 'Todas' : cat}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
 
                         {/* Bottom: Filter Bar */}
                         <div className="flex items-center justify-between md:justify-end border-t border-stone-50 dark:border-stone-900/50 pt-3 md:border-none md:pt-0">
@@ -534,7 +555,7 @@ export const PublicCatalog = () => {
             <button
                 onClick={scrollToTop}
                 className={cn(
-                    "fixed bottom-6 left-6 z-40 p-3 bg-stone-900 dark:bg-white text-white dark:text-stone-900 rounded-full shadow-xl transition-all duration-300",
+                    "fixed bottom-6 left-6 z-40 p-3 border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 rounded-full shadow-lg backdrop-blur-md bg-white/70 dark:bg-stone-900/70 hover:border-gold-500 hover:text-gold-600 dark:hover:text-gold-400 transition-all duration-500",
                     showScrollTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
                 )}
                 aria-label="Volver arriba"

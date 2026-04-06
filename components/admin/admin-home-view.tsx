@@ -41,10 +41,26 @@ export const AdminHomeView: React.FC = () => {
     const CACHE_TTL = 30000; // 30s
 
     useEffect(() => {
-        // Invalidate cache when dataVersion changes (realtime update)
-        if (cacheRef.current) {
-            cacheRef.current = null;
+        // Serve stale cache instantly, then revalidate in background
+        if (cacheRef.current && Date.now() - cacheRef.current.timestamp < CACHE_TTL) {
+            const { monthBal, dayBal, recent } = cacheRef.current.data;
+            setBalance(monthBal);
+            setTodayBalance(dayBal);
+            setRecentTransactions(recent);
+            setLoading(false);
+            return; // fresh enough, skip fetch
         }
+
+        // If we have stale data, show it immediately (no loading spinner)
+        const hasStaleData = !!cacheRef.current;
+        if (hasStaleData) {
+            const { monthBal, dayBal, recent } = cacheRef.current!.data;
+            setBalance(monthBal);
+            setTodayBalance(dayBal);
+            setRecentTransactions(recent);
+            setLoading(false);
+        }
+
         const load = async () => {
             try {
                 const today = new Date();

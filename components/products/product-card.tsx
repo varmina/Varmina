@@ -13,7 +13,7 @@ interface ProductCardProps {
     onClick: (p: Product) => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product, currency, layout, onClick }) => {
+export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, currency, layout, onClick }) => {
     const { settings } = useStore();
     const exchangeRate = settings?.usd_exchange_rate || 950;
     const displayPrice = currency === 'CLP' ? product.price : Math.round(product.price / exchangeRate);
@@ -31,6 +31,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, currency, lay
 
     return (
         <article
+            id={`product-card-${product.id}`}
             className={cn(
                 "group cursor-pointer relative product-card-hover",
                 isList
@@ -146,4 +147,4 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, currency, lay
             </div>
         </article>
     );
-};
+});

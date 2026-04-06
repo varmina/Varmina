@@ -13,9 +13,7 @@ import { formatPrice } from '@/lib/format';
 
 import { attributeService } from '@/services/attributeService';
 
-import { createClient } from '@/utils/supabase/client';
 
-const supabase = createClient();
 
 const getLocalISODate = () => {
     const now = new Date();
@@ -23,7 +21,7 @@ const getLocalISODate = () => {
 };
 
 export const OrdersView: React.FC = () => {
-    const { addToast, settings, products: globalProducts, attributes } = useStore();
+    const { addToast, settings, products: globalProducts, attributes, dataVersion } = useStore();
     const [assets, setAssets] = useState<InternalAsset[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -53,18 +51,14 @@ export const OrdersView: React.FC = () => {
 
     useEffect(() => {
         loadData();
-
-        const sub = supabase
-            .channel('orders_view_assets')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'internal_assets' }, () => {
-                loadData(true);
-            })
-            .subscribe();
-
-        return () => {
-            supabase.removeChannel(sub);
-        };
     }, []);
+
+    // Reload assets when realtime data changes (via StoreContext dataVersion)
+    useEffect(() => {
+        if (dataVersion > 0) {
+            loadData(true);
+        }
+    }, [dataVersion]);
 
     const loadData = async (silent = false) => {
         try {

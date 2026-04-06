@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useStore } from '@/context/StoreContext';
 import { Product, ProductStatus } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -45,19 +45,19 @@ export const AdminDashboardView = () => {
         }
     }, [activeAdminTab, lastTab]);
 
-    const stats = {
+    const stats = useMemo(() => ({
         total: products.length,
         inStock: products.filter((p: Product) => p.status === ProductStatus.IN_STOCK).length,
         madeToOrder: products.filter((p: Product) => p.status === ProductStatus.MADE_TO_ORDER).length,
         soldOut: products.filter((p: Product) => p.status === ProductStatus.SOLD_OUT).length,
-    };
+    }), [products]);
 
-    const filteredInventory = products.filter((p: Product) => {
+    const filteredInventory = useMemo(() => products.filter((p: Product) => {
         const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.id.includes(search);
         const matchesStatus = filterStatus === 'All' || p.status === filterStatus;
         const matchesCategory = filterCategory === 'All' || p.category === filterCategory;
         return matchesSearch && matchesStatus && matchesCategory;
-    });
+    }), [products, search, filterStatus, filterCategory]);
 
     const toggleSelect = (id: string) => {
         setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
@@ -214,25 +214,68 @@ export const AdminDashboardView = () => {
                             </div>
                         </div>
 
-                        {/* Stats Overview - Premium Cards */}
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8 px-4 md:px-0">
-                            <div className="bg-white dark:bg-stone-900 p-4 md:p-5 rounded-xl border border-stone-100 dark:border-stone-800 flex flex-col items-center justify-center text-center group transition-all">
+                        {/* Stats Overview - Clickable Filter Cards */}
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4 px-4 md:px-0">
+                            <button
+                                onClick={() => setFilterStatus(filterStatus === 'All' ? 'All' : 'All')}
+                                className={`bg-white dark:bg-stone-900 p-4 md:p-5 rounded-xl border flex flex-col items-center justify-center text-center group transition-all cursor-pointer hover:shadow-md hover:-translate-y-0.5 ${filterStatus === 'All' ? 'border-stone-300 dark:border-stone-600 ring-1 ring-stone-300 dark:ring-stone-600' : 'border-stone-100 dark:border-stone-800'}`}
+                            >
                                 <span className="text-xl md:text-3xl font-serif text-stone-900 dark:text-white mb-1">{stats.total}</span>
                                 <span className="text-[8px] md:text-[9px] uppercase tracking-widest text-stone-400 font-bold">Total</span>
-                            </div>
-                            <div className="bg-white dark:bg-stone-900 p-4 md:p-5 rounded-xl border border-stone-100 dark:border-stone-800 flex flex-col items-center justify-center text-center group transition-all">
+                            </button>
+                            <button
+                                onClick={() => setFilterStatus(filterStatus === ProductStatus.IN_STOCK ? 'All' : ProductStatus.IN_STOCK)}
+                                className={`bg-white dark:bg-stone-900 p-4 md:p-5 rounded-xl border flex flex-col items-center justify-center text-center group transition-all cursor-pointer hover:shadow-md hover:-translate-y-0.5 ${filterStatus === ProductStatus.IN_STOCK ? 'border-green-400 dark:border-green-600 ring-1 ring-green-400 dark:ring-green-600' : 'border-stone-100 dark:border-stone-800'}`}
+                            >
                                 <span className="text-xl md:text-3xl font-serif text-green-600 dark:text-green-400 mb-1">{stats.inStock}</span>
                                 <span className="text-[8px] md:text-[9px] uppercase tracking-widest text-stone-400 font-bold">Stock</span>
-                            </div>
-                            <div className="bg-white dark:bg-stone-900 p-4 md:p-5 rounded-xl border border-stone-100 dark:border-stone-800 flex flex-col items-center justify-center text-center group transition-all">
+                            </button>
+                            <button
+                                onClick={() => setFilterStatus(filterStatus === ProductStatus.MADE_TO_ORDER ? 'All' : ProductStatus.MADE_TO_ORDER)}
+                                className={`bg-white dark:bg-stone-900 p-4 md:p-5 rounded-xl border flex flex-col items-center justify-center text-center group transition-all cursor-pointer hover:shadow-md hover:-translate-y-0.5 ${filterStatus === ProductStatus.MADE_TO_ORDER ? 'border-blue-400 dark:border-blue-600 ring-1 ring-blue-400 dark:ring-blue-600' : 'border-stone-100 dark:border-stone-800'}`}
+                            >
                                 <span className="text-xl md:text-3xl font-serif text-blue-600 dark:text-blue-400 mb-1">{stats.madeToOrder}</span>
                                 <span className="text-[8px] md:text-[9px] uppercase tracking-widest text-stone-400 font-bold">Encargo</span>
-                            </div>
-                            <div className="bg-white dark:bg-stone-900 p-4 md:p-5 rounded-xl border border-stone-100 dark:border-stone-800 flex flex-col items-center justify-center text-center group transition-all">
+                            </button>
+                            <button
+                                onClick={() => setFilterStatus(filterStatus === ProductStatus.SOLD_OUT ? 'All' : ProductStatus.SOLD_OUT)}
+                                className={`bg-white dark:bg-stone-900 p-4 md:p-5 rounded-xl border flex flex-col items-center justify-center text-center group transition-all cursor-pointer hover:shadow-md hover:-translate-y-0.5 ${filterStatus === ProductStatus.SOLD_OUT ? 'border-stone-400 dark:border-stone-500 ring-1 ring-stone-400' : 'border-stone-100 dark:border-stone-800'}`}
+                            >
                                 <span className="text-xl md:text-3xl font-serif text-stone-400 mb-1">{stats.soldOut}</span>
                                 <span className="text-[8px] md:text-[9px] uppercase tracking-widest text-stone-400 font-bold">Agotado</span>
-                            </div>
+                            </button>
                         </div>
+
+                        {/* Active Filter Indicator */}
+                        {(filterStatus !== 'All' || filterCategory !== 'All' || search) && (
+                            <div className="flex items-center gap-2 mb-6 px-4 md:px-0 flex-wrap">
+                                <span className="text-[9px] uppercase tracking-widest text-stone-400 font-bold">Filtros:</span>
+                                {filterStatus !== 'All' && (
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-stone-100 dark:bg-stone-800 rounded-full text-[9px] uppercase font-bold text-stone-600 dark:text-stone-300">
+                                        {filterStatus}
+                                        <button onClick={() => setFilterStatus('All')} className="hover:text-red-500 transition-colors"><CloseIcon className="w-3 h-3" /></button>
+                                    </span>
+                                )}
+                                {filterCategory !== 'All' && (
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gold-50 dark:bg-gold-900/20 rounded-full text-[9px] uppercase font-bold text-gold-600">
+                                        {filterCategory}
+                                        <button onClick={() => setFilterCategory('All')} className="hover:text-red-500 transition-colors"><CloseIcon className="w-3 h-3" /></button>
+                                    </span>
+                                )}
+                                {search && (
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-stone-100 dark:bg-stone-800 rounded-full text-[9px] uppercase font-bold text-stone-600 dark:text-stone-300">
+                                        "{search}"
+                                        <button onClick={() => setSearch('')} className="hover:text-red-500 transition-colors"><CloseIcon className="w-3 h-3" /></button>
+                                    </span>
+                                )}
+                                <button
+                                    onClick={() => { setFilterStatus('All'); setFilterCategory('All'); setSearch(''); }}
+                                    className="text-[9px] uppercase tracking-widest text-red-400 hover:text-red-500 font-bold transition-colors ml-2"
+                                >
+                                    Limpiar Todo
+                                </button>
+                            </div>
+                        )}
 
                         {/* Bulk Actions Bar */}
                         {selectedIds.length > 0 && (
@@ -331,7 +374,7 @@ export const AdminDashboardView = () => {
 
                                                 {/* Desktop Stock */}
                                                 <div className="hidden lg:flex justify-center items-center">
-                                                    <span className={`font-mono text-xs font-bold px-2 py-1 rounded-md ${(!product.stock || product.stock === 0) ? 'bg-red-50 text-red-500 dark:bg-red-900/20' : 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300'}`}>
+                                                    <span className={`font-mono text-xs font-bold px-2 py-1 rounded-md ${(!product.stock || product.stock === 0) ? 'bg-red-50 text-red-500 dark:bg-red-900/20' : product.stock <= 3 ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/20' : 'bg-green-50 text-green-600 dark:bg-green-900/20'}`}>
                                                         {product.stock || 0}
                                                     </span>
                                                 </div>

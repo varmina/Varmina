@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useStore } from '@/context/StoreContext';
 import {
     BarChart3, TrendingUp, Activity, MousePointerClick,
@@ -18,21 +18,30 @@ export const AnalyticsDashboard: React.FC = () => {
     const [isResetting, setIsResetting] = useState(false);
     const [loading, setLoading] = useState(true);
     const [masterCategories, setMasterCategories] = useState<string[]>([]);
+    const categoryCacheRef = useRef<{ data: string[]; timestamp: number } | null>(null);
+    const CATEGORY_CACHE_TTL = 60000; // 60s
 
     useEffect(() => {
-        loadData();
-    }, [products]);
-
-    const loadData = async () => {
-        try {
-            const attrCats = await attributeService.getByType('category');
-            setMasterCategories(attrCats.map(c => c.name));
-        } catch (error) {
-            console.error('Error loading analytics categories:', error);
-        } finally {
+        // Only fetch categories once (or after TTL expiry)
+        if (categoryCacheRef.current && Date.now() - categoryCacheRef.current.timestamp < CATEGORY_CACHE_TTL) {
+            setMasterCategories(categoryCacheRef.current.data);
             setLoading(false);
+            return;
         }
-    };
+        const loadCategories = async () => {
+            try {
+                const attrCats = await attributeService.getByType('category');
+                const names = attrCats.map(c => c.name);
+                setMasterCategories(names);
+                categoryCacheRef.current = { data: names, timestamp: Date.now() };
+            } catch (error) {
+                console.error('Error loading analytics categories:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadCategories();
+    }, []); // Only run on mount, not on every products change
 
     const handleResetAnalytics = async () => {
         if (!confirm('¿Está seguro de que desea reiniciar todas las estadísticas de interés? Esta acción no se puede deshacer.')) {

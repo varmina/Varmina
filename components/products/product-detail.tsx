@@ -138,13 +138,20 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency,
                 onTouchEnd={onTouchEnd}
             >
                 <div className="w-full aspect-[3/4] md:h-[650px] relative overflow-hidden">
-                    <img
-                        key={imagesToDisplay[activeImg]}
-                        src={imagesToDisplay[activeImg] || product.images[0]}
-                        className="w-full h-full object-cover animate-fade-in"
-                        alt={product.name}
-                        draggable={false}
-                    />
+                    {/* Crossfade: show all images absolutely positioned, only active one visible */}
+                    {imagesToDisplay.map((img: string, idx: number) => (
+                        <img
+                            key={img}
+                            src={img}
+                            className={cn(
+                                "absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out",
+                                activeImg === idx ? "opacity-100 z-10" : "opacity-0 z-0"
+                            )}
+                            alt={product.name}
+                            draggable={false}
+                            loading={idx === 0 ? "eager" : "lazy"}
+                        />
+                    ))}
 
                     {/* Image counter */}
                     {imagesToDisplay.length > 1 && (
