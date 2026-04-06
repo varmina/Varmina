@@ -20,7 +20,7 @@ import { useInventory } from '@/hooks/use-inventory';
 
 // --- MAIN ADMIN COMPONENT ---
 export const AdminDashboardView = () => {
-    const { addToast, activeAdminTab } = useStore();
+    const { addToast, activeAdminTab, attributes } = useStore();
     const { products, loading, refreshInventory } = useInventory();
 
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -30,6 +30,7 @@ export const AdminDashboardView = () => {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [search, setSearch] = useState('');
     const [filterStatus, setFilterStatus] = useState<ProductStatus | 'All'>('All');
+    const [filterCategory, setFilterCategory] = useState<string>('All');
     const [inlinePriceId, setInlinePriceId] = useState<string | null>(null);
     const [inlinePrice, setInlinePrice] = useState<number>(0);
     const [lastTab, setLastTab] = useState(activeAdminTab);
@@ -54,7 +55,8 @@ export const AdminDashboardView = () => {
     const filteredInventory = products.filter((p: Product) => {
         const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.id.includes(search);
         const matchesStatus = filterStatus === 'All' || p.status === filterStatus;
-        return matchesSearch && matchesStatus;
+        const matchesCategory = filterCategory === 'All' || p.category === filterCategory;
+        return matchesSearch && matchesStatus && matchesCategory;
     });
 
     const toggleSelect = (id: string) => {
@@ -173,10 +175,22 @@ export const AdminDashboardView = () => {
                                         <div className="flex bg-white dark:bg-stone-900 p-1 rounded-lg border border-stone-200 dark:border-stone-800 flex-1 sm:flex-none">
                                             <select
                                                 className="w-full bg-transparent text-[9px] font-bold uppercase tracking-widest px-4 py-2 outline-none border-none text-stone-500 dark:text-stone-400 cursor-pointer"
+                                                value={filterCategory}
+                                                onChange={(e) => setFilterCategory(e.target.value)}
+                                            >
+                                                <option value="All">Categorías</option>
+                                                {attributes?.filter(a => a.type === 'category').map(c => (
+                                                    <option key={c.id} value={c.name}>{c.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="flex bg-white dark:bg-stone-900 p-1 rounded-lg border border-stone-200 dark:border-stone-800 flex-1 sm:flex-none">
+                                            <select
+                                                className="w-full bg-transparent text-[9px] font-bold uppercase tracking-widest px-4 py-2 outline-none border-none text-stone-500 dark:text-stone-400 cursor-pointer"
                                                 value={filterStatus}
                                                 onChange={(e) => setFilterStatus(e.target.value as any)}
                                             >
-                                                <option value="All">Todos los Estados</option>
+                                                <option value="All">Estados</option>
                                                 <option value={ProductStatus.IN_STOCK}>Disponible</option>
                                                 <option value={ProductStatus.MADE_TO_ORDER}>Por Encargo</option>
                                                 <option value={ProductStatus.SOLD_OUT}>Agotado</option>

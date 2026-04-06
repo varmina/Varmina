@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '@/context/StoreContext';
 import { Product, ProductStatus } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,62 @@ import { supabaseProductService } from '@/services/supabaseProductService';
 import { Upload, X, GripVertical, Star, Check } from 'lucide-react';
 import { compressImage } from '@/utils/imageOptimizer';
 import { attributeService } from '@/services/attributeService';
+
+function LocalInput({ value, onChange, ...props }: any) {
+    const [localValue, setLocalValue] = useState(value);
+    useEffect(() => setLocalValue(value), [value]);
+    return (
+        <Input 
+            {...props} 
+            value={localValue} 
+            onChange={(e: any) => setLocalValue(e.target.value)} 
+            onBlur={(e: any) => {
+                if (props.type === 'number') {
+                    onChange(Number(localValue));
+                } else {
+                    if (localValue !== value) onChange(localValue);
+                }
+                props.onBlur?.(e);
+            }} 
+        />
+    );
+}
+
+function LocalTextarea({ value, onChange, ...props }: any) {
+    const [localValue, setLocalValue] = useState(value);
+    useEffect(() => setLocalValue(value), [value]);
+    return (
+        <textarea 
+            {...props} 
+            value={localValue} 
+            onChange={(e: any) => setLocalValue(e.target.value)} 
+            onBlur={(e: any) => {
+                if (localValue !== value) onChange(localValue);
+                props.onBlur?.(e);
+            }} 
+        />
+    );
+}
+
+function LocalNativeInput({ value, onChange, ...props }: any) {
+    const [localValue, setLocalValue] = useState(value);
+    useEffect(() => setLocalValue(value), [value]);
+    return (
+        <input 
+            {...props} 
+            value={localValue} 
+            onChange={(e: any) => setLocalValue(e.target.value)} 
+            onBlur={(e: any) => {
+                if (props.type === 'number') {
+                    onChange(Number(localValue));
+                } else {
+                    if (localValue !== value) onChange(localValue);
+                }
+                props.onBlur?.(e);
+            }} 
+        />
+    );
+}
 
 interface ProductFormProps {
     initialData?: Product;
@@ -292,23 +348,23 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                         {/* Card 1: Basic Info */}
                         <div className="bg-white dark:bg-stone-900 rounded-xl shadow-[0_2px_20px_-5px_rgba(0,0,0,0.05)] border border-stone-100 dark:border-stone-800 p-5 md:p-8">
                             <div className="space-y-6">
-                                <Input
+                                <LocalInput
                                     label="Título de la Pieza"
                                     placeholder="Ej: Anillo Solitario Oro Blanco"
-                                    value={formData.name}
-                                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                    value={formData.name || ''}
+                                    onChange={(val: string) => setFormData({ ...formData, name: val })}
                                     error={errors.name}
                                     className="font-serif text-xl md:text-2xl py-3 border-b-2 border-x-0 border-t-0 rounded-none px-0 focus:ring-0 focus:border-gold-500 bg-transparent"
                                 />
                                 <div className="space-y-2">
                                     <label htmlFor="product-description" className="block text-[10px] font-bold uppercase tracking-widest text-stone-400">Descripción</label>
-                                    <textarea
+                                    <LocalTextarea
                                         id="product-description"
                                         name="description"
                                         className="w-full bg-stone-50 dark:bg-stone-950/30 border border-stone-200 dark:border-stone-800 rounded-lg p-4 text-stone-900 dark:text-stone-100 font-sans text-sm focus:border-gold-500 focus:ring-1 focus:ring-gold-500 focus:outline-none min-h-[160px] transition-all resize-y leading-relaxed placeholder:text-stone-300 dark:placeholder:text-stone-700"
                                         placeholder="Describe la pieza, materiales y detalles únicos..."
                                         value={formData.description || ''}
-                                        onChange={e => setFormData({ ...formData, description: e.target.value })}
+                                        onChange={(val: string) => setFormData({ ...formData, description: val })}
                                     />
                                 </div>
                             </div>
@@ -415,10 +471,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                                                         </div>
                                                         <div className="flex-1 max-w-md">
                                                             <label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold mb-1.5 block">Nombre de Variante</label>
-                                                            <input
+                                                            <LocalNativeInput
                                                                 type="text"
                                                                 value={v.name}
-                                                                onChange={e => updateVariant(v.id, 'name', e.target.value)}
+                                                                onChange={(val: string) => updateVariant(v.id, 'name', val)}
                                                                 className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-700 rounded-lg py-2.5 px-4 text-sm font-bold text-stone-900 dark:text-white focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 outline-none transition-all"
                                                                 placeholder="Ej: Oro 18k, Talla 14, etc."
                                                             />
@@ -451,12 +507,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                                                         <label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold block">Precio Venta</label>
                                                         <div className="relative group/input">
                                                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 font-serif">$</span>
-                                                            <input
+                                                            <LocalNativeInput
                                                                 type="number"
                                                                 value={v.price === 0 ? '' : v.price}
-                                                                onChange={e => updateVariant(v.id, 'price', Number(e.target.value) || 0)}
-                                                                onFocus={(e) => e.target.select()}
-                                                                onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                                                                onChange={(val: number) => updateVariant(v.id, 'price', val)}
+                                                                onFocus={(e: any) => e.target.select()}
+                                                                onWheel={(e: any) => (e.target as HTMLInputElement).blur()}
                                                                 className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-700 rounded-lg py-2.5 pl-7 pr-3 text-sm font-bold text-stone-900 dark:text-white focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 outline-none transition-all"
                                                             />
                                                         </div>
@@ -466,12 +522,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                                                         <label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold block">Costo (COGS)</label>
                                                         <div className="relative group/input">
                                                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 font-serif">$</span>
-                                                            <input
+                                                            <LocalNativeInput
                                                                 type="number"
                                                                 value={v.unit_cost === 0 || v.unit_cost === undefined ? '' : v.unit_cost}
-                                                                onChange={e => updateVariant(v.id, 'unit_cost', Number(e.target.value) || 0)}
-                                                                onFocus={(e) => e.target.select()}
-                                                                onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                                                                onChange={(val: number) => updateVariant(v.id, 'unit_cost', val)}
+                                                                onFocus={(e: any) => e.target.select()}
+                                                                onWheel={(e: any) => (e.target as HTMLInputElement).blur()}
                                                                 className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-700 rounded-lg py-2.5 pl-7 pr-3 text-sm font-bold text-stone-900 dark:text-white focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 outline-none transition-all"
                                                             />
                                                         </div>
@@ -479,13 +535,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
 
                                                     <div className="space-y-1.5">
                                                         <label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold block">Stock</label>
-                                                        <input
+                                                        <LocalNativeInput
                                                             type="number"
                                                             min="0"
                                                             value={(v.stock === 0 || v.stock === undefined) ? '' : v.stock}
-                                                            onChange={e => updateVariant(v.id, 'stock', parseInt(e.target.value) || 0)}
-                                                            onFocus={(e) => e.target.select()}
-                                                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                                                            onChange={(val: number) => updateVariant(v.id, 'stock', val)}
+                                                            onFocus={(e: any) => e.target.select()}
+                                                            onWheel={(e: any) => (e.target as HTMLInputElement).blur()}
                                                             className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-700 rounded-lg py-2.5 px-4 text-sm font-bold text-stone-900 dark:text-white focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 outline-none text-center transition-all"
                                                             placeholder="0"
                                                         />
@@ -493,10 +549,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
 
                                                     <div className="space-y-1.5">
                                                         <label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold block">Ubicación</label>
-                                                        <input
+                                                        <LocalNativeInput
                                                             type="text"
                                                             value={v.location || ''}
-                                                            onChange={e => updateVariant(v.id, 'location', e.target.value)}
+                                                            onChange={(val: string) => updateVariant(v.id, 'location', val)}
                                                             className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-700 rounded-lg py-2.5 px-4 text-sm font-medium text-stone-900 dark:text-white focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 outline-none transition-all"
                                                             placeholder="Ej: Cajón A"
                                                         />
@@ -559,11 +615,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                             <div className="mb-6 space-y-6">
                                 <div className="space-y-2">
                                     <label htmlFor="product-location" className="block text-[10px] font-bold uppercase tracking-widest text-stone-400">Ubicación Física General</label>
-                                    <input
+                                    <LocalNativeInput
                                         id="product-location"
                                         placeholder="Ej: Vitrina Principal"
                                         value={formData.location || ''}
-                                        onChange={e => setFormData({ ...formData, location: e.target.value })}
+                                        onChange={(val: string) => setFormData({ ...formData, location: val })}
                                         className="w-full bg-stone-50 dark:bg-stone-950/50 border border-stone-200 dark:border-stone-700 rounded-lg py-3 px-4 text-sm font-medium text-stone-900 dark:text-white focus:border-gold-500 focus:ring-1 focus:ring-gold-500 outline-none transition-all"
                                     />
                                 </div>
@@ -571,7 +627,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                                 <div className="space-y-2">
                                     <label htmlFor="product-stock" className="block text-[10px] font-bold uppercase tracking-widest text-stone-400">Stock Total</label>
                                     <div className="relative">
-                                        <input
+                                        <LocalNativeInput
                                             id="product-stock"
                                             name="stock"
                                             type="number"
@@ -581,9 +637,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                                                 ? formData.variants.reduce((sum, v) => sum + (v.stock || 0), 0)
                                                 : (formData.stock === 0 ? '' : formData.stock)
                                             }
-                                            onChange={e => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })}
-                                            onFocus={(e) => e.target.select()}
-                                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                                            onChange={(val: number) => setFormData({ ...formData, stock: val })}
+                                            onFocus={(e: any) => e.target.select()}
+                                            onWheel={(e: any) => (e.target as HTMLInputElement).blur()}
                                             className="w-full bg-stone-50 dark:bg-stone-950/50 border border-stone-200 dark:border-stone-700 rounded-lg py-3 pl-4 pr-24 text-lg font-bold text-stone-900 dark:text-white focus:border-gold-500 focus:ring-1 focus:ring-gold-500 outline-none transition-all placeholder:text-stone-300 disabled:opacity-50"
                                             placeholder="0"
                                         />
@@ -623,16 +679,16 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                                 <label htmlFor="product-price" className="sr-only">Precio</label>
                                 <div className="relative">
                                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 font-serif text-lg">$</span>
-                                    <input
+                                    <LocalNativeInput
                                         id="product-price"
                                         name="price"
                                         type="number"
                                         className="w-full bg-stone-50 dark:bg-stone-950/50 border border-stone-200 dark:border-stone-700 rounded-lg py-3 pl-10 pr-4 text-xl font-bold text-stone-900 dark:text-white focus:border-gold-500 focus:ring-1 focus:ring-gold-500 outline-none transition-all placeholder:text-stone-300"
                                         placeholder="0"
                                         value={formData.price === 0 ? '' : formData.price}
-                                        onChange={e => setFormData({ ...formData, price: Number(e.target.value) || 0 })}
-                                        onFocus={(e) => e.target.select()}
-                                        onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                                        onChange={(val: number) => setFormData({ ...formData, price: val })}
+                                        onFocus={(e: any) => e.target.select()}
+                                        onWheel={(e: any) => (e.target as HTMLInputElement).blur()}
                                     />
                                 </div>
                                 {errors.price && <p className="mt-2 text-[10px] font-bold text-red-500">{errors.price}</p>}
@@ -697,11 +753,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSave, o
                                     )}
                                 </div>
 
-                                <Input
+                                <LocalInput
                                     label="Etiqueta Visual"
                                     placeholder="Ej: Nuevo, Oferta"
                                     value={formData.badge || ''}
-                                    onChange={e => setFormData({ ...formData, badge: e.target.value })}
+                                    onChange={(val: string) => setFormData({ ...formData, badge: val })}
                                     className="bg-stone-50 dark:bg-stone-950/50 border-stone-200 dark:border-stone-700 rounded-lg py-3 focus:border-gold-500 focus:ring-1 focus:ring-gold-500"
                                 />
                             </div>
