@@ -60,8 +60,10 @@ export default async function ProductPage({ params }: Props) {
     }
 
     return (
-        <div className="min-h-screen bg-white dark:bg-stone-950 flex items-center justify-center p-4">
-            <ProductPageWrapper product={product} />
+        <div className="min-h-screen bg-white dark:bg-stone-950">
+            <div className="max-w-6xl mx-auto py-4 md:py-8 px-0 md:px-4">
+                <ProductPageWrapper product={product} />
+            </div>
         </div>
     );
 }
