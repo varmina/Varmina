@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { Product, ProductStatus, ProductVariant } from '@/types';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { ChevronLeft, ChevronRight, X, Share2, Heart, Copy, Check } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Share2, Copy, Check } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
 import { supabaseProductService } from '@/services/supabaseProductService';
 import { useStore } from '@/context/StoreContext';
@@ -16,15 +16,20 @@ interface ProductDetailProps {
     product: Product;
     currency: 'CLP' | 'USD';
     onClose: () => void;
+    /** Optional: list of products for prev/next navigation */
+    siblingProducts?: Product[];
+    onNavigate?: (product: Product) => void;
 }
 
-export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency, onClose }) => {
+export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency, onClose, siblingProducts, onNavigate }) => {
     const { settings, addToast } = useStore();
     const { addItem } = useCart();
     const [activeImg, setActiveImg] = useState(0);
     const [isAdding, setIsAdding] = useState(false);
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [isCopied, setIsCopied] = useState(false);
+    const [imgLoadedSet, setImgLoadedSet] = useState<Set<number>>(new Set([0]));
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
 
     // Initialize with primary variant or first variant
     const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(() => {
@@ -33,6 +38,21 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency,
         }
         return null;
     });
+
+    // Reset state when product changes (for prev/next navigation)
+    useEffect(() => {
+        setActiveImg(0);
+        setImgLoadedSet(new Set([0]));
+        setIsAdding(false);
+        setIsCopied(false);
+        if (product.variants && product.variants.length > 0) {
+            setSelectedVariant(product.variants.find(v => v.isPrimary) || product.variants[0]);
+        } else {
+            setSelectedVariant(null);
+        }
+        // Scroll back to top of detail
+        scrollContainerRef.current?.scrollTo({ top: 0 });
+    }, [product.id]);
 
     const imagesToDisplay = useMemo(() => {
         if (selectedVariant?.images && selectedVariant.images.length > 0) {
@@ -47,7 +67,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency,
         return currency === 'CLP' ? base : Math.round(base / exchangeRate);
     }, [selectedVariant, product.price, currency, exchangeRate]);
 
-    // Swipe Logic
+    // Swipe Logic (mobile)
     const [touchStart, setTouchStart] = useState<number | null>(null);
     const [touchEnd, setTouchEnd] = useState<number | null>(null);
     const minSwipeDistance = 50;
@@ -71,6 +91,15 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency,
             setActiveImg(prev => prev === 0 ? imagesToDisplay.length - 1 : prev - 1);
         }
     }, [touchStart, touchEnd, imagesToDisplay.length]);
+
+    // Mark image as loaded
+    const handleImgLoad = useCallback((idx: number) => {
+        setImgLoadedSet(prev => {
+            const next = new Set(prev);
+            next.add(idx);
+            return next;
+        });
+    }, []);
 
     const handleAddToCart = async () => {
         setIsAdding(true);
@@ -116,46 +145,88 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency,
         }
     };
 
+    // Prev / Next product navigation
+    const currentIdx = siblingProducts?.findIndex(p => p.id === product.id) ?? -1;
+    const prevProduct = siblingProducts && currentIdx > 0 ? siblingProducts[currentIdx - 1] : null;
+    const nextProduct = siblingProducts && currentIdx >= 0 && currentIdx < siblingProducts.length - 1 ? siblingProducts[currentIdx + 1] : null;
+
     const isSoldOut = product.status === ProductStatus.SOLD_OUT;
     const isVariantSoldOut = selectedVariant ? (selectedVariant.stock !== undefined && selectedVariant.stock <= 0) : false;
 
+    // Split description into short summary and full details
+    const { summary, details } = useMemo(() => {
+        if (!product.description) return { summary: '', details: '' };
+        const text = product.description;
+        // Split at first double-newline or after ~200 chars at a period
+        const doubleNewline = text.indexOf('\n\n');
+        if (doubleNewline > 0 && doubleNewline < 300) {
+            return { summary: text.slice(0, doubleNewline), details: text.slice(doubleNewline + 2) };
+        }
+        // Find a period near 200 chars
+        const cutoff = text.indexOf('.', 150);
+        if (cutoff > 0 && cutoff < 350) {
+            return { summary: text.slice(0, cutoff + 1), details: text.slice(cutoff + 1).trim() };
+        }
+        return { summary: text, details: '' };
+    }, [product.description]);
+
     return (
-        <div className="flex flex-col md:flex-row h-full md:h-auto overflow-hidden bg-white dark:bg-stone-900 md:rounded-lg max-w-5xl w-full mx-auto relative shadow-2xl animate-slide-up-mobile md:animate-scale-in select-none">
+        <div
+            ref={scrollContainerRef}
+            className="flex flex-col h-full md:h-auto overflow-y-auto overflow-x-hidden bg-white dark:bg-stone-900 md:rounded-lg max-w-5xl w-full mx-auto relative shadow-2xl animate-slide-up-mobile md:animate-scale-in select-none"
+        >
             {/* Close Button */}
             <button
                 onClick={onClose}
-                className="absolute top-4 right-4 z-20 p-2 bg-white/80 dark:bg-stone-900/80 rounded-full text-stone-900 dark:text-white hover:bg-gold-500 hover:text-white transition-all backdrop-blur-sm shadow-sm"
+                className="absolute top-4 right-4 z-30 p-2 bg-white/80 dark:bg-stone-900/80 rounded-full text-stone-900 dark:text-white hover:bg-gold-500 hover:text-white transition-all backdrop-blur-sm shadow-sm"
                 aria-label="Cerrar"
             >
                 <X className="w-5 h-5" />
             </button>
 
-            {/* Image Section */}
-            <div
-                className="md:w-1/2 bg-stone-50 dark:bg-stone-900 relative group"
-                onTouchStart={onTouchStart}
-                onTouchMove={onTouchMove}
-                onTouchEnd={onTouchEnd}
-            >
-                <div className="w-full aspect-[3/4] md:h-[650px] relative overflow-hidden">
-                    {/* Crossfade: show all images absolutely positioned, only active one visible */}
-                    {imagesToDisplay.map((img: string, idx: number) => (
-                        <img
-                            key={img}
-                            src={img}
-                            className={cn(
-                                "absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out",
-                                activeImg === idx ? "opacity-100 z-10" : "opacity-0 z-0"
-                            )}
-                            alt={product.name}
-                            draggable={false}
-                            loading={idx === 0 ? "eager" : "lazy"}
-                        />
-                    ))}
+            {/* ─── DESKTOP LAYOUT ─── */}
+            {/* Image Gallery - Full Width on Desktop */}
+            <div className="w-full relative">
+                {/* Main Image */}
+                <div
+                    className="w-full aspect-[3/4] md:aspect-[16/9] md:max-h-[480px] relative overflow-hidden bg-stone-50 dark:bg-stone-900 group"
+                    onTouchStart={onTouchStart}
+                    onTouchMove={onTouchMove}
+                    onTouchEnd={onTouchEnd}
+                >
+                    {/* Only render active image + adjacent for preloading, not ALL */}
+                    {imagesToDisplay.map((img: string, idx: number) => {
+                        // Only mount active, previous, and next images
+                        const isActive = activeImg === idx;
+                        const isAdjacent = Math.abs(activeImg - idx) <= 1 ||
+                            (activeImg === 0 && idx === imagesToDisplay.length - 1) ||
+                            (activeImg === imagesToDisplay.length - 1 && idx === 0);
+                        if (!isActive && !isAdjacent) return null;
+
+                        return (
+                            <img
+                                key={`${product.id}-${img}-${idx}`}
+                                src={img}
+                                className={cn(
+                                    "absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out",
+                                    isActive ? "opacity-100 z-10" : "opacity-0 z-0"
+                                )}
+                                alt={product.name}
+                                draggable={false}
+                                loading={idx === 0 ? "eager" : "lazy"}
+                                onLoad={() => handleImgLoad(idx)}
+                            />
+                        );
+                    })}
+
+                    {/* Loading skeleton for main image */}
+                    {!imgLoadedSet.has(activeImg) && (
+                        <div className="absolute inset-0 animate-pulse bg-stone-200 dark:bg-stone-700 z-0" />
+                    )}
 
                     {/* Image counter */}
                     {imagesToDisplay.length > 1 && (
-                        <div className="absolute top-4 left-4 bg-black/40 backdrop-blur-sm text-white text-[10px] font-bold px-3 py-1 rounded-full tracking-wider">
+                        <div className="absolute top-4 left-4 bg-black/40 backdrop-blur-sm text-white text-[10px] font-bold px-3 py-1 rounded-full tracking-wider z-20">
                             {activeImg + 1} / {imagesToDisplay.length}
                         </div>
                     )}
@@ -163,140 +234,221 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency,
                     {/* Navigation Arrows */}
                     {imagesToDisplay.length > 1 && (
                         <>
-                            <div className="absolute inset-y-0 left-0 flex items-center pl-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                            <div className="absolute inset-y-0 left-0 flex items-center pl-2 md:pl-4 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-20">
                                 <button
                                     onClick={(e) => { e.stopPropagation(); setActiveImg(prev => prev === 0 ? imagesToDisplay.length - 1 : prev - 1); }}
-                                    className="p-2 bg-white/30 dark:bg-black/30 hover:bg-white text-stone-900 dark:text-white rounded-full transition-all backdrop-blur-sm"
+                                    className="p-2 md:p-3 bg-white/30 dark:bg-black/30 hover:bg-white text-stone-900 dark:text-white rounded-full transition-all backdrop-blur-sm"
                                     aria-label="Imagen anterior"
                                 >
-                                    <ChevronLeft className="w-6 h-6" />
+                                    <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
                                 </button>
                             </div>
-                            <div className="absolute inset-y-0 right-0 flex items-center pr-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-2 md:pr-4 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-20">
                                 <button
                                     onClick={(e) => { e.stopPropagation(); setActiveImg(prev => prev === imagesToDisplay.length - 1 ? 0 : prev + 1); }}
-                                    className="p-2 bg-white/30 dark:bg-black/30 hover:bg-white text-stone-900 dark:text-white rounded-full transition-all backdrop-blur-sm"
+                                    className="p-2 md:p-3 bg-white/30 dark:bg-black/30 hover:bg-white text-stone-900 dark:text-white rounded-full transition-all backdrop-blur-sm"
                                     aria-label="Imagen siguiente"
                                 >
-                                    <ChevronRight className="w-6 h-6" />
+                                    <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
                                 </button>
                             </div>
                         </>
                     )}
                 </div>
 
-                {/* Thumbnails */}
+                {/* Thumbnail Strip - Desktop: horizontal scrollable strip below the main image */}
                 {imagesToDisplay.length > 1 && (
-                    <div className="absolute bottom-6 left-0 right-0 px-4 flex justify-center gap-2 overflow-x-auto hide-scrollbar z-10">
+                    <div className="hidden md:flex items-center gap-2 px-6 py-3 bg-stone-50 dark:bg-stone-800/50 overflow-x-auto hide-scrollbar">
                         {imagesToDisplay.map((img: string, idx: number) => (
                             <button
                                 key={idx}
                                 onClick={(e) => { e.stopPropagation(); setActiveImg(idx); }}
                                 className={cn(
-                                    "w-12 h-16 shrink-0 border rounded-sm overflow-hidden transition-all duration-300",
+                                    "w-16 h-16 shrink-0 border-2 rounded-md overflow-hidden transition-all duration-300",
                                     activeImg === idx
-                                        ? "border-gold-500 shadow-md scale-110 opacity-100"
-                                        : "border-white/50 opacity-60 hover:opacity-100"
+                                        ? "border-gold-500 shadow-md scale-105 opacity-100 ring-1 ring-gold-500/30"
+                                        : "border-transparent opacity-60 hover:opacity-100 hover:border-stone-300 dark:hover:border-stone-600"
                                 )}
                                 aria-label={`Ver imagen ${idx + 1}`}
                             >
-                                <img src={img} className="w-full h-full object-cover" alt="" draggable={false} />
+                                <img src={img} className="w-full h-full object-cover" alt="" draggable={false} loading="lazy" />
                             </button>
+                        ))}
+                    </div>
+                )}
+
+                {/* Mobile Thumbnails (dots) */}
+                {imagesToDisplay.length > 1 && (
+                    <div className="flex md:hidden justify-center gap-1.5 py-3 bg-white dark:bg-stone-900">
+                        {imagesToDisplay.map((_: string, idx: number) => (
+                            <button
+                                key={idx}
+                                onClick={() => setActiveImg(idx)}
+                                className={cn(
+                                    "rounded-full transition-all duration-300",
+                                    activeImg === idx
+                                        ? "w-6 h-1.5 bg-gold-500"
+                                        : "w-1.5 h-1.5 bg-stone-300 dark:bg-stone-600"
+                                )}
+                                aria-label={`Ver imagen ${idx + 1}`}
+                            />
                         ))}
                     </div>
                 )}
             </div>
 
-            {/* Info Section */}
-            <div className="md:w-1/2 p-6 md:p-12 flex flex-col h-auto bg-white dark:bg-stone-900">
-                <div className="mb-auto">
-                    {product.collections && product.collections.length > 0 && (
-                        <span className="text-[10px] font-bold text-gold-600 uppercase tracking-[0.25em] mb-3 block">
-                            {product.collections.join(' · ')}
-                        </span>
-                    )}
-                    <h2 className="font-serif text-2xl md:text-4xl text-stone-900 dark:text-white mb-2 tracking-wide leading-tight">
-                        {product.name}
-                    </h2>
+            {/* ─── INFO SECTION ─── Full-width, organized into columns on desktop */}
+            <div className="w-full p-6 md:px-10 md:py-8 bg-white dark:bg-stone-900">
+                {/* Top row: Name/Price/Status + Action side by side on desktop */}
+                <div className="md:flex md:gap-10 md:items-start">
+                    {/* Left column: Product info */}
+                    <div className="md:flex-1 md:min-w-0">
+                        {product.collections && product.collections.length > 0 && (
+                            <span className="text-[10px] font-bold text-gold-600 uppercase tracking-[0.25em] mb-2 block">
+                                {product.collections.join(' · ')}
+                            </span>
+                        )}
+                        <h2 className="font-serif text-2xl md:text-3xl text-stone-900 dark:text-white mb-2 tracking-wide leading-tight">
+                            {product.name}
+                        </h2>
 
-                    <div className="flex items-center gap-4 mb-8 border-b border-stone-100 dark:border-stone-800 pb-6">
-                        <span className="text-xl md:text-2xl font-light text-stone-900 dark:text-gold-200">
-                            {formatPrice(currentPrice, currency)}
-                        </span>
-                        <StatusBadge status={product.status} />
+                        <div className="flex items-center gap-4 mb-4">
+                            <span className="text-xl md:text-2xl font-light text-stone-900 dark:text-gold-200">
+                                {formatPrice(currentPrice, currency)}
+                            </span>
+                            <StatusBadge status={product.status} />
+                        </div>
+
+                        {/* Short Description Summary */}
+                        {summary && (
+                            <p className="text-sm text-stone-600 dark:text-stone-300 leading-relaxed mb-4 md:mb-0 max-w-2xl">
+                                {summary}
+                            </p>
+                        )}
                     </div>
 
-                    {/* Variants */}
-                    {product.variants && product.variants.length > 0 && (
-                        <div className="mb-6 md:mb-8 animate-fade-in">
-                            <label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold mb-3 block">
-                                {product.variants.length > 1 ? 'Seleccionar Opción' : 'Opción'}
-                            </label>
-                            <div className="flex flex-wrap gap-2">
-                                {product.variants.map((v) => (
-                                    <button
-                                        key={v.id}
-                                        onClick={() => { setSelectedVariant(v); setActiveImg(0); }}
-                                        className={cn(
-                                            "px-4 py-3 md:px-5 md:py-2.5 text-xs font-medium border rounded-lg md:rounded-full transition-all duration-300 w-full md:w-auto text-left md:text-center flex items-center justify-between md:justify-center",
-                                            selectedVariant?.id === v.id
-                                                ? "bg-stone-900 dark:bg-white text-white dark:text-stone-900 border-stone-900 dark:border-white shadow-lg scale-[1.02] md:scale-105"
-                                                : "bg-transparent text-stone-500 border-stone-200 hover:border-gold-500 hover:text-stone-900 dark:hover:text-white"
-                                        )}
-                                    >
-                                        <div className="flex flex-row md:flex-col items-center gap-2 md:gap-0.5 w-full md:w-auto justify-between md:justify-center">
-                                            <span className="font-bold md:font-medium">{v.name}</span>
-                                            {v.stock !== undefined && (
-                                                <span className={cn(
-                                                    "text-[9px] md:text-[8px] uppercase tracking-tighter bg-stone-100 dark:bg-stone-800 px-2 py-0.5 rounded-full md:bg-transparent md:p-0",
-                                                    v.stock > 0 ? "text-green-600 dark:text-green-400" : "text-red-500 font-bold"
-                                                )}>
-                                                    {v.stock > 0 ? `${v.stock} disp.` : 'Agotado'}
-                                                </span>
+                    {/* Right column: Variants + CTA */}
+                    <div className="md:w-72 md:shrink-0 md:sticky md:top-4">
+                        {/* Variants */}
+                        {product.variants && product.variants.length > 0 && (
+                            <div className="mb-4">
+                                <label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold mb-2 block">
+                                    {product.variants.length > 1 ? 'Seleccionar Opción' : 'Opción'}
+                                </label>
+                                <div className="flex flex-wrap gap-2">
+                                    {product.variants.map((v) => (
+                                        <button
+                                            key={v.id}
+                                            onClick={() => { setSelectedVariant(v); setActiveImg(0); }}
+                                            className={cn(
+                                                "px-4 py-2.5 text-xs font-medium border rounded-full transition-all duration-300",
+                                                selectedVariant?.id === v.id
+                                                    ? "bg-stone-900 dark:bg-white text-white dark:text-stone-900 border-stone-900 dark:border-white shadow-lg"
+                                                    : "bg-transparent text-stone-500 border-stone-200 hover:border-gold-500 hover:text-stone-900 dark:hover:text-white"
                                             )}
-                                        </div>
-                                    </button>
-                                ))}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-bold">{v.name}</span>
+                                                {v.stock !== undefined && (
+                                                    <span className={cn(
+                                                        "text-[8px] uppercase tracking-tighter",
+                                                        v.stock > 0 ? "text-green-600 dark:text-green-400" : "text-red-500 font-bold"
+                                                    )}>
+                                                        {v.stock > 0 ? `${v.stock} disp.` : 'Agotado'}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {product.description && (
-                        <div className="prose-brand mb-8 font-sans text-sm md:text-base whitespace-pre-line text-stone-600 dark:text-stone-300 leading-relaxed">
-                            {product.description}
-                        </div>
-                    )}
-                </div>
-
-                {/* Actions */}
-                <div className="pt-6 mt-8 md:mt-auto space-y-4">
-                    <Button
-                        className="w-full py-4 text-xs md:text-sm tracking-[0.2em] bg-stone-900 hover:bg-stone-800 dark:bg-white dark:hover:bg-stone-200 text-white dark:text-stone-900 shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
-                        disabled={isSoldOut || isVariantSoldOut}
-                        onClick={handleAddToCart}
-                        isLoading={isAdding}
-                    >
-                        {isSoldOut || isVariantSoldOut ? 'Agotado' : 'Añadir a cotizar'}
-                    </Button>
-
-                    {/* Secondary actions */}
-                    <div className="flex items-center justify-center gap-4">
-                        <button
-                            onClick={handleShare}
-                            className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-stone-400 hover:text-gold-500 transition-colors"
+                        {/* CTA Button */}
+                        <Button
+                            className="w-full py-4 text-xs md:text-sm tracking-[0.2em] bg-stone-900 hover:bg-stone-800 dark:bg-white dark:hover:bg-stone-200 text-white dark:text-stone-900 shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
+                            disabled={isSoldOut || isVariantSoldOut}
+                            onClick={handleAddToCart}
+                            isLoading={isAdding}
                         >
-                            <Share2 className="w-3.5 h-3.5" />
-                            Compartir
-                        </button>
-                    </div>
+                            {isSoldOut || isVariantSoldOut ? 'Agotado' : 'Añadir a cotizar'}
+                        </Button>
 
-                    <div className="flex items-center justify-center">
-                        <span className="text-[10px] uppercase tracking-widest text-stone-400 opacity-60">
-                            Envíos disponibles a todo Chile
-                        </span>
+                        {/* Secondary actions */}
+                        <div className="flex items-center justify-center gap-4 mt-3">
+                            <button
+                                onClick={handleShare}
+                                className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-stone-400 hover:text-gold-500 transition-colors"
+                            >
+                                <Share2 className="w-3.5 h-3.5" />
+                                Compartir
+                            </button>
+                        </div>
+
+                        <div className="flex items-center justify-center mt-2">
+                            <span className="text-[10px] uppercase tracking-widest text-stone-400 opacity-60">
+                                Envíos disponibles a todo Chile
+                            </span>
+                        </div>
                     </div>
                 </div>
+
+                {/* Full description details (below the fold, full width) */}
+                {details && (
+                    <div className="mt-6 pt-6 border-t border-stone-100 dark:border-stone-800">
+                        <div className="prose-brand font-sans text-sm whitespace-pre-line text-stone-600 dark:text-stone-300 leading-relaxed max-w-3xl">
+                            {details}
+                        </div>
+                    </div>
+                )}
             </div>
+
+            {/* ─── PREV / NEXT NAVIGATION ─── */}
+            {siblingProducts && siblingProducts.length > 1 && onNavigate && (
+                <div className="hidden md:flex items-center justify-between px-10 py-4 bg-stone-50 dark:bg-stone-800/30 border-t border-stone-100 dark:border-stone-800">
+                    <button
+                        onClick={() => prevProduct && onNavigate(prevProduct)}
+                        disabled={!prevProduct}
+                        className={cn(
+                            "flex items-center gap-3 text-xs uppercase tracking-widest transition-all group/nav",
+                            prevProduct
+                                ? "text-stone-500 hover:text-stone-900 dark:hover:text-white cursor-pointer"
+                                : "text-stone-300 dark:text-stone-700 cursor-not-allowed"
+                        )}
+                    >
+                        <ChevronLeft className="w-4 h-4 group-hover/nav:-translate-x-1 transition-transform" />
+                        <div className="flex flex-col items-start">
+                            <span className="text-[9px] text-stone-400 font-bold">Anterior</span>
+                            {prevProduct && (
+                                <span className="font-serif text-sm normal-case tracking-normal">{prevProduct.name}</span>
+                            )}
+                        </div>
+                    </button>
+
+                    <div className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">
+                        {currentIdx + 1} / {siblingProducts.length}
+                    </div>
+
+                    <button
+                        onClick={() => nextProduct && onNavigate(nextProduct)}
+                        disabled={!nextProduct}
+                        className={cn(
+                            "flex items-center gap-3 text-xs uppercase tracking-widest transition-all group/nav",
+                            nextProduct
+                                ? "text-stone-500 hover:text-stone-900 dark:hover:text-white cursor-pointer"
+                                : "text-stone-300 dark:text-stone-700 cursor-not-allowed"
+                        )}
+                    >
+                        <div className="flex flex-col items-end">
+                            <span className="text-[9px] text-stone-400 font-bold">Siguiente</span>
+                            {nextProduct && (
+                                <span className="font-serif text-sm normal-case tracking-normal">{nextProduct.name}</span>
+                            )}
+                        </div>
+                        <ChevronRight className="w-4 h-4 group-hover/nav:translate-x-1 transition-transform" />
+                    </button>
+                </div>
+            )}
 
             {/* Share Fallback Modal */}
             <Modal

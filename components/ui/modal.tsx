@@ -105,7 +105,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
                         <X className="w-5 h-5 text-stone-900 dark:text-white" />
                     </button>
                 )}
-                <div className={cn(title ? "" : "pt-4", "overflow-y-auto flex-1 h-full pb-10 md:pb-0")}>
+                <div className={cn(title ? "" : "", "overflow-y-auto flex-1 h-full pb-10 md:pb-0")}>
                     <div className={title ? "p-6 md:p-8 pt-2 md:pt-8" : "p-0"}>
                         {children}
                     </div>

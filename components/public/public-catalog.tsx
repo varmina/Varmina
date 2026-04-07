@@ -565,7 +565,18 @@ export const PublicCatalog = () => {
 
             {/* --- Product Detail Modal --- */}
             <Modal isOpen={!!selectedProduct} onClose={handleCloseProduct} showCloseButton={false} size="xl">
-                {selectedProduct && <ProductDetail product={selectedProduct} currency={currency} onClose={handleCloseProduct} />}
+                {selectedProduct && (
+                    <ProductDetail
+                        product={selectedProduct}
+                        currency={currency}
+                        onClose={handleCloseProduct}
+                        siblingProducts={filteredProducts}
+                        onNavigate={(p) => {
+                            setSelectedProduct(p);
+                            window.history.replaceState({ productId: p.id }, '', `/product/${p.id}`);
+                        }}
+                    />
+                )}
             </Modal>
         </div>
     );
