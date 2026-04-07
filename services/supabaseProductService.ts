@@ -281,12 +281,13 @@ export const supabaseProductService = {
 
         if (fetchError || !original) throw new Error('No se pudo encontrar el producto original');
 
-        const { id: _, created_at: __, updated_at: ___, ...rest } = original;
-        const copyData = {
-            ...rest,
-            name: `${original.name} (Copia)`,
-            whatsapp_clicks: 0
-        };
+        const copyData = { ...original };
+        delete copyData.id;
+        delete copyData.created_at;
+        delete copyData.updated_at;
+
+        copyData.name = `${original.name} (Copia)`;
+        copyData.whatsapp_clicks = 0;
 
         const { data, error } = await (supabase as any)
             .from('products')
@@ -311,7 +312,7 @@ export const supabaseProductService = {
 
         const p = product as any as Product;
         let newStatus = p.status;
-        let updates: any = {};
+        const updates: any = {};
 
         // 2. Handle Variants
         if (variantName && p.variants && p.variants.length > 0) {

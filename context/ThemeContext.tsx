@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 
 interface ThemeContextType {
     darkMode: boolean;
@@ -39,8 +40,10 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         }
     }, [darkMode, mounted]);
 
+    const contextValue = useMemo(() => ({ darkMode, toggleDarkMode, setDarkMode }), [darkMode, toggleDarkMode]);
+
     return (
-        <ThemeContext.Provider value={{ darkMode, toggleDarkMode, setDarkMode }}>
+        <ThemeContext.Provider value={contextValue}>
             {children}
         </ThemeContext.Provider>
     );

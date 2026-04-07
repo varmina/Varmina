@@ -6,7 +6,7 @@ import { Product, ProductStatus } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { supabaseProductService } from '@/services/supabaseProductService';
-import { Plus, Edit2, Trash2, AlertCircle, Package, Copy, Check, X as CloseIcon, FileText, Search, MapPin } from 'lucide-react';
+import { Plus, Edit2, Trash2, AlertCircle, Package, Copy, Check, X as CloseIcon, Search, MapPin } from 'lucide-react';
 import { ProductForm } from '@/components/admin/product-form';
 import { AnalyticsDashboard } from '@/components/admin/analytics-dashboard';
 import { SettingsView } from '@/components/admin/settings-view';
@@ -76,7 +76,7 @@ export const AdminDashboardView = () => {
             refreshInventory();
             setDeleteConfirm(null);
             setSelectedIds([]);
-        } catch (e) {
+        } catch {
             addToast('error', 'Error al eliminar productos');
         }
     };
@@ -87,7 +87,7 @@ export const AdminDashboardView = () => {
             addToast('success', 'Estado actualizado en lote');
             refreshInventory();
             setSelectedIds([]);
-        } catch (e) {
+        } catch {
             addToast('error', 'Error al actualizar estados');
         }
     };
@@ -103,7 +103,7 @@ export const AdminDashboardView = () => {
             await supabaseProductService.duplicate(id);
             addToast('success', 'Producto duplicado correctamente');
             refreshInventory();
-        } catch (e) {
+        } catch {
             addToast('error', 'Error al duplicar producto');
         }
     };
@@ -114,7 +114,7 @@ export const AdminDashboardView = () => {
             addToast('success', 'Precio actualizado');
             refreshInventory();
             setInlinePriceId(null);
-        } catch (e) {
+        } catch {
             addToast('error', 'Error al actualizar precio');
         }
     };
@@ -124,7 +124,7 @@ export const AdminDashboardView = () => {
             await supabaseProductService.update(id, { status });
             addToast('success', 'Estado actualizado');
             refreshInventory();
-        } catch (e) {
+        } catch {
             addToast('error', 'Error al actualizar estado');
         }
     };
@@ -188,7 +188,7 @@ export const AdminDashboardView = () => {
                                             <select
                                                 className="w-full bg-transparent text-[9px] font-bold uppercase tracking-widest px-4 py-2 outline-none border-none text-stone-500 dark:text-stone-400 cursor-pointer"
                                                 value={filterStatus}
-                                                onChange={(e) => setFilterStatus(e.target.value as any)}
+                                                onChange={(e) => setFilterStatus(e.target.value as ProductStatus | 'All')}
                                             >
                                                 <option value="All">Estados</option>
                                                 <option value={ProductStatus.IN_STOCK}>Disponible</option>

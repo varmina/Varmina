@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Product, ProductStatus } from '@/types';
 import { useStore } from '@/context/StoreContext';
 import { formatPrice } from '@/lib/format';
@@ -17,7 +18,6 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, cu
     const { settings } = useStore();
     const exchangeRate = settings?.usd_exchange_rate || 950;
     const displayPrice = currency === 'CLP' ? product.price : Math.round(product.price / exchangeRate);
-    const [imgLoaded, setImgLoaded] = useState(false);
     const [hoverActive, setHoverActive] = useState(false);
 
     const isList = layout === 'list';
@@ -51,31 +51,28 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, cu
                     ? "w-24 h-32 md:w-48 md:h-64 shrink-0"
                     : "w-full aspect-square"
             )}>
-                {/* Skeleton while loading */}
-                {!imgLoaded && (
-                    <div className="absolute inset-0 animate-pulse bg-stone-100 dark:bg-stone-700" />
-                )}
-
-                <img
+                <Image
                     src={primaryImage}
                     alt={product.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     className={cn(
-                        "w-full h-full object-contain transition-all duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] p-2",
+                        "object-contain transition-all duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] p-2",
                         hoverActive && hoverImage ? "opacity-0" : "opacity-100",
-                        !imgLoaded && "opacity-0",
                         !hoverActive && "group-hover:scale-105"
                     )}
-                    loading="lazy"
-                    onLoad={() => setImgLoaded(true)}
+                    priority={layout === 'grid'}
                 />
 
                 {/* Hover second image */}
                 {hoverImage && (
-                    <img
+                    <Image
                         src={hoverImage}
                         alt={product.name}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className={cn(
-                            "absolute inset-0 w-full h-full object-contain p-2 transition-opacity duration-500 ease-in-out",
+                            "object-contain p-2 transition-opacity duration-500 ease-in-out",
                             hoverActive ? "opacity-100 scale-105" : "opacity-0"
                         )}
                         loading="lazy"

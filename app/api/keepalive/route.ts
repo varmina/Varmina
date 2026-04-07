@@ -8,7 +8,7 @@ export async function GET() {
   try {
     const supabase = createClient(supabaseUrl, supabaseKey);
     // Just fetch one product ID to register activity
-    const { data, error } = await supabase.from('products').select('id').limit(1);
+    const { error } = await supabase.from('products').select('id').limit(1);
     
     if (error) {
       console.error('Keepalive error:', error);
@@ -16,7 +16,7 @@ export async function GET() {
     }
 
     return NextResponse.json({ status: 'ok', activity: true, timestamp: new Date().toISOString() });
-  } catch (err) {
+  } catch {
     return NextResponse.json({ status: 'error', message: 'Internal Server Error' }, { status: 500 });
   }
 }

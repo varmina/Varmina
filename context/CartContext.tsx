@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import { Product } from '@/types';
 
 export interface CartItem {
@@ -43,7 +44,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         localStorage.setItem('varmina_cart', JSON.stringify(items));
     }, [items]);
 
-    const addItem = (product: Product, quantity = 1, variant?: string) => {
+    const addItem = useCallback((product: Product, quantity = 1, variant?: string) => {
         setItems(prev => {
             const existing = prev.find(i => i.product.id === product.id && i.selectedVariant === variant);
             if (existing) {
@@ -56,29 +57,31 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             return [...prev, { product, quantity, selectedVariant: variant }];
         });
         setIsOpen(true); // Auto open on add
-    };
+    }, []);
 
-    const removeItem = (productId: string) => {
+    const removeItem = useCallback((productId: string) => {
         setItems(prev => prev.filter(i => i.product.id !== productId));
-    };
+    }, []);
 
-    const updateQuantity = (productId: string, quantity: number) => {
+    const updateQuantity = useCallback((productId: string, quantity: number) => {
         if (quantity < 1) {
             removeItem(productId);
             return;
         }
         setItems(prev => prev.map(i => i.product.id === productId ? { ...i, quantity } : i));
-    };
+    }, [removeItem]);
 
-    const clearCart = () => setItems([]);
+    const clearCart = useCallback(() => setItems([]), []);
 
-    const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
-    const totalPrice = items.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
+    const totalItems = useMemo(() => items.reduce((acc, item) => acc + item.quantity, 0), [items]);
+    const totalPrice = useMemo(() => items.reduce((acc, item) => acc + (item.product.price * item.quantity), 0), [items]);
+
+    const contextValue = useMemo(() => ({
+        items, isOpen, setIsOpen, addItem, removeItem, updateQuantity, clearCart, totalItems, totalPrice
+    }), [items, isOpen, addItem, removeItem, updateQuantity, clearCart, totalItems, totalPrice]);
 
     return (
-        <CartContext.Provider value={{
-            items, isOpen, setIsOpen, addItem, removeItem, updateQuantity, clearCart, totalItems, totalPrice
-        }}>
+        <CartContext.Provider value={contextValue}>
             {children}
         </CartContext.Provider>
     );

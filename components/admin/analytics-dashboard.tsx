@@ -1,13 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from '@/context/StoreContext';
 import {
     BarChart3, TrendingUp, Activity, MousePointerClick,
     RotateCcw, AlertCircle, DollarSign,
-    Box, PieChart, Layers, ArrowUpRight
+    PieChart, Layers, ArrowUpRight
 } from 'lucide-react';
-import { ProductStatus } from '@/types';
 import { supabaseProductService } from '@/services/supabaseProductService';
 import { attributeService } from '@/services/attributeService';
 import { Button } from '../ui/button';

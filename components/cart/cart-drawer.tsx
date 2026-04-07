@@ -28,7 +28,7 @@ export const CartDrawer: React.FC = () => {
 
         const phone = settings.whatsapp_number.replace(/\D/g, '');
         let header = `Hola *${settings.brand_name}*, me interesan las siguientes piezas:\n\n`;
-        let footer = `\n\nTotal Estimado: ${formatPrice(getDisplayPrice(totalPrice), currency)}\n\nQuedo atento a su respuesta.`;
+        const footer = `\n\nTotal Estimado: ${formatPrice(getDisplayPrice(totalPrice), currency)}\n\nQuedo atento a su respuesta.`;
 
         if (settings.whatsapp_template) {
             header = settings.whatsapp_template

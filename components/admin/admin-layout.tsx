@@ -6,7 +6,7 @@ import { useStore } from '@/context/StoreContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
 import { APP_NAME } from '@/lib/constants';
-import { LayoutGrid, Sun, Moon, Store, LogOut, Award, BarChart3, DollarSign, Truck, ShoppingCart, Calculator, Paintbrush, Home, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutGrid, Sun, Moon, Store, LogOut, Award, BarChart3, DollarSign, Truck, ShoppingCart, Paintbrush, Home, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { darkMode, toggleDarkMode, setDarkMode } = useTheme();
@@ -249,10 +249,19 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
 };
 
 // --- Mobile More Menu Helper ---
-const MenuButton = ({ activeAdminTab, setActiveAdminTab, toggleDarkMode, handleLogout, darkMode }: any) => {
+type AdminTab = 'overview' | 'inventory' | 'analytics' | 'finance' | 'settings' | 'erp' | 'orders' | 'designer';
+
+interface MenuButtonProps {
+    activeAdminTab: string;
+    setActiveAdminTab: (tab: AdminTab) => void;
+    toggleDarkMode: () => void;
+    handleLogout: () => void;
+    darkMode: boolean;
+}
+const MenuButton = ({ activeAdminTab, setActiveAdminTab, toggleDarkMode, handleLogout, darkMode }: MenuButtonProps) => {
     const [isOpen, setIsOpen] = React.useState(false);
 
-    const menuItems = [
+    const menuItems: { id: AdminTab; label: string; icon: React.ElementType }[] = [
         { id: 'analytics', label: 'Analítica', icon: BarChart3 },
         { id: 'erp', label: 'Logística', icon: Truck },
         { id: 'designer', label: 'Diseñador', icon: Paintbrush },
@@ -281,7 +290,7 @@ const MenuButton = ({ activeAdminTab, setActiveAdminTab, toggleDarkMode, handleL
                             {menuItems.map(item => (
                                 <button
                                     key={item.id}
-                                    onClick={() => { setActiveAdminTab(item.id as any); setIsOpen(false); }}
+                                    onClick={() => { setActiveAdminTab(item.id); setIsOpen(false); }}
                                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-colors ${activeAdminTab === item.id ? 'bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-gold-400' : 'text-stone-500 hover:bg-stone-50 dark:hover:bg-stone-800/50'}`}
                                 >
                                     <item.icon className="w-4 h-4" />

@@ -78,18 +78,18 @@ export const usePublicProducts = () => {
                 if (!mounted) return;
                 if (error) throw error;
 
-                const parsed = (data as any[])?.map(p => ({
+                const parsed = (data as Record<string, unknown>[])?.map(p => ({
                     ...p,
                     price: Number(p.price),
                     stock: Number(p.stock)
-                })) || [];
+                })) as Product[] || [];
 
                 setProducts(parsed);
                 memoryCache = { products: parsed, timestamp: Date.now() };
                 setSessionCache(parsed);
-            } catch (err: any) {
+            } catch (err: unknown) {
                 console.error('Public fetch error:', err);
-                if (mounted) setError(err.message);
+                if (mounted) setError(err instanceof Error ? err.message : String(err));
             } finally {
                 if (mounted) setLoading(false);
             }

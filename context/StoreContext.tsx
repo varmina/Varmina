@@ -227,19 +227,25 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         link.href = "/assets/no bg png.png";
     }, [settings]);
 
+    const contextValue = useMemo(() => ({
+        products,
+        loading: dataLoading,
+        attributes,
+        currency, toggleCurrency,
+        refreshProducts,
+        refreshAttributes,
+        toasts, addToast, removeToast,
+        settings, refreshSettings,
+        activeAdminTab, setActiveAdminTab,
+        dataVersion
+    }), [
+        products, dataLoading, attributes, currency, toggleCurrency,
+        refreshProducts, refreshAttributes, toasts, addToast, removeToast,
+        settings, refreshSettings, activeAdminTab, dataVersion
+    ]);
+
     return (
-        <StoreContext.Provider value={{
-            products,
-            loading: dataLoading,
-            attributes,
-            currency, toggleCurrency,
-            refreshProducts,
-            refreshAttributes,
-            toasts, addToast, removeToast,
-            settings, refreshSettings,
-            activeAdminTab, setActiveAdminTab,
-            dataVersion
-        }}>
+        <StoreContext.Provider value={contextValue}>
             {children}
         </StoreContext.Provider>
     );

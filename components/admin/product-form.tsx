@@ -10,15 +10,27 @@ import { Upload, X, GripVertical, Star, Check } from 'lucide-react';
 import { compressImage } from '@/utils/imageOptimizer';
 import { attributeService } from '@/services/attributeService';
 
-function LocalInput({ value, onChange, ...props }: any) {
+interface LocalInputProps {
+    value: string | number;
+    onChange: (val: any) => void;
+    [key: string]: any;
+}
+
+function LocalInput({ value, onChange, ...props }: LocalInputProps) {
     const [localValue, setLocalValue] = useState(value);
-    useEffect(() => setLocalValue(value), [value]);
+    const [prevValue, setPrevValue] = useState(value);
+
+    if (value !== prevValue) {
+        setPrevValue(value);
+        setLocalValue(value);
+    }
+
     return (
         <Input 
             {...props} 
             value={localValue} 
-            onChange={(e: any) => setLocalValue(e.target.value)} 
-            onBlur={(e: any) => {
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocalValue(e.target.value)} 
+            onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
                 if (props.type === 'number') {
                     onChange(Number(localValue));
                 } else {
@@ -30,15 +42,21 @@ function LocalInput({ value, onChange, ...props }: any) {
     );
 }
 
-function LocalTextarea({ value, onChange, ...props }: any) {
+function LocalTextarea({ value, onChange, ...props }: LocalInputProps) {
     const [localValue, setLocalValue] = useState(value);
-    useEffect(() => setLocalValue(value), [value]);
+    const [prevValue, setPrevValue] = useState(value);
+
+    if (value !== prevValue) {
+        setPrevValue(value);
+        setLocalValue(value);
+    }
+
     return (
         <textarea 
             {...props} 
             value={localValue} 
-            onChange={(e: any) => setLocalValue(e.target.value)} 
-            onBlur={(e: any) => {
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setLocalValue(e.target.value)} 
+            onBlur={(e: React.FocusEvent<HTMLTextAreaElement>) => {
                 if (localValue !== value) onChange(localValue);
                 props.onBlur?.(e);
             }} 
@@ -46,15 +64,21 @@ function LocalTextarea({ value, onChange, ...props }: any) {
     );
 }
 
-function LocalNativeInput({ value, onChange, ...props }: any) {
+function LocalNativeInput({ value, onChange, ...props }: LocalInputProps) {
     const [localValue, setLocalValue] = useState(value);
-    useEffect(() => setLocalValue(value), [value]);
+    const [prevValue, setPrevValue] = useState(value);
+
+    if (value !== prevValue) {
+        setPrevValue(value);
+        setLocalValue(value);
+    }
+
     return (
         <input 
             {...props} 
             value={localValue} 
-            onChange={(e: any) => setLocalValue(e.target.value)} 
-            onBlur={(e: any) => {
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocalValue(e.target.value)} 
+            onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
                 if (props.type === 'number') {
                     onChange(Number(localValue));
                 } else {

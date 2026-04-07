@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Product, ProductStatus, ProductVariant } from '@/types';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -161,7 +162,6 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                         {/* Main Image - adapts to image aspect ratio */}
                         <div
                             className="w-full relative overflow-hidden bg-stone-50 dark:bg-stone-900/50 flex items-center justify-center md:rounded-lg"
-                            style={{ minHeight: '350px' }}
                             onTouchStart={onTouchStart}
                             onTouchMove={onTouchMove}
                             onTouchEnd={onTouchEnd}
@@ -175,17 +175,20 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                 if (!isActive && !isAdjacent) return null;
 
                                 return (
-                                    <img
+                                    <Image
                                         key={`${product.id}-${img}-${idx}`}
                                         src={img}
+                                        fill
+                                        sizes="(max-width: 768px) 100vw, 50vw"
                                         className={cn(
-                                            "w-full max-h-[75vh] md:max-h-[650px] object-contain transition-opacity duration-500 ease-in-out p-4 md:p-8",
+                                            "object-contain transition-opacity duration-500 ease-in-out",
                                             isActive ? "opacity-100 relative z-10" : "opacity-0 absolute inset-0 z-0"
                                         )}
                                         alt={product.name}
                                         draggable={false}
-                                        loading={idx === 0 ? "eager" : "lazy"}
+                                        priority={idx === 0}
                                         onLoad={() => handleImgLoad(idx)}
+                                        unoptimized={img.startsWith('data:')}
                                     />
                                 );
                             })}
@@ -235,14 +238,14 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                         key={idx}
                                         onClick={(e) => { e.stopPropagation(); setActiveImg(idx); }}
                                         className={cn(
-                                            "w-16 h-16 md:w-20 md:h-20 shrink-0 border-2 rounded-md overflow-hidden transition-all duration-300 bg-stone-50 dark:bg-stone-800",
+                                            "relative w-16 h-16 md:w-20 md:h-20 shrink-0 border-2 rounded-md overflow-hidden transition-all duration-300 bg-stone-50 dark:bg-stone-800",
                                             activeImg === idx
                                                 ? "border-stone-900 dark:border-white shadow-md opacity-100"
                                                 : "border-transparent opacity-50 hover:opacity-100 hover:border-stone-300 dark:hover:border-stone-600"
                                         )}
                                         aria-label={`Ver imagen ${idx + 1}`}
                                     >
-                                        <img src={img} className="w-full h-full object-contain p-1" alt="" draggable={false} loading="lazy" />
+                                        <Image src={img} fill sizes="80px" className="object-contain p-1" alt="" draggable={false} unoptimized={img.startsWith('data:')} />
                                     </button>
                                 ))}
                             </div>
@@ -294,11 +297,11 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                             {/* Divider */}
                             <div className="w-full h-px bg-stone-100 dark:bg-stone-800" />
 
-                            {/* Short Description */}
+                            {/* Full Description */}
                             {product.description && (
-                                <p className="text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
-                                    {product.description.split('\n\n')[0]}
-                                </p>
+                                <div className="prose-brand font-sans text-sm whitespace-pre-line text-stone-600 dark:text-stone-300 leading-relaxed">
+                                    {product.description}
+                                </div>
                             )}
 
                             {/* Variants */}
@@ -356,35 +359,6 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                     Compartir
                                 </button>
                             </div>
-
-                            {/* Trust Badges */}
-                            <div className="grid grid-cols-1 gap-3 pt-2">
-                                <div className="flex items-center gap-3 text-stone-400">
-                                    <Truck className="w-4 h-4 shrink-0" />
-                                    <span className="text-[10px] uppercase tracking-widest">Envíos a todo Chile</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-stone-400">
-                                    <Shield className="w-4 h-4 shrink-0" />
-                                    <span className="text-[10px] uppercase tracking-widest">Garantía de autenticidad</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-stone-400">
-                                    <Package className="w-4 h-4 shrink-0" />
-                                    <span className="text-[10px] uppercase tracking-widest">Empaque premium</span>
-                                </div>
-                            </div>
-
-                            {/* Divider */}
-                            <div className="w-full h-px bg-stone-100 dark:bg-stone-800" />
-
-                            {/* Full Description */}
-                            {product.description && product.description.includes('\n\n') && (
-                                <div>
-                                    <h4 className="text-[10px] uppercase tracking-widest text-stone-400 font-bold mb-3">Detalles</h4>
-                                    <div className="prose-brand font-sans text-sm whitespace-pre-line text-stone-600 dark:text-stone-300 leading-relaxed">
-                                        {product.description.split('\n\n').slice(1).join('\n\n')}
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>

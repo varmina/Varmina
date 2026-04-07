@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
@@ -65,7 +66,7 @@ export const PublicCatalog = () => {
     // Filtering Logic (uses debounced search)
     const filteredProducts = useMemo(() => {
         const q = debouncedSearch.toLowerCase();
-        let result = products.filter(p => {
+        const result = products.filter(p => {
             // Never show sold out products in public catalog
             if (p.status === ProductStatus.SOLD_OUT) return false;
             const matchesSearch = !q || p.name.toLowerCase().includes(q);
