@@ -1,14 +1,13 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useStore } from '@/context/StoreContext';
 import { usePublicProducts } from '@/hooks/use-public-products';
-import { Product, ProductStatus } from '@/types';
-import { Modal } from '@/components/ui/modal';
+import { ProductStatus } from '@/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Search, SlidersHorizontal, Grid, List, X, Check, ArrowUp } from 'lucide-react';
 import { ProductCard } from '@/components/products/product-card';
-import { ProductDetail } from '@/components/products/product-detail';
 import { cn } from '@/lib/utils';
 
 type SortOption = 'newest' | 'price_asc' | 'price_desc';
@@ -16,47 +15,29 @@ type SortOption = 'newest' | 'price_asc' | 'price_desc';
 export const PublicCatalog = () => {
     const { currency, settings } = useStore();
     const { products, loading } = usePublicProducts();
+    const searchParams = useSearchParams();
 
     const [layout, setLayout] = useState<'grid' | 'list'>('grid');
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
-    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
 
-    // Update URL when product is selected/deselected
-    useEffect(() => {
-        if (selectedProduct) {
-            window.history.pushState({ productId: selectedProduct.id }, '', `/product/${selectedProduct.id}`);
-        }
-    }, [selectedProduct]);
-
-    // Handle browser back button
-    useEffect(() => {
-        const handlePopState = (event: PopStateEvent) => {
-            if (selectedProduct) {
-                // If we have a product open and user hits back, close it
-                setSelectedProduct(null);
-            }
-        };
-
-        window.addEventListener('popstate', handlePopState);
-        return () => window.removeEventListener('popstate', handlePopState);
-    }, [selectedProduct]);
-
-    const handleCloseProduct = useCallback(() => {
-        setSelectedProduct(null);
-        // Revert URL to catalog
-        window.history.pushState(null, '', '/');
-    }, []);
-
-    // Filters
+    // Filters — initialize from URL search params if present
     const [minPrice, setMinPrice] = useState(0);
     const [maxPrice, setMaxPrice] = useState(300000);
     const [statusFilter, setStatusFilter] = useState<ProductStatus | 'All'>('All');
-    const [categoryFilter, setCategoryFilter] = useState<string>('All');
-    const [collectionFilter, setCollectionFilter] = useState<string>('All');
+    const [categoryFilter, setCategoryFilter] = useState<string>(() => searchParams?.get('category') || 'All');
+    const [collectionFilter, setCollectionFilter] = useState<string>(() => searchParams?.get('collection') || 'All');
     const [sort, setSort] = useState<SortOption>('newest');
+
+    // Sync filters when URL params change
+    useEffect(() => {
+        const cat = searchParams?.get('category');
+        const col = searchParams?.get('collection');
+        if (cat) setCategoryFilter(cat);
+        if (col) setCollectionFilter(col);
+    }, [searchParams]);
 
     // Debounce search
     useEffect(() => {
@@ -284,7 +265,7 @@ export const PublicCatalog = () => {
                     <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-8">
                         {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
                             <div key={i} className="space-y-3">
-                                <Skeleton className="aspect-[3/4] w-full" />
+                                <Skeleton className="aspect-square w-full" />
                                 <Skeleton className="h-4 w-2/3" />
                                 <Skeleton className="h-3 w-1/3" />
                             </div>
@@ -353,7 +334,6 @@ export const PublicCatalog = () => {
                                     product={product}
                                     currency={currency}
                                     layout={layout}
-                                    onClick={setSelectedProduct}
                                 />
                             ))}
                         </div>
@@ -562,22 +542,6 @@ export const PublicCatalog = () => {
             >
                 <ArrowUp className="w-4 h-4" />
             </button>
-
-            {/* --- Product Detail Modal --- */}
-            <Modal isOpen={!!selectedProduct} onClose={handleCloseProduct} showCloseButton={false} size="xl">
-                {selectedProduct && (
-                    <ProductDetail
-                        product={selectedProduct}
-                        currency={currency}
-                        onClose={handleCloseProduct}
-                        siblingProducts={filteredProducts}
-                        onNavigate={(p) => {
-                            setSelectedProduct(p);
-                            window.history.replaceState({ productId: p.id }, '', `/product/${p.id}`);
-                        }}
-                    />
-                )}
-            </Modal>
         </div>
     );
 };

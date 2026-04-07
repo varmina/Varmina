@@ -150,10 +150,54 @@ const DividerConfigEditor = ({ config, onChange }: { config: Record<string, any>
     </div>
 );
 
+const CategoriesConfigEditor = ({ config, onChange }: { config: Record<string, any>; onChange: (c: Record<string, any>) => void }) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Input label="Título de Sección" value={config.title || ''} onChange={e => onChange({ ...config, title: e.target.value })} className="bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 rounded-lg py-3 dark:text-white" />
+        <Input label="Subtítulo (opcional)" value={config.subtitle || ''} onChange={e => onChange({ ...config, subtitle: e.target.value })} className="bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 rounded-lg py-3 dark:text-white" />
+        <div>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-2">Columnas (Desktop)</label>
+            <select value={config.columns || 3} onChange={e => onChange({ ...config, columns: Number(e.target.value) })} className="w-full bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg py-3 px-4 text-xs dark:text-white focus:outline-none focus:border-gold-500">
+                <option value={2}>2 Columnas</option>
+                <option value={3}>3 Columnas</option>
+                <option value={4}>4 Columnas</option>
+            </select>
+        </div>
+        <label className="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" checked={config.show_product_count !== false} onChange={e => onChange({ ...config, show_product_count: e.target.checked })} className="w-4 h-4 accent-gold-500 rounded" />
+            <span className="text-xs text-stone-600 dark:text-stone-300 font-bold uppercase tracking-wider">Mostrar Cantidad de Productos</span>
+        </label>
+    </div>
+);
+
+const CollectionsConfigEditor = ({ config, onChange }: { config: Record<string, any>; onChange: (c: Record<string, any>) => void }) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Input label="Título de Sección" value={config.title || ''} onChange={e => onChange({ ...config, title: e.target.value })} className="bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 rounded-lg py-3 dark:text-white" />
+        <Input label="Subtítulo (opcional)" value={config.subtitle || ''} onChange={e => onChange({ ...config, subtitle: e.target.value })} className="bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 rounded-lg py-3 dark:text-white" />
+        <div>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-2">Columnas (Desktop)</label>
+            <select value={config.columns || 2} onChange={e => onChange({ ...config, columns: Number(e.target.value) })} className="w-full bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg py-3 px-4 text-xs dark:text-white focus:outline-none focus:border-gold-500">
+                <option value={2}>2 Columnas</option>
+                <option value={3}>3 Columnas</option>
+                <option value={4}>4 Columnas</option>
+            </select>
+        </div>
+        <div>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-2">Máx. Colecciones (0 = todas)</label>
+            <input type="number" value={config.max_items || 0} onChange={e => onChange({ ...config, max_items: Number(e.target.value) })} onWheel={e => (e.target as HTMLInputElement).blur()} className="w-full bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg py-3 px-4 text-xs dark:text-white focus:outline-none focus:border-gold-500" />
+        </div>
+        <label className="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" checked={config.show_product_count !== false} onChange={e => onChange({ ...config, show_product_count: e.target.checked })} className="w-4 h-4 accent-gold-500 rounded" />
+            <span className="text-xs text-stone-600 dark:text-stone-300 font-bold uppercase tracking-wider">Mostrar Cantidad de Productos</span>
+        </label>
+    </div>
+);
+
 const CONFIG_EDITORS: Record<string, React.FC<{ config: Record<string, any>; onChange: (c: Record<string, any>) => void }>> = {
     hero: HeroConfigEditor,
     catalog: CatalogConfigEditor,
     featured: FeaturedConfigEditor,
+    categories: CategoriesConfigEditor,
+    collections: CollectionsConfigEditor,
     text: TextConfigEditor,
     image: ImageConfigEditor,
     banner: BannerConfigEditor,

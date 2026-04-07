@@ -1,15 +1,15 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useStore } from '@/context/StoreContext';
 import { usePublicProducts } from '@/hooks/use-public-products';
 import { pageLayoutService, PageSection } from '@/services/pageLayoutService';
-import { Product, ProductStatus } from '@/types';
+import { ProductStatus } from '@/types';
 import { ProductCard } from '@/components/products/product-card';
-import { ProductDetail } from '@/components/products/product-detail';
-import { Modal } from '@/components/ui/modal';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, SlidersHorizontal, Grid, List, X, Check, ArrowUp } from 'lucide-react';
+import { Search, SlidersHorizontal, Grid, List, X, Check, ArrowUp, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // ─── Hero Section ──────────────────────────────────────────────────────
@@ -71,6 +71,240 @@ const HeroSection: React.FC<{ config: Record<string, any> }> = ({ config }) => {
     );
 };
 
+// ─── Categories Section ────────────────────────────────────────────────
+
+const CategoriesSection: React.FC<{ config: Record<string, any> }> = ({ config }) => {
+    const { products } = usePublicProducts();
+
+    const categoryData = useMemo(() => {
+        const available = products.filter(p => p.status !== ProductStatus.SOLD_OUT);
+        const catMap = new Map<string, { count: number; image: string }>();
+
+        available.forEach(p => {
+            if (!p.category) return;
+            const existing = catMap.get(p.category);
+            if (!existing) {
+                const img = p.images?.[0] || '';
+                catMap.set(p.category, { count: 1, image: img });
+            } else {
+                existing.count++;
+            }
+        });
+
+        return Array.from(catMap.entries()).map(([name, data]) => ({
+            name,
+            count: data.count,
+            image: data.image,
+        }));
+    }, [products]);
+
+    if (categoryData.length === 0) return null;
+
+    const columns = config.columns || 3;
+    const gridClass = columns === 2
+        ? 'grid-cols-1 sm:grid-cols-2'
+        : columns === 4
+            ? 'grid-cols-2 lg:grid-cols-4'
+            : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+
+    return (
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-20">
+            {/* Section Header */}
+            {config.title && (
+                <div className="text-center mb-10 md:mb-14">
+                    <h2 className="font-serif text-2xl md:text-4xl tracking-[0.2em] text-stone-900 dark:text-white uppercase">
+                        {config.title}
+                    </h2>
+                    {config.subtitle && (
+                        <p className="text-[10px] md:text-xs text-stone-400 uppercase tracking-[0.25em] mt-3 font-bold">
+                            {config.subtitle}
+                        </p>
+                    )}
+                    <div className="w-12 h-[1px] bg-gold-500/60 mx-auto mt-5" />
+                </div>
+            )}
+
+            {/* Category Cards Grid */}
+            <div className={`grid ${gridClass} gap-4 md:gap-6`}>
+                {categoryData.map(cat => (
+                    <Link
+                        key={cat.name}
+                        href={`/?category=${encodeURIComponent(cat.name)}`}
+                        className="group relative overflow-hidden rounded-lg aspect-[4/3] bg-stone-100 dark:bg-stone-800 cursor-pointer block"
+                    >
+                        {/* Background Image */}
+                        {cat.image && (
+                            <img
+                                src={cat.image}
+                                alt={cat.name}
+                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                                loading="lazy"
+                            />
+                        )}
+
+                        {/* Gradient Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent group-hover:from-black/80 transition-colors duration-500" />
+
+                        {/* Content */}
+                        <div className="absolute inset-0 flex flex-col items-center justify-end p-6 md:p-8">
+                            <h3 className="font-serif text-lg md:text-2xl text-white tracking-[0.15em] uppercase text-center drop-shadow-lg">
+                                {cat.name}
+                            </h3>
+                            {config.show_product_count !== false && (
+                                <p className="text-[9px] md:text-[10px] text-white/70 uppercase tracking-[0.3em] font-bold mt-2">
+                                    {cat.count} {cat.count === 1 ? 'pieza' : 'piezas'}
+                                </p>
+                            )}
+                            {/* Hover arrow */}
+                            <div className="flex items-center gap-1.5 mt-3 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                                <span className="text-[9px] text-gold-400 uppercase tracking-[0.2em] font-bold">Explorar</span>
+                                <ArrowRight className="w-3 h-3 text-gold-400" />
+                            </div>
+                        </div>
+                    </Link>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+// ─── Collections Section ───────────────────────────────────────────────
+
+const CollectionsSection: React.FC<{ config: Record<string, any> }> = ({ config }) => {
+    const { products } = usePublicProducts();
+
+    const collectionData = useMemo(() => {
+        const available = products.filter(p => p.status !== ProductStatus.SOLD_OUT);
+        const colMap = new Map<string, { count: number; images: string[] }>();
+
+        available.forEach(p => {
+            if (!p.collections) return;
+            p.collections.forEach(col => {
+                const existing = colMap.get(col);
+                if (!existing) {
+                    colMap.set(col, { count: 1, images: p.images?.slice(0, 1) || [] });
+                } else {
+                    existing.count++;
+                    if (existing.images.length < 4 && p.images?.[0]) {
+                        existing.images.push(p.images[0]);
+                    }
+                }
+            });
+        });
+
+        let result = Array.from(colMap.entries()).map(([name, data]) => ({
+            name,
+            count: data.count,
+            images: data.images,
+        }));
+
+        if (config.max_items > 0) {
+            result = result.slice(0, config.max_items);
+        }
+
+        return result;
+    }, [products, config.max_items]);
+
+    if (collectionData.length === 0) return null;
+
+    const columns = config.columns || 2;
+    const gridClass = columns === 3
+        ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+        : columns === 4
+            ? 'grid-cols-2 lg:grid-cols-4'
+            : 'grid-cols-1 sm:grid-cols-2';
+
+    return (
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-20">
+            {/* Section Header */}
+            {config.title && (
+                <div className="text-center mb-10 md:mb-14">
+                    <h2 className="font-serif text-2xl md:text-4xl tracking-[0.2em] text-stone-900 dark:text-white uppercase">
+                        {config.title}
+                    </h2>
+                    {config.subtitle && (
+                        <p className="text-[10px] md:text-xs text-stone-400 uppercase tracking-[0.25em] mt-3 font-bold">
+                            {config.subtitle}
+                        </p>
+                    )}
+                    <div className="w-12 h-[1px] bg-gold-500/60 mx-auto mt-5" />
+                </div>
+            )}
+
+            {/* Collection Cards Grid */}
+            <div className={`grid ${gridClass} gap-4 md:gap-6`}>
+                {collectionData.map(col => (
+                    <Link
+                        key={col.name}
+                        href={`/?collection=${encodeURIComponent(col.name)}`}
+                        className="group relative overflow-hidden rounded-lg bg-stone-100 dark:bg-stone-800 cursor-pointer block"
+                    >
+                        {/* Image Mosaic or Single Image */}
+                        <div className="aspect-[3/2] relative">
+                            {col.images.length >= 4 ? (
+                                // 2x2 mosaic
+                                <div className="grid grid-cols-2 grid-rows-2 w-full h-full">
+                                    {col.images.slice(0, 4).map((img, i) => (
+                                        <img
+                                            key={i}
+                                            src={img}
+                                            alt=""
+                                            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                                            loading="lazy"
+                                        />
+                                    ))}
+                                </div>
+                            ) : col.images.length >= 2 ? (
+                                // Side-by-side
+                                <div className="grid grid-cols-2 w-full h-full">
+                                    {col.images.slice(0, 2).map((img, i) => (
+                                        <img
+                                            key={i}
+                                            src={img}
+                                            alt=""
+                                            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                                            loading="lazy"
+                                        />
+                                    ))}
+                                </div>
+                            ) : col.images[0] ? (
+                                <img
+                                    src={col.images[0]}
+                                    alt={col.name}
+                                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                                    loading="lazy"
+                                />
+                            ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-stone-200 to-stone-300 dark:from-stone-700 dark:to-stone-800" />
+                            )}
+
+                            {/* Overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent group-hover:from-black/80 transition-colors duration-500" />
+                        </div>
+
+                        {/* Content overlay */}
+                        <div className="absolute inset-0 flex flex-col items-center justify-end p-6 md:p-8">
+                            <h3 className="font-serif text-lg md:text-2xl text-white tracking-[0.15em] uppercase text-center drop-shadow-lg">
+                                {col.name}
+                            </h3>
+                            {config.show_product_count !== false && (
+                                <p className="text-[9px] md:text-[10px] text-white/70 uppercase tracking-[0.3em] font-bold mt-2">
+                                    {col.count} {col.count === 1 ? 'pieza' : 'piezas'}
+                                </p>
+                            )}
+                            {/* Hover CTA */}
+                            <div className="flex items-center gap-1.5 mt-3 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                                <span className="text-[9px] text-gold-400 uppercase tracking-[0.2em] font-bold">Ver Colección</span>
+                                <ArrowRight className="w-3 h-3 text-gold-400" />
+                            </div>
+                        </div>
+                    </Link>
+                ))}
+            </div>
+        </div>
+    );
+};
+
 // ─── Catalog Section (Product Grid with Search/Filters) ───────────────
 
 type SortOption = 'newest' | 'price_asc' | 'price_desc';
@@ -78,45 +312,33 @@ type SortOption = 'newest' | 'price_asc' | 'price_desc';
 const CatalogSection: React.FC<{ config: Record<string, any> }> = ({ config }) => {
     const { currency } = useStore();
     const { products, loading } = usePublicProducts();
+    const searchParams = useSearchParams();
 
     const [layout, setLayout] = useState<'grid' | 'list'>('grid');
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
-    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
 
     const [minPrice, setMinPrice] = useState(0);
     const [maxPrice, setMaxPrice] = useState(300000);
     const [statusFilter, setStatusFilter] = useState<ProductStatus | 'All'>('All');
-    const [categoryFilter, setCategoryFilter] = useState<string>('All');
-    const [collectionFilter, setCollectionFilter] = useState<string>('All');
+    const [categoryFilter, setCategoryFilter] = useState<string>(() => searchParams?.get('category') || 'All');
+    const [collectionFilter, setCollectionFilter] = useState<string>(() => searchParams?.get('collection') || 'All');
     const [sort, setSort] = useState<SortOption>('newest');
+
+    // Sync filters when URL params change
+    useEffect(() => {
+        const cat = searchParams?.get('category');
+        const col = searchParams?.get('collection');
+        if (cat) setCategoryFilter(cat);
+        if (col) setCollectionFilter(col);
+    }, [searchParams]);
 
     const showSearch = config.show_search !== false;
     const showFilters = config.show_filters !== false;
     const columns = config.columns || 4;
     const maxItems = config.max_items || 0;
-
-    // URL handling for product detail
-    useEffect(() => {
-        if (selectedProduct) {
-            window.history.pushState({ productId: selectedProduct.id }, '', `/product/${selectedProduct.id}`);
-        }
-    }, [selectedProduct]);
-
-    useEffect(() => {
-        const handlePopState = () => {
-            if (selectedProduct) setSelectedProduct(null);
-        };
-        window.addEventListener('popstate', handlePopState);
-        return () => window.removeEventListener('popstate', handlePopState);
-    }, [selectedProduct]);
-
-    const handleCloseProduct = useCallback(() => {
-        setSelectedProduct(null);
-        window.history.pushState(null, '', '/');
-    }, []);
 
     useEffect(() => {
         const timer = setTimeout(() => setDebouncedSearch(search), 300);
@@ -208,6 +430,26 @@ const CatalogSection: React.FC<{ config: Record<string, any> }> = ({ config }) =
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Desktop Quick Category Pills */}
+                            {categories.length > 2 && (
+                                <div className="hidden md:flex items-center gap-2 overflow-x-auto scrollbar-hide border-t border-stone-50 dark:border-stone-900/50 pt-3">
+                                    {categories.map(cat => (
+                                        <button
+                                            key={cat}
+                                            onClick={() => setCategoryFilter(cat)}
+                                            className={cn(
+                                                "px-4 py-1.5 text-[10px] uppercase tracking-wider font-bold border rounded-full transition-all whitespace-nowrap shrink-0",
+                                                categoryFilter === cat
+                                                    ? 'bg-stone-900 text-white border-stone-900 dark:bg-white dark:text-stone-900 dark:border-white'
+                                                    : 'border-stone-200 dark:border-stone-800 text-stone-400 hover:border-stone-400 dark:hover:border-stone-600 hover:text-stone-600 dark:hover:text-stone-300'
+                                            )}
+                                        >
+                                            {cat === 'All' ? 'Todas' : cat}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -217,25 +459,35 @@ const CatalogSection: React.FC<{ config: Record<string, any> }> = ({ config }) =
             <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 py-6 md:py-12">
                 {loading ? (
                     <div className={`grid ${gridClass} gap-4 md:gap-6`}>
-                        {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-xl" />)}
+                        {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="aspect-square rounded-lg" />)}
                     </div>
                 ) : filteredProducts.length === 0 ? (
                     <div className="text-center py-24">
-                        <p className="text-stone-400 text-sm uppercase tracking-widest">No se encontraron productos</p>
+                        <Search className="w-12 h-12 mx-auto mb-4 text-stone-200 dark:text-stone-700" />
+                        <p className="text-stone-400 text-sm uppercase tracking-widest mb-6">No se encontraron productos</p>
+                        {activeFiltersCount > 0 && (
+                            <button onClick={clearAllFilters} className="px-6 py-2.5 bg-stone-900 dark:bg-white text-white dark:text-stone-900 text-xs uppercase tracking-widest font-bold rounded-full hover:opacity-90 transition-opacity">
+                                Limpiar Filtros
+                            </button>
+                        )}
                     </div>
                 ) : (
-                    <div className={layout === 'grid' ? `grid ${gridClass} gap-4 md:gap-6` : 'space-y-4'}>
-                        {filteredProducts.map(product => (
-                            <ProductCard key={product.id} product={product} layout={layout} currency={currency} onClick={() => setSelectedProduct(product)} />
-                        ))}
-                    </div>
+                    <>
+                        {/* Product count */}
+                        <div className="flex items-center justify-between mb-6">
+                            <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">
+                                {filteredProducts.length} {filteredProducts.length === 1 ? 'pieza' : 'piezas'}
+                            </p>
+                        </div>
+
+                        <div className={layout === 'grid' ? `grid ${gridClass} gap-x-4 gap-y-8 md:gap-x-6 md:gap-y-12` : 'space-y-4'}>
+                            {filteredProducts.map(product => (
+                                <ProductCard key={product.id} product={product} layout={layout} currency={currency} />
+                            ))}
+                        </div>
+                    </>
                 )}
             </div>
-
-            {/* Product Detail Modal */}
-            <Modal isOpen={!!selectedProduct} onClose={handleCloseProduct} showCloseButton={false} size="xl">
-                {selectedProduct && <ProductDetail product={selectedProduct} onClose={handleCloseProduct} currency={currency} />}
-            </Modal>
 
             {/* Filter Drawer */}
             {isFilterOpen && (
@@ -302,8 +554,6 @@ const FeaturedSection: React.FC<{ config: Record<string, any> }> = ({ config }) 
     const { currency } = useStore();
     const { products } = usePublicProducts();
 
-    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-
     const filteredProducts = useMemo(() => {
         let result = products.filter(p => p.status !== ProductStatus.SOLD_OUT);
         if (config.collection_name) {
@@ -317,19 +567,28 @@ const FeaturedSection: React.FC<{ config: Record<string, any> }> = ({ config }) 
     return (
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 py-10 md:py-20">
             {config.title && (
-                <div className="text-center mb-10">
+                <div className="text-center mb-10 md:mb-14">
                     <h2 className="font-serif text-2xl md:text-4xl tracking-[0.2em] text-stone-900 dark:text-white uppercase">{config.title}</h2>
                     <div className="w-12 h-[1px] bg-gold-400/60 mx-auto mt-4" />
                 </div>
             )}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-8 md:gap-x-6 md:gap-y-12">
                 {filteredProducts.map(product => (
-                    <ProductCard key={product.id} product={product} layout="grid" currency={currency} onClick={() => setSelectedProduct(product)} />
+                    <ProductCard key={product.id} product={product} layout="grid" currency={currency} />
                 ))}
             </div>
-            <Modal isOpen={!!selectedProduct} onClose={() => { setSelectedProduct(null); window.history.pushState(null, '', '/'); }} showCloseButton={false} size="xl">
-                {selectedProduct && <ProductDetail product={selectedProduct} onClose={() => { setSelectedProduct(null); window.history.pushState(null, '', '/'); }} currency={currency} />}
-            </Modal>
+            {/* View All Link */}
+            {config.collection_name && (
+                <div className="text-center mt-10">
+                    <Link
+                        href={`/?collection=${encodeURIComponent(config.collection_name)}`}
+                        className="inline-flex items-center gap-2 px-8 py-3 border border-stone-300 dark:border-stone-700 text-xs uppercase tracking-[0.2em] font-bold text-stone-600 dark:text-stone-300 hover:bg-stone-900 hover:text-white dark:hover:bg-white dark:hover:text-stone-900 hover:border-stone-900 dark:hover:border-white transition-all duration-300 rounded-sm"
+                    >
+                        Ver Toda la Colección
+                        <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                </div>
+            )}
         </div>
     );
 };
@@ -370,7 +629,6 @@ const BannerSection: React.FC<{ config: Record<string, any> }> = ({ config }) =>
     if (!config.text) return null;
 
     const bgColor = config.bg_color || '#1c1917';
-    // Determine text color based on background brightness
     const isLight = parseInt(bgColor.replace('#', ''), 16) > 0x7FFFFF;
 
     return (
@@ -417,6 +675,8 @@ const SECTION_COMPONENTS: Record<string, React.FC<{ config: Record<string, any> 
     hero: HeroSection,
     catalog: CatalogSection,
     featured: FeaturedSection,
+    categories: CategoriesSection,
+    collections: CollectionsSection,
     text: TextSection,
     image: ImageSection,
     banner: BannerSection,
@@ -431,7 +691,6 @@ export const SectionRenderer: React.FC<{ prefetchedSections?: PageSection[] }> =
     const [error, setError] = useState(false);
 
     useEffect(() => {
-        // Skip fetch if sections were passed as props
         if (prefetchedSections) return;
 
         const fetchSections = async () => {
@@ -456,7 +715,6 @@ export const SectionRenderer: React.FC<{ prefetchedSections?: PageSection[] }> =
         );
     }
 
-    // If error or no sections, signal fallback
     if (error || sections.length === 0) return null;
 
     return (

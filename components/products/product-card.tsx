@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Product, ProductStatus } from '@/types';
 import { useStore } from '@/context/StoreContext';
 import { formatPrice } from '@/lib/format';
@@ -10,10 +11,9 @@ interface ProductCardProps {
     product: Product;
     currency: 'CLP' | 'USD';
     layout: 'grid' | 'list';
-    onClick: (p: Product) => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, currency, layout, onClick }) => {
+export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, currency, layout }) => {
     const { settings } = useStore();
     const exchangeRate = settings?.usd_exchange_rate || 950;
     const displayPrice = currency === 'CLP' ? product.price : Math.round(product.price / exchangeRate);
@@ -31,20 +31,17 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, cu
     const hoverImage = product.images[1] || null;
 
     return (
-        <article
+        <Link
+            href={`/product/${product.id}`}
             id={`product-card-${product.id}`}
             className={cn(
-                "group cursor-pointer relative",
+                "group cursor-pointer relative block",
                 isList
                     ? "flex gap-4 p-3 md:p-0 border-b border-stone-100 dark:border-stone-800 md:border-none"
                     : "flex flex-col"
             )}
-            onClick={() => onClick(product)}
             onMouseEnter={() => setHoverActive(true)}
             onMouseLeave={() => setHoverActive(false)}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(product); } }}
             aria-label={`Ver ${product.name} - ${formatPrice(displayPrice, currency)}`}
         >
             {/* Image Container */}
@@ -156,6 +153,6 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, cu
                     <p className="text-xs text-stone-500 mt-2 line-clamp-2 hidden md:block">{product.description}</p>
                 )}
             </div>
-        </article>
+        </Link>
     );
 });

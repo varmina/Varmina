@@ -5,7 +5,7 @@ const supabase = createClient();
 export interface PageSection {
     id: string;
     page_slug: string;
-    section_type: 'hero' | 'catalog' | 'featured' | 'text' | 'image' | 'banner' | 'divider';
+    section_type: 'hero' | 'catalog' | 'featured' | 'categories' | 'collections' | 'text' | 'image' | 'banner' | 'divider';
     position: number;
     config: Record<string, any>;
     is_visible: boolean;
@@ -29,6 +29,16 @@ export const SECTION_DEFAULTS: Record<PageSection['section_type'], { label: stri
         label: 'Colección Destacada',
         icon: '⭐',
         config: { collection_name: '', max_items: 6, title: 'Destacados' },
+    },
+    categories: {
+        label: 'Tarjetas de Categorías',
+        icon: '🏷',
+        config: { title: 'Comprar por Categoría', subtitle: '', columns: 3, show_product_count: true },
+    },
+    collections: {
+        label: 'Tarjetas de Colecciones',
+        icon: '💎',
+        config: { title: 'Nuestras Colecciones', subtitle: '', columns: 2, max_items: 0, show_product_count: true },
     },
     text: {
         label: 'Bloque de Texto',

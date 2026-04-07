@@ -41,10 +41,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
 
     return {
-        title: product.name,
+        title: `${product.name} | Varmina Joyas`,
         description: product.description || `Detalles de ${product.name}`,
         openGraph: {
-            title: product.name,
+            title: `${product.name} | Varmina Joyas`,
             description: product.description || `Detalles de ${product.name}`,
             images: product.images && product.images.length > 0 ? [product.images[0]] : [],
         },
@@ -59,11 +59,5 @@ export default async function ProductPage({ params }: Props) {
         notFound();
     }
 
-    return (
-        <div className="min-h-screen bg-white dark:bg-stone-950">
-            <div className="max-w-6xl mx-auto py-4 md:py-8 px-0 md:px-4">
-                <ProductPageWrapper product={product} />
-            </div>
-        </div>
-    );
+    return <ProductPageWrapper product={product} />;
 }
