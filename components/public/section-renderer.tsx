@@ -103,10 +103,10 @@ const CategoriesSection: React.FC<{ config: Record<string, any> }> = ({ config }
 
     const columns = config.columns || 3;
     const gridClass = columns === 2
-        ? 'grid-cols-1 sm:grid-cols-2'
+        ? 'grid-cols-2'
         : columns === 4
-            ? 'grid-cols-2 lg:grid-cols-4'
-            : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+            ? 'grid-cols-2 md:grid-cols-4'
+            : 'grid-cols-2 lg:grid-cols-3';
 
     return (
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-20">
@@ -130,7 +130,7 @@ const CategoriesSection: React.FC<{ config: Record<string, any> }> = ({ config }
                 {categoryData.map(cat => (
                     <Link
                         key={cat.name}
-                        href={`/?category=${encodeURIComponent(cat.name)}`}
+                        href={`/category/${encodeURIComponent(cat.name)}`}
                         className="group relative overflow-hidden rounded-lg aspect-square bg-stone-100 dark:bg-stone-800 cursor-pointer block"
                     >
                             <img
@@ -209,10 +209,10 @@ const CollectionsSection: React.FC<{ config: Record<string, any> }> = ({ config 
 
     const columns = config.columns || 2;
     const gridClass = columns === 3
-        ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+        ? 'grid-cols-2 lg:grid-cols-3'
         : columns === 4
             ? 'grid-cols-2 lg:grid-cols-4'
-            : 'grid-cols-1 sm:grid-cols-2';
+            : 'grid-cols-2';
 
     return (
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-20">
@@ -236,7 +236,7 @@ const CollectionsSection: React.FC<{ config: Record<string, any> }> = ({ config 
                 {collectionData.map(col => (
                     <Link
                         key={col.name}
-                        href={`/?collection=${encodeURIComponent(col.name)}`}
+                        href={`/collection/${encodeURIComponent(col.name)}`}
                         className="group relative overflow-hidden rounded-lg bg-stone-100 dark:bg-stone-800 cursor-pointer block"
                     >
                         {/* Image Mosaic or Single Image */}

@@ -13,7 +13,13 @@ import { cn } from '@/lib/utils';
 
 type SortOption = 'newest' | 'price_asc' | 'price_desc';
 
-export const PublicCatalog = () => {
+export const PublicCatalog = ({ 
+    collectionName, 
+    categoryName 
+}: { 
+    collectionName?: string, 
+    categoryName?: string 
+} = {}) => {
     const { currency, settings } = useStore();
     const { products, loading } = usePublicProducts();
     const searchParams = useSearchParams();
@@ -24,21 +30,25 @@ export const PublicCatalog = () => {
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
 
-    // Filters — initialize from URL search params if present
+    // Filters — initialize from URL search params if present or strictly from Props
     const [minPrice, setMinPrice] = useState(0);
     const [maxPrice, setMaxPrice] = useState(300000);
     const [statusFilter, setStatusFilter] = useState<ProductStatus | 'All'>('All');
-    const [categoryFilter, setCategoryFilter] = useState<string>(() => searchParams?.get('category') || 'All');
-    const [collectionFilter, setCollectionFilter] = useState<string>(() => searchParams?.get('collection') || 'All');
+    const [categoryFilter, setCategoryFilter] = useState<string>(categoryName || (() => searchParams?.get('category') || 'All'));
+    const [collectionFilter, setCollectionFilter] = useState<string>(collectionName || (() => searchParams?.get('collection') || 'All'));
     const [sort, setSort] = useState<SortOption>('newest');
 
-    // Sync filters when URL params change
+    // Sync filters when URL params change, unless strict props are provided
     useEffect(() => {
-        const cat = searchParams?.get('category');
-        const col = searchParams?.get('collection');
-        if (cat) setCategoryFilter(cat);
-        if (col) setCollectionFilter(col);
-    }, [searchParams]);
+        if (!categoryName) {
+            const cat = searchParams?.get('category');
+            if (cat) setCategoryFilter(cat);
+        }
+        if (!collectionName) {
+            const col = searchParams?.get('collection');
+            if (col) setCollectionFilter(col);
+        }
+    }, [searchParams, categoryName, collectionName]);
 
     // Debounce search
     useEffect(() => {
@@ -107,10 +117,10 @@ export const PublicCatalog = () => {
         setStatusFilter('All');
         setMinPrice(0);
         setMaxPrice(300000);
-        setCategoryFilter('All');
-        setCollectionFilter('All');
+        setCategoryFilter(categoryName || 'All');
+        setCollectionFilter(collectionName || 'All');
         setSort('newest');
-    }, []);
+    }, [categoryName, collectionName]);
 
     const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -118,58 +128,73 @@ export const PublicCatalog = () => {
         <div className="w-full min-h-screen bg-white dark:bg-stone-950">
 
             {/* HERO SECTION */}
-            {settings?.hero_image_url ? (
-                <div className="relative w-full h-[60vh] md:h-[80vh] min-h-[400px] overflow-hidden group">
-                    <img
-                        src={settings.hero_image_url}
-                        alt={settings.hero_title || "Varmina Collection"}
-                        className="w-full h-full object-cover transition-transform duration-[20s] ease-linear group-hover:scale-110"
-                        fetchPriority="high"
-                    />
-                    {/* Deep Premium Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-stone-900/60 flex flex-col items-center justify-center text-center p-6 md:p-12">
-                        <div className="max-w-4xl space-y-6 animate-fade-in-up">
-                            {settings.hero_title && (
-                                <h1 className="font-serif text-4xl md:text-7xl text-white drop-shadow-2xl tracking-[0.25em] uppercase leading-tight font-light">
+            {!collectionName && !categoryName && (
+                settings?.hero_image_url ? (
+                    <div className="relative w-full h-[60vh] md:h-[80vh] min-h-[400px] overflow-hidden group">
+                        <img
+                            src={settings.hero_image_url}
+                            alt={settings.hero_title || "Varmina Collection"}
+                            className="w-full h-full object-cover transition-transform duration-[20s] ease-linear group-hover:scale-110"
+                            fetchPriority="high"
+                        />
+                        {/* Deep Premium Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-stone-900/60 flex flex-col items-center justify-center text-center p-6 md:p-12">
+                            <div className="max-w-4xl space-y-6 animate-fade-in-up">
+                                {settings.hero_title && (
+                                    <h1 className="font-serif text-4xl md:text-7xl text-white drop-shadow-2xl tracking-[0.25em] uppercase leading-tight font-light">
+                                        {settings.hero_title}
+                                    </h1>
+                                )}
+                                {settings.hero_subtitle && (
+                                    <div className="flex flex-col items-center gap-6">
+                                        <div className="w-12 h-[1px] bg-gold-400/60" />
+                                        <p className="font-sans text-xs md:text-sm text-white/90 max-w-xl drop-shadow-md tracking-[0.4em] uppercase font-bold">
+                                            {settings.hero_subtitle}
+                                        </p>
+                                        <div className="w-12 h-[1px] bg-gold-400/60" />
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Scroll Indicator */}
+                            <div className="absolute bottom-12 left-1/2 -translate-x-1/2 animate-bounce opacity-50">
+                                <div className="w-[1px] h-12 bg-white/60" />
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="w-full py-20 md:py-32 bg-gradient-to-br from-stone-50 to-stone-100 dark:from-stone-950 dark:to-stone-900 flex flex-col items-center justify-center text-center px-6 border-b border-stone-100 dark:border-stone-800">
+                        <div className="max-w-3xl space-y-4 animate-fade-in-up">
+                            {settings?.hero_title && (
+                                <h1 className="font-serif text-3xl md:text-5xl text-stone-900 dark:text-white tracking-[0.2em] uppercase">
                                     {settings.hero_title}
                                 </h1>
                             )}
-                            {settings.hero_subtitle && (
-                                <div className="flex flex-col items-center gap-6">
-                                    <div className="w-12 h-[1px] bg-gold-400/60" />
-                                    <p className="font-sans text-xs md:text-sm text-white/90 max-w-xl drop-shadow-md tracking-[0.4em] uppercase font-bold">
-                                        {settings.hero_subtitle}
-                                    </p>
-                                    <div className="w-12 h-[1px] bg-gold-400/60" />
-                                </div>
+                            {settings?.hero_subtitle && (
+                                <p className="text-[10px] md:text-xs font-bold text-gold-600 dark:text-gold-400 uppercase tracking-[0.3em]">
+                                    {settings.hero_subtitle}
+                                </p>
+                            )}
+                            {!settings?.hero_title && !settings?.hero_subtitle && (
+                                <h1 className="font-serif text-2xl md:text-4xl tracking-[0.2em] text-stone-300 dark:text-stone-700 uppercase italic">
+                                    {settings?.brand_name || 'Varmina'}
+                                </h1>
                             )}
                         </div>
+                    </div>
+                )
+            )}
 
-                        {/* Scroll Indicator */}
-                        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 animate-bounce opacity-50">
-                            <div className="w-[1px] h-12 bg-white/60" />
-                        </div>
-                    </div>
-                </div>
-            ) : (
-                <div className="w-full py-20 md:py-32 bg-gradient-to-br from-stone-50 to-stone-100 dark:from-stone-950 dark:to-stone-900 flex flex-col items-center justify-center text-center px-6 border-b border-stone-100 dark:border-stone-800">
-                    <div className="max-w-3xl space-y-4 animate-fade-in-up">
-                        {settings?.hero_title && (
-                            <h1 className="font-serif text-3xl md:text-5xl text-stone-900 dark:text-white tracking-[0.2em] uppercase">
-                                {settings.hero_title}
-                            </h1>
-                        )}
-                        {settings?.hero_subtitle && (
-                            <p className="text-[10px] md:text-xs font-bold text-gold-600 dark:text-gold-400 uppercase tracking-[0.3em]">
-                                {settings.hero_subtitle}
-                            </p>
-                        )}
-                        {!settings?.hero_title && !settings?.hero_subtitle && (
-                            <h1 className="font-serif text-2xl md:text-4xl tracking-[0.2em] text-stone-300 dark:text-stone-700 uppercase italic">
-                                {settings?.brand_name || 'Varmina'}
-                            </h1>
-                        )}
-                    </div>
+            {/* DEDICATED PAGE HEADER */}
+            {(collectionName || categoryName) && (
+                <div className="w-full py-16 md:py-24 bg-stone-50 dark:bg-stone-900/50 border-b border-stone-200 dark:border-stone-800 flex flex-col items-center justify-center text-center px-4">
+                     <p className="text-[10px] font-bold text-gold-600 dark:text-gold-400 uppercase tracking-[0.3em] mb-4">
+                         {collectionName ? 'Colección' : 'Categoría'}
+                     </p>
+                     <h1 className="font-serif text-3xl md:text-5xl text-stone-900 dark:text-white uppercase tracking-[0.15em] mb-6">
+                         {collectionName || categoryName}
+                     </h1>
+                     <div className="w-16 h-[1px] bg-stone-300 dark:bg-stone-700" />
                 </div>
             )}
 
