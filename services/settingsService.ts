@@ -22,6 +22,7 @@ export interface BrandSettings {
     announcement_color: string;
     contact_email: string;
     google_analytics_id: string;
+    facebook_url: string;
     updated_at: string;
 }
 
