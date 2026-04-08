@@ -54,7 +54,7 @@ export const SECTION_DEFAULTS: Record<PageSection['section_type'], { label: stri
     banner: {
         label: 'Banner / CTA',
         icon: '📢',
-        config: { text: '', bg_color: '#1c1917', btn_text: '', btn_link: '/' },
+        config: { text: '', bg_color: '#1c1917', image_url: '', btn_text: '', btn_link: '/' },
     },
     divider: {
         label: 'Separador',

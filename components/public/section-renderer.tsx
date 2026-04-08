@@ -34,7 +34,7 @@ const HeroSection: React.FC<{ config: Record<string, any> }> = ({ config }) => {
                     sizes="100vw"
                     priority
                     className="w-full h-full object-cover transition-transform duration-[20s] ease-linear group-hover:scale-110"
-                    unoptimized={imageUrl.startsWith('data:')}
+                    unoptimized={!imageUrl.includes('supabase.co')}
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/10 to-stone-900/70 flex flex-col items-center justify-center text-center p-6 md:p-12">
                     <div className="max-w-4xl space-y-6 animate-fade-in-up">
@@ -623,7 +623,7 @@ const ImageSection: React.FC<{ config: Record<string, any> }> = ({ config }) => 
                     sizes="100vw"
                     className="object-cover"
                     loading="lazy"
-                    unoptimized={config.image_url?.startsWith('data:')}
+                    unoptimized={!config.image_url?.includes('supabase.co')}
                 />
             </div>
         </div>
@@ -636,15 +636,41 @@ const BannerSection: React.FC<{ config: Record<string, any> }> = ({ config }) =>
     if (!config.text) return null;
 
     const bgColor = config.bg_color || '#1c1917';
-    const isLight = parseInt(bgColor.replace('#', ''), 16) > 0x7FFFFF;
+    const imageUrl = config.image_url || '';
+    const isLight = parseInt((bgColor || '#000000').replace('#', ''), 16) > 0x7FFFFF;
 
     return (
-        <div className="w-full py-10 md:py-16 px-6 flex flex-col items-center justify-center text-center gap-6" style={{ backgroundColor: bgColor }}>
-            <p className={`font-serif text-xl md:text-3xl tracking-[0.15em] uppercase ${isLight ? 'text-stone-900' : 'text-white'}`}>
+        <div 
+            className="relative w-full py-20 md:py-36 px-8 md:px-16 flex flex-col items-center justify-center text-center gap-8 md:gap-12 overflow-hidden" 
+            style={{ backgroundColor: imageUrl ? undefined : bgColor }}
+        >
+            {imageUrl && (
+                <Image
+                    src={imageUrl}
+                    fill
+                    alt=""
+                    className="absolute inset-0 w-full h-full object-cover z-0"
+                    unoptimized={!imageUrl.includes('supabase.co')}
+                />
+            )}
+            {imageUrl && <div className="absolute inset-0 bg-black/50 z-[1]" />}
+
+            <p className={cn(
+                "relative z-10 font-serif text-2xl md:text-5xl lg:text-6xl tracking-[0.1em] md:tracking-[0.15em] uppercase px-4 max-w-5xl leading-tight md:leading-tight drop-shadow-sm",
+                imageUrl || !isLight ? 'text-white' : 'text-stone-900'
+            )}>
                 {config.text}
             </p>
             {config.btn_text && (
-                <a href={config.btn_link || '/'} className={`inline-block px-8 py-3 border text-xs uppercase tracking-[0.3em] font-bold transition-all duration-300 ${isLight ? 'border-stone-900 text-stone-900 hover:bg-stone-900 hover:text-white' : 'border-white/40 text-white hover:bg-white hover:text-stone-900'}`}>
+                <a 
+                    href={config.btn_link || '/'} 
+                    className={cn(
+                        "relative z-10 inline-block px-12 py-4 md:px-16 md:py-5 border text-xs uppercase tracking-[0.3em] font-bold transition-all duration-500 hover:scale-105 active:scale-95",
+                        imageUrl || !isLight 
+                            ? 'border-white/40 text-white hover:bg-white hover:text-stone-900 bg-white/5 backdrop-blur-md' 
+                            : 'border-stone-900 text-stone-900 hover:bg-stone-900 hover:text-white'
+                    )}
+                >
                     {config.btn_text}
                 </a>
             )}

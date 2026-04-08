@@ -125,15 +125,25 @@ const BannerConfigEditor = ({ config, onChange }: { config: Record<string, any>;
         <div className="md:col-span-2">
             <Input label="Texto del Banner" value={config.text || ''} onChange={e => onChange({ ...config, text: e.target.value })} className="bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 rounded-lg py-3 dark:text-white" />
         </div>
+        <div className="md:col-span-2">
+            <Input label="URL Imagen de Fondo (opcional)" value={config.image_url || ''} onChange={e => onChange({ ...config, image_url: e.target.value })} placeholder="https://..." className="bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 rounded-lg py-3 dark:text-white" />
+        </div>
         <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-2">Color de Fondo</label>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-2">Color de Fondo (si no hay imagen)</label>
             <div className="flex items-center gap-4 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg p-2">
                 <input type="color" className="w-10 h-10 rounded-md border-none cursor-pointer bg-transparent" value={config.bg_color || '#1c1917'} onChange={e => onChange({ ...config, bg_color: e.target.value })} />
                 <code className="text-xs font-mono text-stone-500 uppercase">{config.bg_color}</code>
             </div>
         </div>
-        <Input label="Texto del Botón" value={config.btn_text || ''} onChange={e => onChange({ ...config, btn_text: e.target.value })} placeholder="Dejar vacío para ocultar" className="bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 rounded-lg py-3 dark:text-white" />
-        <Input label="Enlace del Botón" value={config.btn_link || '/'} onChange={e => onChange({ ...config, btn_link: e.target.value })} className="bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 rounded-lg py-3 dark:text-white" />
+        <div className="grid grid-cols-1 gap-4">
+            <Input label="Texto del Botón" value={config.btn_text || ''} onChange={e => onChange({ ...config, btn_text: e.target.value })} placeholder="Dejar vacío" className="bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 rounded-lg py-3 dark:text-white" />
+            <Input label="Enlace del Botón" value={config.btn_link || '/'} onChange={e => onChange({ ...config, btn_link: e.target.value })} className="bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 rounded-lg py-3 dark:text-white" />
+        </div>
+        {config.image_url && (
+            <div className="md:col-span-2 mt-2 rounded-lg overflow-hidden border border-stone-200 dark:border-stone-700 max-h-48">
+                <img src={config.image_url} alt="Preview" className="w-full h-full object-cover" />
+            </div>
+        )}
     </div>
 );
 
