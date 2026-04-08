@@ -407,7 +407,7 @@ const CatalogSection: React.FC<{ config: Record<string, any> }> = ({ config }) =
         <>
             {/* Sticky Controls */}
             {(showSearch || showFilters) && (
-                <div className="sticky top-16 lg:top-24 z-30 bg-white/90 dark:bg-stone-950/90 backdrop-blur-xl border-b border-stone-100 dark:border-stone-800 transition-all duration-300">
+                <div className="sticky top-16 md:top-24 z-30 bg-white/90 dark:bg-stone-950/90 backdrop-blur-xl border-b border-stone-100 dark:border-stone-800 transition-all duration-300">
                     <div className="max-w-[1600px] mx-auto px-6 md:px-12 py-2 md:py-3">
                         <div className="flex flex-col gap-2">
                             <div className="flex items-center justify-between gap-4">

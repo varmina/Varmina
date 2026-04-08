@@ -46,7 +46,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
 
     const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    const whatsappNumber = (settings as any)?.phone?.replace(/\+/g, '').replace(/\s/g, '') || "569XXXXXXXX"; // Fallback
+    const whatsappNumber = "56944106742";
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Hola!%20Me%20gustaría%20más%20información%20sobre%20sus%20joyas.`;
 
     const year = mounted ? new Date().getFullYear() : 2026;
@@ -81,7 +81,8 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
 
             {/* Header */}
             <header className={cn(
-                "sticky top-0 z-50 h-16 md:h-24 flex items-center justify-between px-6 md:px-16 transition-all duration-300",
+                "sticky top-0 z-50 h-16 md:h-24 flex items-center justify-between px-6 md:px-16 transition-all duration-700",
+                isPreloading ? "opacity-0" : "opacity-100",
                 scrolled
                     ? "bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl shadow-sm border-b border-stone-100 dark:border-stone-800"
                     : "bg-white/90 dark:bg-stone-900/90 backdrop-blur border-b border-stone-200 dark:border-stone-800"
@@ -239,12 +240,18 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
             </div>
 
             {/* Main */}
-            <main className="flex-1 w-full relative">
+            <main className={cn(
+                "flex-1 w-full relative transition-opacity duration-700",
+                isPreloading ? "opacity-0" : "opacity-100"
+            )}>
                 {children}
             </main>
 
             {/* Footer */}
-            <footer className="relative border-t border-stone-100 dark:border-stone-800 py-12 md:py-24 px-8 bg-white dark:bg-[#0A0A0A]">
+            <footer className={cn(
+                "relative border-t border-stone-100 dark:border-stone-800 py-12 md:py-24 px-8 bg-white dark:bg-[#0A0A0A] transition-opacity duration-700",
+                isPreloading ? "opacity-0" : "opacity-100"
+            )}>
                 <div className="max-w-[1600px] mx-auto flex flex-col items-center gap-8 md:gap-10">
                     <div className="premium-divider w-12 md:w-16" />
 
