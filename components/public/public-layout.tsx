@@ -118,7 +118,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
                     ))}
                     {collections.length > 0 && (
                         <Link 
-                            href="/catalog?view=collections"
+                            href="/collections"
                             className="text-[10px] font-bold tracking-[0.25em] text-stone-400 hover:text-stone-900 dark:hover:text-white transition-all hover:-translate-y-0.5 uppercase"
                         >
                             Colecciones
@@ -200,7 +200,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
                             ))}
                             {collections.length > 0 && (
                                 <Link 
-                                    href="/catalog?view=collections"
+                                    href="/collections"
                                     onClick={() => setIsMobileMenuOpen(false)}
                                     className="block text-lg font-serif tracking-[0.1em] text-stone-900 dark:text-white uppercase"
                                 >
