@@ -54,9 +54,6 @@ const HeroSection: React.FC<{ config: Record<string, any> }> = ({ config }) => {
                             </a>
                         )}
                     </div>
-                    <div className="absolute bottom-8 md:bottom-12 left-1/2 -translate-x-1/2 animate-bounce opacity-40">
-                        <div className="w-[1px] h-8 md:h-12 bg-white/60" />
-                    </div>
                 </div>
             </div>
         );

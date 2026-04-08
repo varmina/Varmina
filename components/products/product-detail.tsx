@@ -218,7 +218,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                 <div className="grid grid-cols-1 lg:grid-cols-[100px_1fr_420px] xl:grid-cols-[120px_1fr_480px] gap-8 xl:gap-16 items-start">
                     
                     {/* COL 1: Vertical Thumbnails (Desktop Only) */}
-                    <div className="hidden lg:flex flex-col gap-3 sticky top-32 overflow-y-auto max-h-[70vh] pr-4 scrollbar-thin scrollbar-thumb-stone-200 dark:scrollbar-thumb-stone-800">
+                    <div className="hidden lg:flex flex-col gap-3 sticky top-32 overflow-y-auto max-h-[70vh] px-1 hide-scrollbar">
                         {imagesToDisplay.map((img: string, idx: number) => (
                             <button
                                 key={idx}
@@ -226,7 +226,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                 className={cn(
                                     "relative w-20 xl:w-24 aspect-[4/5] rounded transition-all duration-300 shrink-0",
                                     activeImg === idx 
-                                        ? "ring-1 ring-stone-900 dark:ring-white ring-offset-4 dark:ring-offset-stone-950" 
+                                        ? "border border-stone-900 dark:border-white opacity-100" 
                                         : "opacity-40 hover:opacity-100"
                                 )}
                             >
@@ -282,34 +282,18 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                 <div className="absolute inset-0 bg-stone-100 dark:bg-stone-900 animate-pulse z-20" />
                             )}
 
-                            {/* Slider Navigation (Mobile focus or Hover) */}
-                            {imagesToDisplay.length > 1 && (
-                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 z-30 lg:hidden">
-                                    {imagesToDisplay.map((_, idx) => (
-                                        <button
-                                            key={idx}
-                                            onClick={() => setActiveImg(idx)}
-                                            className={cn(
-                                                "h-1 transition-all duration-500 rounded-full",
-                                                activeImg === idx ? "w-8 bg-stone-900 dark:bg-white" : "w-2 bg-stone-300 dark:bg-stone-700"
-                                            )}
-                                        />
-                                    ))}
-                                </div>
-                            )}
-
                         </div>
 
                         {/* Mobile: Horizontal Thumb Strip */}
                         {imagesToDisplay.length > 1 && (
-                            <div className="flex lg:hidden gap-2 mt-4 overflow-x-auto pb-2 hide-scrollbar">
+                            <div className="flex lg:hidden gap-3 mt-4 overflow-x-auto pb-4 hide-scrollbar">
                                 {imagesToDisplay.map((img, idx) => (
                                     <button
                                         key={idx}
                                         onClick={() => setActiveImg(idx)}
                                         className={cn(
-                                            "relative w-16 h-16 shrink-0 rounded overflow-hidden transition-all",
-                                            activeImg === idx ? "ring-2 ring-stone-900 dark:ring-white" : "opacity-60"
+                                            "relative w-16 h-20 shrink-0 rounded overflow-hidden transition-all",
+                                            activeImg === idx ? "border border-stone-900 dark:border-white opacity-100" : "opacity-60"
                                         )}
                                     >
                                         <Image src={img} fill sizes="64px" className="object-cover" alt="" unoptimized={img.startsWith('data:')} />
