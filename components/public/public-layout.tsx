@@ -26,8 +26,8 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
     const [mounted, setMounted] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
     const [showScrollTop, setShowScrollTop] = useState(false);
+    const [isPreloading, setIsPreloading] = useState(true);
 
     useEffect(() => { setMounted(true); }, []);
 
@@ -63,8 +63,8 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
             "min-h-screen flex flex-col transition-colors duration-500",
             mounted && darkMode ? 'dark bg-stone-950' : 'bg-stone-50'
         )}>
-            {loading && <LoadingScreen />}
-            <BrandLoader />
+            {loading && !isPreloading && <LoadingScreen />}
+            <BrandLoader onComplete={() => setIsPreloading(false)} />
 
             {/* Announcement Bar */}
             {settings?.announcement_text && (

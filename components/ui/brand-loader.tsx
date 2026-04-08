@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
-export const BrandLoader: React.FC = () => {
+export const BrandLoader: React.FC<{ onComplete?: () => void }> = ({ onComplete }) => {
     const [isVisible, setIsVisible] = useState(true);
     const [shouldRender, setShouldRender] = useState(false);
 
@@ -12,22 +12,28 @@ export const BrandLoader: React.FC = () => {
         const lastSeen = localStorage.getItem('varmina_preloader_seen');
         const now = new Date().getTime();
         
-        // Ensure we are in browser
         if (typeof window === 'undefined') return;
 
         if (!lastSeen || now - parseInt(lastSeen) > 24 * 60 * 60 * 1000) {
             setShouldRender(true);
-            // Hide after 3.5s (3s animation + 0.5s fade out)
+            // Hide after 2.5s total (animation 2s + fade-out 0.5s)
             const timer = setTimeout(() => {
                 setIsVisible(false);
                 localStorage.setItem('varmina_preloader_seen', now.toString());
-                // Force scroll to top when entering
                 window.scrollTo(0, 0);
-            }, 3500);
+                
+                // Final cleanup after fade out
+                setTimeout(() => {
+                    setShouldRender(false);
+                    if (onComplete) onComplete();
+                }, 1000);
+            }, 2500);
 
             return () => clearTimeout(timer);
+        } else {
+            if (onComplete) onComplete();
         }
-    }, []);
+    }, [onComplete]);
 
     if (!shouldRender) return null;
 
