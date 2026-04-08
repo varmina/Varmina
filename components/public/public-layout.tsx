@@ -59,7 +59,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
 
             {/* Header */}
             <header className={cn(
-                "sticky top-0 z-40 h-16 flex items-center justify-between px-4 md:px-8 transition-all duration-300",
+                "sticky top-0 z-40 h-16 md:h-20 flex items-center justify-between px-8 md:px-16 transition-all duration-300",
                 scrolled
                     ? "bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl shadow-sm border-b border-stone-100 dark:border-stone-800"
                     : "bg-white/90 dark:bg-stone-900/90 backdrop-blur border-b border-stone-200 dark:border-stone-800"
@@ -113,8 +113,8 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
             </main>
 
             {/* Footer */}
-            <footer className="relative border-t border-stone-100 dark:border-stone-800 py-12 md:py-20 px-6 bg-white dark:bg-[#0A0A0A]">
-                <div className="max-w-7xl mx-auto flex flex-col items-center gap-8 md:gap-10">
+            <footer className="relative border-t border-stone-100 dark:border-stone-800 py-12 md:py-24 px-8 bg-white dark:bg-[#0A0A0A]">
+                <div className="max-w-[1600px] mx-auto flex flex-col items-center gap-8 md:gap-10">
                     <div className="premium-divider w-12 md:w-16" />
 
                     <h3 className="font-serif text-lg md:text-xl tracking-[0.3em] md:tracking-[0.4em] text-stone-300 dark:text-stone-700 uppercase select-none">

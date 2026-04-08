@@ -105,7 +105,7 @@ const CategoriesSection: React.FC<{ config: Record<string, any> }> = ({ config }
     const gridClass = 'grid-cols-2 lg:grid-cols-4';
 
     return (
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-20">
+        <div className="max-w-[1600px] mx-auto px-6 md:px-12 py-12 md:py-20">
             {/* Section Header */}
             {config.title && (
                 <div className="text-center mb-10 md:mb-14">
@@ -204,7 +204,7 @@ const CollectionsSection: React.FC<{ config: Record<string, any> }> = ({ config 
     const gridClass = 'grid-cols-2 lg:grid-cols-4';
 
     return (
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-20">
+        <div className="max-w-[1600px] mx-auto px-6 md:px-12 py-12 md:py-20">
             {/* Section Header */}
             {config.title && (
                 <div className="text-center mb-10 md:mb-14">
@@ -407,7 +407,7 @@ const CatalogSection: React.FC<{ config: Record<string, any> }> = ({ config }) =
             {/* Sticky Controls */}
             {(showSearch || showFilters) && (
                 <div className="sticky top-16 z-30 bg-white/80 dark:bg-stone-950/80 backdrop-blur-md border-b border-stone-100 dark:border-stone-800 transition-all duration-300">
-                    <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
+                    <div className="max-w-[1600px] mx-auto px-6 md:px-12 py-4">
                         <div className="flex flex-col gap-4">
                             <div className="flex items-center justify-between gap-4">
                                 <h2 className="font-serif text-lg md:text-2xl tracking-[0.15em] text-stone-900 dark:text-white uppercase hidden md:block">Catálogo</h2>
@@ -460,7 +460,7 @@ const CatalogSection: React.FC<{ config: Record<string, any> }> = ({ config }) =
             )}
 
             {/* Product Grid */}
-            <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 py-6 md:py-12">
+            <div className="max-w-[1600px] mx-auto px-4 md:px-12 py-6 md:py-12">
                 {loading ? (
                     <div className={cn("grid gap-4 md:gap-6", gridLayoutClass)}>
                         {Array.from({ length: 8 }).map((_, i) => (
@@ -562,7 +562,7 @@ const FeaturedSection: React.FC<{ config: Record<string, any> }> = ({ config }) 
     if (filteredProducts.length === 0) return null;
 
     return (
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 py-10 md:py-20">
+        <div className="max-w-[1600px] mx-auto px-4 md:px-12 py-10 md:py-20">
             {config.title && (
                 <div className="text-center mb-10 md:mb-14">
                     <h2 className="font-serif text-2xl md:text-4xl tracking-[0.2em] text-stone-900 dark:text-white uppercase">{config.title}</h2>
@@ -597,7 +597,7 @@ const TextSection: React.FC<{ config: Record<string, any> }> = ({ config }) => {
     const alignClass = alignment === 'left' ? 'text-left' : alignment === 'right' ? 'text-right' : 'text-center';
 
     return (
-        <div className={`max-w-4xl mx-auto px-6 md:px-12 py-12 md:py-20 ${alignClass}`}>
+        <div className={`max-w-5xl mx-auto px-8 md:px-16 py-12 md:py-24 ${alignClass}`}>
             {config.title && (
                 <h2 className="font-serif text-2xl md:text-4xl tracking-[0.2em] text-stone-900 dark:text-white uppercase mb-6">{config.title}</h2>
             )}
@@ -614,7 +614,7 @@ const ImageSection: React.FC<{ config: Record<string, any> }> = ({ config }) => 
     if (!config.image_url) return null;
 
     return (
-        <div className={config.full_width !== false ? 'w-full' : 'max-w-5xl mx-auto px-4 md:px-8 py-8'}>
+        <div className={config.full_width !== false ? 'w-full' : 'max-w-[1600px] mx-auto px-6 md:px-12 py-12 md:py-20'}>
             <div className="relative w-full aspect-video md:aspect-[21/9] overflow-hidden">
                 <Image
                     src={config.image_url}
@@ -696,7 +696,7 @@ const DividerSection: React.FC<{ config: Record<string, any> }> = ({ config }) =
     }
 
     return (
-        <div className="max-w-7xl mx-auto px-8">
+        <div className="max-w-[1600px] mx-auto px-12">
             <div className="h-[1px] bg-stone-200 dark:bg-stone-800 my-8 md:my-12" />
         </div>
     );
