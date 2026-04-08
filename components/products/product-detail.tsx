@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Product, ProductStatus, ProductVariant } from '@/types';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { ChevronLeft, ChevronRight, Share2, Copy, Check, Truck, Shield, Package, ArrowLeft, Star, Minus, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Share2, Copy, Check, Truck, Shield, Package, ArrowLeft, Star, Minus, Plus, ChevronDown, ChevronUp, Sparkles, Heart, Leaf, ShieldCheck } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
 import { supabaseProductService } from '@/services/supabaseProductService';
 import { useStore } from '@/context/StoreContext';
@@ -14,6 +14,7 @@ import { useCart } from '@/context/CartContext';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
+import { usePublicProducts } from '@/hooks/use-public-products';
 
 interface ProductDetailProps {
     product: Product;
@@ -22,6 +23,7 @@ interface ProductDetailProps {
 
 export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency }) => {
     const router = useRouter();
+    const { products: allProducts } = usePublicProducts();
     const { settings, addToast } = useStore();
     const { addItem } = useCart();
     const [activeImg, setActiveImg] = useState(0);
@@ -190,7 +192,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                 key={idx}
                                 onClick={() => setActiveImg(idx)}
                                 className={cn(
-                                    "relative w-20 xl:w-24 aspect-[4/5] rounded overflow-hidden transition-all duration-500",
+                                    "relative w-20 xl:w-24 aspect-[4/5] rounded transition-all duration-500",
                                     activeImg === idx 
                                         ? "ring-2 ring-stone-900 dark:ring-white ring-offset-2 dark:ring-offset-stone-950" 
                                         : "opacity-40 hover:opacity-100"
@@ -200,7 +202,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                     src={img} 
                                     fill 
                                     sizes="100px" 
-                                    className="object-cover" 
+                                    className="object-cover rounded" 
                                     alt={`Miniatura ${idx + 1}`}
                                     unoptimized={img.startsWith('data:')}
                                 />
@@ -209,9 +211,9 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                     </div>
 
                     {/* COL 2: Main Image Centerpiece */}
-                    <div className="relative w-full">
+                    <div className="relative w-full lg:max-w-[800px] mx-auto">
                         <div 
-                            className="relative aspect-[4/5] md:aspect-[3/4] lg:aspect-[4/5] w-full bg-white dark:bg-stone-900/40 rounded-xl overflow-hidden shadow-sm md:shadow-none"
+                            className="relative aspect-[4/5] md:aspect-[3/4] lg:aspect-[4/5] w-full max-h-[85vh] bg-white dark:bg-stone-900/40 rounded-xl overflow-hidden shadow-sm md:shadow-none mx-auto"
                             onTouchStart={onTouchStart}
                             onTouchMove={onTouchMove}
                             onTouchEnd={onTouchEnd}
@@ -326,16 +328,36 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                     <p className="text-2xl xl:text-3xl font-light text-stone-900 dark:text-stone-100">
                                         {formatPrice(currentPrice, currency)}
                                     </p>
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex text-amber-400">
-                                            {[...Array(5)].map((_, i) => (
-                                                <Star key={i} className="w-3 h-3 fill-current" />
-                                            ))}
-                                        </div>
-                                        <span className="text-[10px] text-stone-400 dark:text-stone-500 font-medium uppercase tracking-wider">4.8 Verificado</span>
-                                    </div>
                                 </div>
                                 <StatusBadge status={product.status} />
+                            </div>
+
+                            {/* Product Features / Badges */}
+                            <div className="grid grid-cols-2 gap-4 py-4 border-y border-stone-100 dark:border-stone-900">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-full bg-stone-50 dark:bg-stone-900 flex items-center justify-center text-stone-400">
+                                        <Sparkles className="w-4 h-4" />
+                                    </div>
+                                    <span className="text-[9px] font-bold uppercase tracking-widest text-stone-500">Plata 925 Certificada</span>
+                                </div>
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-full bg-stone-50 dark:bg-stone-900 flex items-center justify-center text-stone-400">
+                                        <Heart className="w-4 h-4" />
+                                    </div>
+                                    <span className="text-[9px] font-bold uppercase tracking-widest text-stone-500">Hipoalergénico</span>
+                                </div>
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-full bg-stone-50 dark:bg-stone-900 flex items-center justify-center text-stone-400">
+                                        <ShieldCheck className="w-4 h-4" />
+                                    </div>
+                                    <span className="text-[9px] font-bold uppercase tracking-widest text-stone-500">Hecho a Mano</span>
+                                </div>
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-full bg-stone-50 dark:bg-stone-900 flex items-center justify-center text-stone-400">
+                                        <Leaf className="w-4 h-4" />
+                                    </div>
+                                    <span className="text-[9px] font-bold uppercase tracking-widest text-stone-500">Packaging Sustentable</span>
+                                </div>
                             </div>
                         </div>
 
@@ -412,9 +434,6 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                         {isSoldOut || isVariantSoldOut ? 'Agotado' : 'Añadir a Cotización'}
                                     </Button>
                                 </div>
-                                <p className="text-[10px] text-center text-stone-400 dark:text-stone-500 uppercase tracking-widest font-medium">
-                                    Edición Limitada · Joyería de Autor
-                                </p>
                             </div>
                         </div>
 
@@ -509,6 +528,51 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                 <span className="text-[8px] uppercase tracking-widest font-bold">Pack</span>
                              </div>
                         </div>
+                    </div>
+                </div>
+
+                {/* ─── RELACIONADOS ─── */}
+                <div className="mt-32 pt-24 border-t border-stone-100 dark:border-stone-900">
+                    <div className="flex flex-col items-center mb-16">
+                        <div className="w-12 h-px bg-gold-400 mb-6" />
+                        <h2 className="text-2xl md:text-3xl font-serif tracking-[0.2em] text-stone-900 dark:text-white uppercase text-center">
+                            También te puede interesar
+                        </h2>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+                        {allProducts
+                            .filter((p: Product) => p.id !== product.id && (p.category === product.category || !product.category))
+                            .slice(0, 4)
+                            .map((related: Product) => (
+                                <Link 
+                                    key={related.id} 
+                                    href={`/product/${related.id}`}
+                                    className="group space-y-4"
+                                >
+                                    <div className="relative aspect-[3/4] overflow-hidden rounded bg-stone-100 dark:bg-stone-900">
+                                        {related.images?.[0] && (
+                                            <Image 
+                                                src={related.images[0]} 
+                                                fill 
+                                                className="object-cover transition-transform duration-700 group-hover:scale-110" 
+                                                alt={related.name}
+                                                unoptimized={related.images[0].startsWith('data:')}
+                                            />
+                                        )}
+                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
+                                    </div>
+                                    <div className="space-y-1 text-center">
+                                        <h3 className="text-[10px] font-bold tracking-[0.2em] text-stone-400 uppercase">{related.category}</h3>
+                                        <p className="text-xs font-serif tracking-widest text-stone-900 dark:text-white group-hover:text-gold-600 transition-colors">
+                                            {related.name}
+                                        </p>
+                                        <p className="text-[10px] font-medium text-stone-500">
+                                            {formatPrice(related.price, currency)}
+                                        </p>
+                                    </div>
+                                </Link>
+                            ))}
                     </div>
                 </div>
             </main>

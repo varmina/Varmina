@@ -7,7 +7,7 @@ import { useStore } from '@/context/StoreContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useCart } from '@/context/CartContext';
 import { APP_NAME } from '@/lib/constants';
-import { Sun, Moon, ShoppingBag } from 'lucide-react';
+import { Sun, Moon, ShoppingBag, Menu, X, Instagram, Facebook } from 'lucide-react';
 import { CartDrawer } from '@/components/cart/cart-drawer';
 import { LoadingScreen } from '@/components/ui/loading-screen';
 import { cn } from '@/lib/utils';
@@ -18,6 +18,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
     const { totalItems, setIsOpen } = useCart();
     const [mounted, setMounted] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     useEffect(() => { setMounted(true); }, []);
 
@@ -59,53 +60,135 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
 
             {/* Header */}
             <header className={cn(
-                "sticky top-0 z-40 h-16 md:h-20 flex items-center justify-between px-8 md:px-16 transition-all duration-300",
+                "sticky top-0 z-50 h-16 md:h-24 flex items-center justify-between px-6 md:px-16 transition-all duration-300",
                 scrolled
                     ? "bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl shadow-sm border-b border-stone-100 dark:border-stone-800"
                     : "bg-white/90 dark:bg-stone-900/90 backdrop-blur border-b border-stone-200 dark:border-stone-800"
             )}>
+                {/* Mobile Menu Button */}
+                <button 
+                    onClick={() => setIsMobileMenuOpen(true)}
+                    className="lg:hidden p-2 text-stone-600 dark:text-stone-400 hover:text-gold-600 transition-colors"
+                >
+                    <Menu className="w-6 h-6" />
+                </button>
+
                 {/* Logo */}
-                <Link href="/" className="group">
-                    <h1 className="font-serif text-lg md:text-2xl tracking-[0.3em] text-stone-900 dark:text-gold-200 cursor-pointer select-none uppercase group-hover:text-gold-600 transition-colors duration-300">
+                <Link href="/" className="group absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0">
+                    <h1 className="font-serif text-xl md:text-2xl tracking-[0.3em] text-stone-900 dark:text-gold-200 cursor-pointer select-none uppercase group-hover:text-gold-600 transition-colors duration-300">
                         {settings?.brand_name || APP_NAME}
                     </h1>
                 </Link>
 
+                {/* Desktop Nav */}
+                <nav className="hidden lg:flex items-center gap-10">
+                    {['INICIO', 'ANILLOS', 'COLLARES', 'PENDIENTES', 'COLECCIONES'].map((item) => (
+                        <Link 
+                            key={item} 
+                            href={item === 'INICIO' ? '/' : `/category/${item.toLowerCase()}`}
+                            className="text-[10px] font-bold tracking-[0.25em] text-stone-400 hover:text-stone-900 dark:hover:text-white transition-all hover:-translate-y-0.5"
+                        >
+                            {item}
+                        </Link>
+                    ))}
+                </nav>
+
                 {/* Actions */}
-                <div className="flex items-center gap-1 md:gap-2">
-                    {/* Cart */}
+                <div className="flex items-center gap-1 md:gap-3">
+                    {/* Theme Toggle */}
                     <button
-                        onClick={() => setIsOpen(true)}
-                        className="relative p-2.5 md:p-3 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full text-stone-600 dark:text-stone-400 transition-colors"
-                        aria-label={`Ver cotización, ${totalItems} artículos`}
+                        onClick={toggleDarkMode}
+                        className="hidden md:flex p-2.5 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full text-stone-600 dark:text-stone-400 transition-colors"
                     >
-                        <ShoppingBag className="w-[18px] h-[18px]" />
-                        {totalItems > 0 && (
-                            <span className="absolute top-1 right-1 min-w-[16px] h-4 bg-gold-500 rounded-full text-[9px] font-bold text-white flex items-center justify-center px-1 animate-scale-in">
-                                {totalItems}
-                            </span>
-                        )}
+                        {mounted && darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                     </button>
 
                     {/* Currency Toggle */}
                     <button
                         onClick={handleCurrencyToggle}
-                        className="p-2.5 md:p-3 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full text-stone-600 dark:text-stone-400 transition-colors"
-                        aria-label={`Moneda actual: ${currency}. Haz clic para cambiar.`}
+                        className="p-2.5 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full text-stone-600 dark:text-stone-400 transition-colors"
                     >
-                        <span className="font-serif font-bold text-xs">{currency}</span>
+                        <span className="font-serif font-bold text-xs uppercase">{currency}</span>
                     </button>
 
-                    {/* Theme Toggle */}
+                    {/* Cart */}
                     <button
-                        onClick={toggleDarkMode}
-                        className="p-2.5 md:p-3 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full text-stone-600 dark:text-stone-400 transition-colors"
-                        aria-label={darkMode ? 'Activar modo claro' : 'Activar modo oscuro'}
+                        onClick={() => setIsOpen(true)}
+                        className="relative p-2.5 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full text-stone-600 dark:text-stone-400 transition-colors"
                     >
-                        {mounted && darkMode ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
+                        <ShoppingBag className="w-5 h-5" />
+                        {totalItems > 0 && (
+                            <span className="absolute top-1 right-1 min-w-[16px] h-4 bg-gold-500 rounded-full text-[9px] font-bold text-white flex items-center justify-center px-1">
+                                {totalItems}
+                            </span>
+                        )}
                     </button>
                 </div>
             </header>
+
+            {/* Mobile Menu Drawer */}
+            <div className={cn(
+                "fixed inset-0 z-[60] lg:hidden transition-all duration-500",
+                isMobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+            )}>
+                <div 
+                    className="absolute inset-0 bg-stone-900/40 backdrop-blur-sm"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                />
+                <div className={cn(
+                    "absolute top-0 left-0 bottom-0 w-80 bg-white dark:bg-stone-950 shadow-2xl transition-transform duration-500 ease-out flex flex-col",
+                    isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+                )}>
+                    <div className="p-6 flex items-center justify-between border-b border-stone-100 dark:border-stone-900">
+                        <span className="font-serif text-lg tracking-[0.2em] uppercase">{settings?.brand_name}</span>
+                        <button onClick={() => setIsMobileMenuOpen(false)}>
+                            <X className="w-6 h-6 text-stone-400" />
+                        </button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-8 space-y-8">
+                        <div className="space-y-6">
+                            {['INICIO', 'ANILLOS', 'COLLARES', 'PENDIENTES', 'COLECCIONES'].map((item) => (
+                                <Link 
+                                    key={item} 
+                                    href={item === 'INICIO' ? '/' : `/category/${item.toLowerCase()}`}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="block text-lg font-serif tracking-[0.1em] text-stone-900 dark:text-white"
+                                >
+                                    {item}
+                                </Link>
+                            ))}
+                        </div>
+
+                        <div className="h-px bg-stone-100 dark:bg-stone-900" />
+
+                        <div className="space-y-4">
+                            <button 
+                                onClick={toggleDarkMode}
+                                className="flex items-center gap-3 text-sm font-bold tracking-widest text-stone-400"
+                            >
+                                {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                                {darkMode ? 'MODO CLARO' : 'MODO OSCURO'}
+                            </button>
+                            <button 
+                                onClick={handleCurrencyToggle}
+                                className="flex items-center gap-3 text-sm font-bold tracking-widest text-stone-400 uppercase"
+                            >
+                                <span className="font-serif text-stone-900 dark:text-white">{currency}</span>
+                                CAMBIAR MONEDA
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="p-8 border-t border-stone-100 dark:border-stone-900">
+                        <div className="flex items-center gap-6 mb-4">
+                            {settings?.instagram_url && <Instagram className="w-5 h-5 text-stone-400" />}
+                            {settings?.facebook_url && <Facebook className="w-5 h-5 text-stone-400" />}
+                        </div>
+                        <p className="text-[10px] text-stone-400 tracking-[0.2em]">SANTIAGO, CHILE</p>
+                    </div>
+                </div>
+            </div>
 
             {/* Main */}
             <main className="flex-1 w-full flex flex-col items-center justify-start">

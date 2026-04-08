@@ -410,11 +410,11 @@ const CatalogSection: React.FC<{ config: Record<string, any> }> = ({ config }) =
         <>
             {/* Sticky Controls */}
             {(showSearch || showFilters) && (
-                <div className="sticky top-16 z-30 bg-white/80 dark:bg-stone-950/80 backdrop-blur-md border-b border-stone-100 dark:border-stone-800 transition-all duration-300">
-                    <div className="max-w-[1600px] mx-auto px-6 md:px-12 py-4">
-                        <div className="flex flex-col gap-4">
+                <div className="sticky top-16 lg:top-24 z-30 bg-white/90 dark:bg-stone-950/90 backdrop-blur-xl border-b border-stone-100 dark:border-stone-800 transition-all duration-300">
+                    <div className="max-w-[1600px] mx-auto px-6 md:px-12 py-2 md:py-3">
+                        <div className="flex flex-col gap-2">
                             <div className="flex items-center justify-between gap-4">
-                                <h2 className="font-serif text-lg md:text-2xl tracking-[0.15em] text-stone-900 dark:text-white uppercase hidden md:block">Catálogo</h2>
+                                <h2 className="font-serif text-sm md:text-base tracking-[0.2em] text-stone-900 dark:text-white uppercase hidden md:block">Catálogo</h2>
                                 <div className="flex items-center gap-3 flex-1 md:flex-initial justify-end">
                                     {showSearch && (
                                         <div className="relative flex-1 md:w-64">
@@ -441,7 +441,7 @@ const CatalogSection: React.FC<{ config: Record<string, any> }> = ({ config }) =
 
                             {/* Desktop Quick Category Pills */}
                             {categories.length > 2 && (
-                                <div className="hidden md:flex items-center gap-2 overflow-x-auto scrollbar-hide border-t border-stone-50 dark:border-stone-900/50 pt-3">
+                                <div className="hidden md:flex items-center gap-2 overflow-x-auto scrollbar-hide py-1">
                                     {categories.map(cat => (
                                         <button
                                             key={cat}
