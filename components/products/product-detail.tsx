@@ -13,6 +13,7 @@ import { useStore } from '@/context/StoreContext';
 import { useCart } from '@/context/CartContext';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
 
 interface ProductDetailProps {
     product: Product;
@@ -20,6 +21,7 @@ interface ProductDetailProps {
 }
 
 export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency }) => {
+    const router = useRouter();
     const { settings, addToast } = useStore();
     const { addItem } = useCart();
     const [activeImg, setActiveImg] = useState(0);
@@ -146,13 +148,13 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
             <div className="max-w-[1600px] mx-auto px-4 md:px-12 py-6 md:py-8">
                 <nav className="flex items-center justify-between">
                     <div className="flex items-center gap-3 text-[10px] uppercase tracking-[0.2em]">
-                        <Link
-                            href="/"
+                        <button
+                            onClick={() => router.back()}
                             className="flex items-center gap-2 text-stone-400 hover:text-stone-900 dark:hover:text-white transition-all group"
                         >
                             <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
                             <span>Volver</span>
-                        </Link>
+                        </button>
                         <span className="text-stone-200 dark:text-stone-800">/</span>
                         <div className="hidden sm:flex items-center gap-2">
                             {product.category && (
@@ -179,7 +181,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
 
             {/* ─── PREMIUM PRODUCT PAGE LAYOUT ─── */}
             <main className="max-w-[1600px] mx-auto px-4 md:px-12 pb-24">
-                <div className="grid grid-cols-1 lg:grid-cols-[auto,1fr,480px] xl:grid-cols-[auto,1fr,540px] gap-8 xl:gap-16 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-[100px_1fr_420px] xl:grid-cols-[120px_1fr_480px] gap-8 xl:gap-16 items-start">
                     
                     {/* COL 1: Vertical Thumbnails (Desktop Only) */}
                     <div className="hidden lg:flex flex-col gap-3 sticky top-32 overflow-y-auto max-h-[70vh] pr-4 scrollbar-thin scrollbar-thumb-stone-200 dark:scrollbar-thumb-stone-800">
@@ -314,7 +316,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                         ))}
                                     </div>
                                 )}
-                                <h1 className="text-3xl md:text-4xl xl:text-5xl font-serif text-stone-900 dark:text-white leading-tight tracking-tight">
+                                <h1 className="text-2xl md:text-3xl xl:text-4xl font-serif text-stone-900 dark:text-white leading-tight tracking-tight uppercase">
                                     {product.name}
                                 </h1>
                             </div>
@@ -428,10 +430,10 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                     {expandedSections.has('description') ? <Minus className="w-3.5 h-3.5 text-stone-400" /> : <Plus className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-900 dark:group-hover:text-white transition-colors" />}
                                 </button>
                                 <div className={cn(
-                                    "overflow-hidden transition-all duration-500 ease-in-out",
-                                    expandedSections.has('description') ? "max-h-[500px] mb-6" : "max-h-0"
+                                    "overflow-hidden transition-all duration-700 ease-in-out",
+                                    expandedSections.has('description') ? "max-h-[2000px] opacity-100 mb-6" : "max-h-0 opacity-0"
                                 )}>
-                                    <div className="prose prose-stone prose-sm dark:prose-invert max-w-none text-stone-600 dark:text-stone-400 leading-relaxed font-sans whitespace-pre-line">
+                                    <div className="prose prose-stone prose-sm dark:prose-invert max-w-none text-stone-600 dark:text-stone-400 leading-relaxed font-sans whitespace-pre-line py-2">
                                         {product.description}
                                     </div>
                                 </div>
@@ -447,8 +449,8 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                     {expandedSections.has('shipping') ? <Minus className="w-3.5 h-3.5 text-stone-400" /> : <Plus className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-900 dark:group-hover:text-white transition-colors" />}
                                 </button>
                                 <div className={cn(
-                                    "overflow-hidden transition-all duration-500 ease-in-out",
-                                    expandedSections.has('shipping') ? "max-h-[300px] mb-6" : "max-h-0"
+                                    "overflow-hidden transition-all duration-700 ease-in-out",
+                                    expandedSections.has('shipping') ? "max-h-[1000px] opacity-100 mb-6" : "max-h-0 opacity-0"
                                 )}>
                                     <div className="text-xs text-stone-600 dark:text-stone-400 space-y-4 font-sans leading-relaxed">
                                         <div className="flex items-start gap-4">
@@ -479,8 +481,8 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                     {expandedSections.has('care') ? <Minus className="w-3.5 h-3.5 text-stone-400" /> : <Plus className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-900 dark:group-hover:text-white transition-colors" />}
                                 </button>
                                 <div className={cn(
-                                    "overflow-hidden transition-all duration-500 ease-in-out",
-                                    expandedSections.has('care') ? "max-h-[300px] mb-6" : "max-h-0"
+                                    "overflow-hidden transition-all duration-700 ease-in-out",
+                                    expandedSections.has('care') ? "max-h-[1000px] opacity-100 mb-6" : "max-h-0 opacity-0"
                                 )}>
                                     <ul className="text-xs text-stone-600 dark:text-stone-400 space-y-3 list-disc pl-4 font-sans leading-relaxed">
                                         <li>Evita el contacto con perfumes y químicos.</li>
