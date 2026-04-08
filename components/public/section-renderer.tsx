@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useStore } from '@/context/StoreContext';
@@ -708,7 +708,15 @@ export const SectionRenderer: React.FC<{ prefetchedSections?: PageSection[] }> =
             {sections.map(section => {
                 const Component = SECTION_COMPONENTS[section.section_type];
                 if (!Component) return null;
-                return <Component key={section.id} config={section.config} />;
+                return (
+                    <Suspense key={section.id} fallback={
+                        <div className="w-full py-32 flex items-center justify-center">
+                            <div className="w-10 h-10 border-2 border-gold-500 border-t-transparent rounded-full animate-spin" />
+                        </div>
+                    }>
+                        <Component config={section.config} />
+                    </Suspense>
+                );
             })}
         </div>
     );
