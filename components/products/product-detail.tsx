@@ -306,9 +306,10 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                     <div 
                                         key={idx}
                                         className={cn(
-                                            "absolute inset-0 transition-opacity duration-700 ease-in-out",
-                                            isActive ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                                            "absolute inset-0 transition-opacity duration-1000 ease-in-out will-change-[opacity]",
+                                            isActive ? "opacity-100" : "opacity-0 pointer-events-none"
                                         )}
+                                        style={{ transitionProperty: 'opacity' }}
                                     >
                                         <Image
                                             src={img}
@@ -727,9 +728,10 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                 <div 
                                     key={idx}
                                     className={cn(
-                                        "absolute inset-0 transition-opacity duration-500 ease-in-out w-full h-full flex items-center justify-center",
-                                        isActive ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                                        "absolute inset-0 transition-opacity duration-700 ease-in-out w-full h-full flex items-center justify-center will-change-[opacity]",
+                                        isActive ? "opacity-100" : "opacity-0 pointer-events-none"
                                     )}
+                                    style={{ transitionProperty: 'opacity' }}
                                 >
                                     <div 
                                         className="relative w-full h-full transition-transform duration-300 ease-out flex items-center justify-center"
