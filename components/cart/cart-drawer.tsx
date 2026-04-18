@@ -115,6 +115,7 @@ export const CartDrawer: React.FC = () => {
                                             fill
                                             sizes="80px"
                                             className="object-cover"
+                                            unoptimized
                                         />
                                     )}
                                 </div>

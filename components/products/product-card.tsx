@@ -51,32 +51,34 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, cu
                     ? "w-24 h-24 md:w-48 md:h-48 shrink-0"
                     : "w-full aspect-square"
             )}>
-                <Image
-                    src={primaryImage}
-                    alt={product.name}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    className={cn(
-                        "object-cover transition-all duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]",
-                        hoverActive && hoverImage ? "opacity-0" : "opacity-100",
-                        !hoverActive && "group-hover:scale-[1.03]"
-                    )}
-                    priority={layout === 'grid'}
-                />
-
-                {/* Hover second image */}
-                {hoverImage && (
                     <Image
-                        src={hoverImage}
+                        src={primaryImage}
                         alt={product.name}
                         fill
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className={cn(
-                            "object-cover transition-opacity duration-500 ease-in-out",
-                            hoverActive ? "opacity-100 scale-[1.03]" : "opacity-0"
+                            "object-cover transition-all duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]",
+                            hoverActive && hoverImage ? "opacity-0" : "opacity-100",
+                            !hoverActive && "group-hover:scale-[1.03]"
                         )}
-                        loading="lazy"
+                        priority={layout === 'grid'}
+                        unoptimized
                     />
+
+                {/* Hover second image */}
+                {hoverImage && (
+                        <Image
+                            src={hoverImage}
+                            alt={product.name}
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            className={cn(
+                                "object-cover transition-opacity duration-500 ease-in-out",
+                                hoverActive ? "opacity-100 scale-[1.03]" : "opacity-0"
+                            )}
+                            loading="lazy"
+                            unoptimized
+                        />
                 )}
 
                 {/* Badge */}

@@ -30,7 +30,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
     const [isAdding, setIsAdding] = useState(false);
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [isCopied, setIsCopied] = useState(false);
-    const [imgLoadedSet, setImgLoadedSet] = useState<Set<number>>(new Set([0]));
+    const [imgLoadedSet, setImgLoadedSet] = useState<Set<number>>(new Set());
     const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['description']));
     const [quantity, setQuantity] = useState(1);
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -284,6 +284,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                         sizes="100px" 
                                         className="object-cover rounded-sm" 
                                         alt={`Miniatura ${idx + 1}`}
+                                        unoptimized
                                     />
                                 </button>
                             ))}
@@ -300,7 +301,13 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                             >
                                 {imagesToDisplay.map((img: string, idx: number) => {
                                     const isActive = activeImg === idx;
+                                    // Only render current, previous, and next image for performance
+                                    const isNear = Math.abs(idx - activeImg) <= 1 || 
+                                                 (activeImg === 0 && idx === imagesToDisplay.length - 1) ||
+                                                 (activeImg === imagesToDisplay.length - 1 && idx === 0);
                                     
+                                    if (!isNear && !isActive) return null;
+
                                     return (
                                         <div 
                                             key={idx}
@@ -313,7 +320,8 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                             <Image
                                                 src={img}
                                                 fill
-                                                priority={idx === 0}
+                                                priority={isActive}
+                                                unoptimized
                                                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 50vw"
                                                 className="object-contain md:object-cover p-4 md:p-0 transition-transform duration-[2s] ease-out group-hover:scale-105"
                                                 alt={product.name}
@@ -379,7 +387,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                             activeImg === idx ? "border border-stone-900 dark:border-white opacity-100" : "opacity-60"
                                         )}
                                     >
-                                        <Image src={img} fill sizes="64px" className="object-cover" alt="" />
+                                        <Image src={img} fill sizes="64px" className="object-cover" alt="" unoptimized />
                                     </button>
                                 ))}
                             </div>
@@ -621,6 +629,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                                 fill 
                                                 className="object-cover transition-transform duration-700 group-hover:scale-110" 
                                                 alt={related.name}
+                                                unoptimized
                                             />
                                         )}
                                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
@@ -747,6 +756,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                             className="object-contain p-4 md:p-12"
                                             sizes="100vw"
                                             alt={product.name}
+                                            unoptimized
                                         />
                                     </div>
                                 </div>

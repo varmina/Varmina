@@ -84,6 +84,7 @@ export const CollectionsList = () => {
                                         alt={col.name}
                                         fill
                                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                        unoptimized
                                         className="object-cover transition-transform duration-[10s] group-hover:scale-110 ease-linear"
                                     />
                                 ) : (

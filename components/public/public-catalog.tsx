@@ -158,6 +158,7 @@ export const PublicCatalog = ({
                             alt={settings.hero_title || "Varmina Collection"}
                             fill
                             priority
+                            unoptimized
                             className="w-full h-full object-cover transition-transform duration-[20s] ease-linear group-hover:scale-110"
                         />
                         {/* Deep Premium Overlay */}

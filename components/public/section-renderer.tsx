@@ -33,6 +33,7 @@ const HeroSection: React.FC<{ config: Record<string, any> }> = ({ config }) => {
                     fill
                     sizes="100vw"
                     priority
+                    unoptimized
                     className="w-full h-full object-cover transition-transform duration-[20s] ease-linear group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/10 to-stone-900/70 flex flex-col items-center justify-center text-center p-6 md:p-12">
@@ -630,6 +631,7 @@ const ImageSection: React.FC<{ config: Record<string, any> }> = ({ config }) => 
                     sizes="100vw"
                     className="object-cover"
                     loading="lazy"
+                    unoptimized
                 />
             </div>
         </div>
@@ -655,6 +657,7 @@ const BannerSection: React.FC<{ config: Record<string, any> }> = ({ config }) =>
                     src={imageUrl}
                     fill
                     alt=""
+                    unoptimized
                     className="absolute inset-0 w-full h-full object-cover z-0"
                 />
             )}
