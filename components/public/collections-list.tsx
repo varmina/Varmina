@@ -85,7 +85,6 @@ export const CollectionsList = () => {
                                         fill
                                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                         className="object-cover transition-transform duration-[10s] group-hover:scale-110 ease-linear"
-                                        unoptimized={col.coverImage.startsWith('data:')}
                                     />
                                 ) : (
                                     <div className="w-full h-full flex flex-col items-center justify-center bg-stone-100 dark:bg-stone-900 text-stone-300 dark:text-stone-700">

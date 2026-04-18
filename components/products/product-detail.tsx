@@ -278,52 +278,50 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                         : "opacity-40 hover:opacity-100"
                                 )}
                             >
-                                <Image 
-                                    src={img} 
-                                    fill 
-                                    sizes="100px" 
-                                    className="object-cover rounded-sm" 
-                                    alt={`Miniatura ${idx + 1}`}
-                                    unoptimized={img.startsWith('data:')}
-                                />
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* COL 2: Main Image Centerpiece */}
-                    <div className="relative w-full lg:max-w-[800px] mx-auto group">
-                        <div 
-                            className="relative aspect-[4/5] md:aspect-[3/4] lg:aspect-[4/5] w-full max-h-[85vh] bg-white dark:bg-stone-900/40 rounded-xl overflow-hidden shadow-sm md:shadow-none mx-auto cursor-zoom-in"
-                            onTouchStart={onTouchStart}
-                            onTouchMove={onTouchMove}
-                            onTouchEnd={onTouchEnd}
-                            onClick={() => { setIsFullscreen(true); setZoomLevel(1); }}
-                        >
-                            {imagesToDisplay.map((img: string, idx: number) => {
-                                const isActive = activeImg === idx;
-                                
-                                return (
-                                    <div 
-                                        key={idx}
-                                        className={cn(
-                                            "absolute inset-0 transition-opacity duration-1000 ease-in-out will-change-[opacity]",
-                                            isActive ? "opacity-100" : "opacity-0 pointer-events-none"
-                                        )}
-                                        style={{ transitionProperty: 'opacity' }}
-                                    >
-                                        <Image
-                                            src={img}
-                                            fill
-                                            priority={idx === 0}
-                                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 50vw"
-                                            className="object-contain md:object-cover p-4 md:p-0 transition-transform duration-[2s] ease-out group-hover:scale-105"
-                                            alt={product.name}
-                                            onLoad={() => handleImgLoad(idx)}
-                                            unoptimized={img.startsWith('data:')}
-                                        />
-                                    </div>
-                                );
-                            })}
+                                    <Image 
+                                        src={img} 
+                                        fill 
+                                        sizes="100px" 
+                                        className="object-cover rounded-sm" 
+                                        alt={`Miniatura ${idx + 1}`}
+                                    />
+                                </button>
+                            ))}
+                        </div>
+    
+                        {/* COL 2: Main Image Centerpiece */}
+                        <div className="relative w-full lg:max-w-[800px] mx-auto group">
+                            <div 
+                                className="relative aspect-[4/5] md:aspect-[3/4] lg:aspect-[4/5] w-full max-h-[85vh] bg-white dark:bg-stone-900/40 rounded-xl overflow-hidden shadow-sm md:shadow-none mx-auto cursor-zoom-in"
+                                onTouchStart={onTouchStart}
+                                onTouchMove={onTouchMove}
+                                onTouchEnd={onTouchEnd}
+                                onClick={() => { setIsFullscreen(true); setZoomLevel(1); }}
+                            >
+                                {imagesToDisplay.map((img: string, idx: number) => {
+                                    const isActive = activeImg === idx;
+                                    
+                                    return (
+                                        <div 
+                                            key={idx}
+                                            className={cn(
+                                                "absolute inset-0 transition-opacity duration-1000 ease-in-out will-change-[opacity]",
+                                                isActive ? "opacity-100" : "opacity-0 pointer-events-none"
+                                            )}
+                                            style={{ transitionProperty: 'opacity' }}
+                                        >
+                                            <Image
+                                                src={img}
+                                                fill
+                                                priority={idx === 0}
+                                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 50vw"
+                                                className="object-contain md:object-cover p-4 md:p-0 transition-transform duration-[2s] ease-out group-hover:scale-105"
+                                                alt={product.name}
+                                                onLoad={() => handleImgLoad(idx)}
+                                            />
+                                        </div>
+                                    );
+                                })}
                             
                             {/* Navigation Arrows for main image */}
                             {imagesToDisplay.length > 1 && (
@@ -381,7 +379,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                             activeImg === idx ? "border border-stone-900 dark:border-white opacity-100" : "opacity-60"
                                         )}
                                     >
-                                        <Image src={img} fill sizes="64px" className="object-cover" alt="" unoptimized={img.startsWith('data:')} />
+                                        <Image src={img} fill sizes="64px" className="object-cover" alt="" />
                                     </button>
                                 ))}
                             </div>
@@ -623,7 +621,6 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                                 fill 
                                                 className="object-cover transition-transform duration-700 group-hover:scale-110" 
                                                 alt={related.name}
-                                                unoptimized={related.images[0].startsWith('data:')}
                                             />
                                         )}
                                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
@@ -750,7 +747,6 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                             className="object-contain p-4 md:p-12"
                                             sizes="100vw"
                                             alt={product.name}
-                                            unoptimized={img.startsWith('data:')}
                                         />
                                     </div>
                                 </div>

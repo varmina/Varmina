@@ -34,7 +34,6 @@ const HeroSection: React.FC<{ config: Record<string, any> }> = ({ config }) => {
                     sizes="100vw"
                     priority
                     className="w-full h-full object-cover transition-transform duration-[20s] ease-linear group-hover:scale-110"
-                    unoptimized={!imageUrl.includes('supabase.co')}
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/10 to-stone-900/70 flex flex-col items-center justify-center text-center p-6 md:p-12">
                     <div className="max-w-4xl space-y-6">
@@ -631,7 +630,6 @@ const ImageSection: React.FC<{ config: Record<string, any> }> = ({ config }) => 
                     sizes="100vw"
                     className="object-cover"
                     loading="lazy"
-                    unoptimized={!config.image_url?.includes('supabase.co')}
                 />
             </div>
         </div>
@@ -658,7 +656,6 @@ const BannerSection: React.FC<{ config: Record<string, any> }> = ({ config }) =>
                     fill
                     alt=""
                     className="absolute inset-0 w-full h-full object-cover z-0"
-                    unoptimized={!imageUrl.includes('supabase.co')}
                 />
             )}
             {imageUrl && <div className="absolute inset-0 bg-black/50 z-[1]" />}

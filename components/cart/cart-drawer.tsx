@@ -115,7 +115,6 @@ export const CartDrawer: React.FC = () => {
                                             fill
                                             sizes="80px"
                                             className="object-cover"
-                                            unoptimized={item.product.images[0].startsWith('data:')}
                                         />
                                     )}
                                 </div>

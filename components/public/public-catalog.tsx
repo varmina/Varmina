@@ -159,7 +159,6 @@ export const PublicCatalog = ({
                             fill
                             priority
                             className="w-full h-full object-cover transition-transform duration-[20s] ease-linear group-hover:scale-110"
-                            unoptimized={settings.hero_image_url.startsWith('data:')}
                         />
                         {/* Deep Premium Overlay */}
                         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-stone-900/60 flex flex-col items-center justify-center text-center p-6 md:p-12">
