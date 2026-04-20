@@ -150,6 +150,18 @@ export const FinanceView: React.FC = () => {
         }
     };
 
+    const handleAddNew = (type: 'income' | 'expense') => {
+        setEditingTransaction(null);
+        setModalType(type);
+        setFormData({
+            description: '',
+            amount: '',
+            category: '',
+            date: getLocalISODate() // Fresh date
+        });
+        setIsModalOpen(true);
+    };
+
     const handleEdit = (tx: Transaction) => {
         setEditingTransaction(tx);
         setModalType(tx.type);
@@ -258,13 +270,13 @@ export const FinanceView: React.FC = () => {
                         <FileText className="w-4 h-4" /> Carga Masiva
                     </Button>
                     <Button
-                        onClick={() => { setEditingTransaction(null); setModalType('income'); setIsModalOpen(true); }}
+                        onClick={() => handleAddNew('income')}
                         className="bg-green-600 hover:bg-green-700 text-white gap-2"
                     >
                         <Plus className="w-4 h-4" /> Nuevo Ingreso
                     </Button>
                     <Button
-                        onClick={() => { setEditingTransaction(null); setModalType('expense'); setIsModalOpen(true); }}
+                        onClick={() => handleAddNew('expense')}
                         className="bg-red-600 hover:bg-red-700 text-white gap-2"
                     >
                         <Minus className="w-4 h-4" /> Nuevo Gasto
@@ -481,8 +493,9 @@ export const FinanceView: React.FC = () => {
                                             </td>
                                             <td className="p-5 text-center text-stone-500 font-serif text-xs">
                                                 {tx.date ? (() => {
-                                                    const [year, month, day] = tx.date.split('-').map(Number);
-                                                    return new Date(year, month - 1, day).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' });
+                                                    const [year, month, day] = tx.date.split('-');
+                                                    const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+                                                    return `${parseInt(day)} ${months[parseInt(month) - 1]} ${year}`;
                                                 })() : '-'}
                                             </td>
                                             <td className={`p-5 text-right font-medium text-lg font-serif ${tx.type === 'income' ? 'text-green-600' : 'text-red-700 dark:text-red-500'}`}>

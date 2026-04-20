@@ -259,7 +259,14 @@ export const AdminHomeView: React.FC = () => {
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-xs font-semibold text-stone-800 dark:text-stone-200 truncate">{t.description}</p>
-                                            <p className="text-[10px] text-stone-400">{t.category} · {new Date(t.date).toLocaleDateString('es-CL', { day: 'numeric', month: 'short' })}</p>
+                                            <p className="text-[10px] text-stone-400">
+                                                {t.category} · {(() => {
+                                                    if (!t.date) return '-';
+                                                    const [year, month, day] = t.date.split('-');
+                                                    const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+                                                    return `${parseInt(day)} ${months[parseInt(month) - 1]}`;
+                                                })()}
+                                            </p>
                                         </div>
                                         <span className={`text-sm font-bold font-mono whitespace-nowrap ${t.type === 'income' ? 'text-green-600' : 'text-red-500'}`}>
                                             {t.type === 'income' ? '+' : '-'}{formatPrice(t.amount, 'CLP')}
