@@ -125,7 +125,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
 
             {/* Header */}
             <header className={cn(
-                "sticky top-0 z-50 h-16 md:h-24 flex items-center justify-between px-6 md:px-16 transition-all duration-700",
+                "sticky top-0 z-50 h-14 md:h-24 flex items-center justify-between px-4 md:px-16 transition-all duration-700",
                 isPreloading ? "opacity-0" : "opacity-100",
                 scrolled
                     ? "bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl shadow-sm border-b border-stone-100 dark:border-stone-800"
@@ -134,14 +134,14 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
                 {/* Mobile Menu Button */}
                 <button 
                     onClick={() => setIsMobileMenuOpen(true)}
-                    className="lg:hidden p-2 text-stone-600 dark:text-stone-400 hover:text-gold-600 transition-colors"
+                    className="lg:hidden p-1.5 text-stone-600 dark:text-stone-400 hover:text-gold-600 transition-colors"
                 >
-                    <Menu className="w-6 h-6" />
+                    <Menu className="w-5 h-5 md:w-6 md:h-6" />
                 </button>
 
                 {/* Logo */}
                 <Link href="/" className="group absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0">
-                    <h1 className="font-serif text-xl md:text-2xl tracking-[0.3em] text-stone-900 dark:text-gold-200 cursor-pointer select-none uppercase group-hover:text-gold-600 transition-colors duration-300">
+                    <h1 className="font-serif text-lg md:text-2xl tracking-[0.15em] md:tracking-[0.3em] text-stone-900 dark:text-gold-200 cursor-pointer select-none uppercase group-hover:text-gold-600 transition-colors duration-300 whitespace-nowrap">
                         {settings?.brand_name || APP_NAME}
                     </h1>
                 </Link>
@@ -174,11 +174,11 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
                 </nav>
 
                 {/* Actions */}
-                <div className="flex items-center gap-1 md:gap-3">
-                    {/* Search */}
+                <div className="flex items-center gap-0.5 md:gap-3">
+                    {/* Search — hidden on mobile, visible md+ */}
                     <button
                         onClick={() => setIsSearchOpen(true)}
-                        className="p-2.5 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full text-stone-600 dark:text-stone-400 transition-colors"
+                        className="hidden md:flex p-2.5 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full text-stone-600 dark:text-stone-400 transition-colors"
                         aria-label="Buscar"
                     >
                         <Search className="w-5 h-5" />
@@ -195,15 +195,15 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
                     {/* Currency Toggle */}
                     <button
                         onClick={handleCurrencyToggle}
-                        className="p-2.5 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full text-stone-600 dark:text-stone-400 transition-colors"
+                        className="p-2 md:p-2.5 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full text-stone-600 dark:text-stone-400 transition-colors"
                     >
-                        <span className="font-serif font-bold text-xs uppercase">{currency}</span>
+                        <span className="font-serif font-bold text-[10px] md:text-xs uppercase">{currency}</span>
                     </button>
 
                     {/* Cart */}
                     <button
                         onClick={() => setIsOpen(true)}
-                        className="relative p-2.5 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full text-stone-600 dark:text-stone-400 transition-colors"
+                        className="relative p-2 md:p-2.5 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full text-stone-600 dark:text-stone-400 transition-colors"
                     >
                         <ShoppingBag className="w-5 h-5" />
                         {totalItems > 0 && (
@@ -327,6 +327,15 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
                                 >COLECCIONES</Link>
                             )}
                         </div>
+
+                        {/* Mobile Search Button */}
+                        <button
+                            onClick={() => { setIsMobileMenuOpen(false); setTimeout(() => setIsSearchOpen(true), 300); }}
+                            className="flex items-center gap-3 w-full p-3 bg-stone-50 dark:bg-stone-900 rounded-lg text-sm font-bold tracking-widest text-stone-500 hover:text-stone-900 dark:hover:text-white transition-colors"
+                        >
+                            <Search className="w-4 h-4" />
+                            BUSCAR
+                        </button>
 
                         <div className="h-px bg-stone-100 dark:bg-stone-900" />
 

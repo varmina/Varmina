@@ -174,18 +174,6 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
     const currentStock = selectedVariant?.stock ?? product.stock;
     const isLowStock = currentStock !== undefined && currentStock !== null && currentStock > 0 && currentStock <= stockUrgencyThreshold;
 
-    // Sticky mobile CTA visibility
-    const [showStickyBar, setShowStickyBar] = useState(false);
-    const ctaButtonRef = useRef<HTMLDivElement>(null);
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => setShowStickyBar(!entry.isIntersecting),
-            { threshold: 0 }
-        );
-        if (ctaButtonRef.current) observer.observe(ctaButtonRef.current);
-        return () => observer.disconnect();
-    }, []);
-
     // WhatsApp direct inquiry for single product
     const handleWhatsAppDirect = () => {
         if (!settings?.whatsapp_number) return;
@@ -264,43 +252,9 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
 
     return (
         <div className="w-full bg-stone-50/30 dark:bg-stone-950 min-h-screen selection:bg-stone-200 dark:selection:bg-stone-800">
-            {/* Navigation & Breadcrumb */}
-            <div className="max-w-[1600px] mx-auto px-4 md:px-12 py-6 md:py-8">
-                <nav className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 text-[10px] uppercase tracking-[0.2em]">
-                        <button
-                            onClick={() => router.back()}
-                            className="flex items-center gap-2 text-stone-400 hover:text-stone-900 dark:hover:text-white transition-all group"
-                        >
-                            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
-                            <span>Volver</span>
-                        </button>
-                        <span className="text-stone-200 dark:text-stone-800">›</span>
-                        <div className="hidden sm:flex items-center gap-2">
-                            {product.category && (
-                                <>
-                                    <span className="text-stone-400">{product.category}</span>
-                                    <span className="text-stone-200 dark:text-stone-800">›</span>
-                                </>
-                            )}
-                            <span className="text-stone-900 dark:text-white font-semibold truncate max-w-[200px]">
-                                {product.name}
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <button
-                        onClick={handleShare}
-                        className="p-2 text-stone-400 hover:text-stone-900 dark:hover:text-white transition-colors"
-                        aria-label="Compartir producto"
-                    >
-                        <Share2 className="w-4 h-4" />
-                    </button>
-                </nav>
-            </div>
 
             {/* ─── PREMIUM PRODUCT PAGE LAYOUT ─── */}
-            <main className="max-w-[1600px] mx-auto px-4 md:px-12 pb-24">
+            <main className="max-w-[1600px] mx-auto px-4 md:px-12 py-4 md:py-8 pb-24">
                 <div className="grid grid-cols-1 lg:grid-cols-[100px_1fr_420px] xl:grid-cols-[120px_1fr_480px] gap-8 xl:gap-16 items-start">
                     
                     {/* COL 1: Vertical Thumbnails (Desktop Only) */}
@@ -521,7 +475,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                             )}
 
                             {/* Quantity & CTA */}
-                            <div className="space-y-4" ref={ctaButtonRef}>
+                            <div className="space-y-4">
                                 <div className="flex items-center gap-4">
                                     <div className="flex items-center border border-stone-200 dark:border-stone-800 rounded-sm h-14 px-2">
                                         <button 
@@ -855,31 +809,6 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                 </div>
             )}
 
-            {/* Sticky Mobile Add-to-Cart Bar */}
-            {showStickyBar && !isFullscreen && (
-                <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-t border-stone-200 dark:border-stone-800 px-4 py-3 pb-safe animate-slide-up-mobile">
-                    <div className="flex items-center gap-3">
-                        <div className="flex-shrink-0">
-                            <p className="text-lg font-bold text-stone-900 dark:text-white font-serif">
-                                {formatPrice(currentPrice, currency)}
-                            </p>
-                            {isLowStock && showStockUrgency && (
-                                <p className="text-[9px] text-amber-600 font-bold uppercase tracking-wider">
-                                    {currentStock === 1 ? 'Última unidad' : `Solo ${currentStock} quedan`}
-                                </p>
-                            )}
-                        </div>
-                        <Button
-                            className="flex-1 h-12 text-[11px] font-bold uppercase tracking-[0.2em] bg-stone-900 hover:bg-stone-800 dark:bg-white dark:hover:bg-stone-200 text-white dark:text-stone-900 rounded-sm active:scale-[0.98]"
-                            disabled={isAdding || isCtaDisabled}
-                            onClick={handleAddToCart}
-                            isLoading={isAdding}
-                        >
-                            {isCtaDisabled ? 'Agotado' : ctaText}
-                        </Button>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
