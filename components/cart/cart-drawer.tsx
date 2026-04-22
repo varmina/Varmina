@@ -1,17 +1,27 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { useStore } from '@/context/StoreContext';
 import { Button } from '@/components/ui/button';
-import { X, ShoppingBag, Plus, Minus, Trash2, MessageCircle, ArrowLeft } from 'lucide-react';
+import { X, ShoppingBag, Plus, Minus, Trash2, MessageCircle, ArrowLeft, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/lib/format';
 
 export const CartDrawer: React.FC = () => {
     const { items, isOpen, setIsOpen, updateQuantity, removeItem, clearCart, totalItems, totalPrice } = useCart();
     const { settings, currency } = useStore();
+
+    // Lock body scroll when drawer is open
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => { document.body.style.overflow = ''; };
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -20,6 +30,11 @@ export const CartDrawer: React.FC = () => {
     const getDisplayPrice = (price: number) => {
         return currency === 'CLP' ? price : Math.ceil(price / exchangeRate);
     };
+
+    // Free shipping progress
+    const freeShippingThreshold = settings?.free_shipping_threshold || 0;
+    const freeShippingProgress = freeShippingThreshold > 0 ? Math.min((totalPrice / freeShippingThreshold) * 100, 100) : 0;
+    const remainingForFreeShipping = freeShippingThreshold > 0 ? Math.max(freeShippingThreshold - totalPrice, 0) : 0;
 
     const handleSendQuote = () => {
         if (!settings?.whatsapp_number) {
@@ -65,7 +80,7 @@ export const CartDrawer: React.FC = () => {
                 aria-modal="true"
             >
                 {/* Header */}
-                <div className="p-6 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between">
+                <div className="p-5 md:p-6 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between">
                     <h2 className="font-serif text-lg md:text-xl text-stone-900 dark:text-gold-200 uppercase tracking-widest flex items-center gap-3">
                         <ShoppingBag className="w-5 h-5 text-gold-500" />
                         Tu Selección
@@ -73,17 +88,50 @@ export const CartDrawer: React.FC = () => {
                             {totalItems}
                         </span>
                     </h2>
-                    <button
-                        onClick={() => setIsOpen(false)}
-                        className="p-2 text-stone-400 hover:text-stone-900 dark:hover:text-white transition-colors rounded-full hover:bg-stone-100 dark:hover:bg-stone-800"
-                        aria-label="Cerrar cotización"
-                    >
-                        <X className="w-6 h-6" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        {items.length > 0 && (
+                            <button
+                                onClick={() => {
+                                    if (window.confirm('¿Vaciar toda tu selección?')) clearCart();
+                                }}
+                                className="text-[10px] font-bold uppercase tracking-wider text-stone-400 hover:text-red-500 transition-colors px-2 py-1"
+                            >
+                                Vaciar todo
+                            </button>
+                        )}
+                        <button
+                            onClick={() => setIsOpen(false)}
+                            className="p-2 text-stone-400 hover:text-stone-900 dark:hover:text-white transition-colors rounded-full hover:bg-stone-100 dark:hover:bg-stone-800"
+                            aria-label="Cerrar cotización"
+                        >
+                            <X className="w-6 h-6" />
+                        </button>
+                    </div>
                 </div>
 
+                {/* Free Shipping Bar */}
+                {freeShippingThreshold > 0 && items.length > 0 && (
+                    <div className="px-5 md:px-6 py-3 bg-stone-50 dark:bg-stone-800/50 border-b border-stone-100 dark:border-stone-800">
+                        <div className="flex items-center gap-2 mb-1.5">
+                            <Sparkles className="w-3.5 h-3.5 text-gold-500" />
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-stone-600 dark:text-stone-300">
+                                {remainingForFreeShipping > 0
+                                    ? `Te faltan ${formatPrice(getDisplayPrice(remainingForFreeShipping), currency)} para envío gratis`
+                                    : '¡Envío gratis aplicado! 🎉'
+                                }
+                            </span>
+                        </div>
+                        <div className="w-full h-1.5 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-gradient-to-r from-gold-400 to-gold-500 rounded-full transition-all duration-500"
+                                style={{ width: `${freeShippingProgress}%` }}
+                            />
+                        </div>
+                    </div>
+                )}
+
                 {/* Items List */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-5 md:p-6 space-y-5 custom-scrollbar">
                     {items.length === 0 ? (
                         <div className="h-full flex flex-col items-center justify-center text-center space-y-4 text-stone-400 animate-fade-in">
                             <div className="w-24 h-24 rounded-full bg-stone-50 dark:bg-stone-800/50 flex items-center justify-center">
@@ -100,79 +148,86 @@ export const CartDrawer: React.FC = () => {
                             </button>
                         </div>
                     ) : (
-                        items.map((item, i) => (
-                            <div
-                                key={`${item.product.id}-${item.selectedVariant}`}
-                                className="flex gap-4 group animate-fade-in-up"
-                                style={{ animationDelay: `${i * 50}ms` }}
-                            >
-                                {/* Image */}
-                                <div className="relative w-20 h-24 bg-stone-100 dark:bg-stone-800 rounded-lg overflow-hidden flex-shrink-0 border border-stone-200 dark:border-stone-700">
-                                    {item.product.images[0] && (
-                                        <Image
-                                            src={item.product.images[0]}
-                                            alt={item.product.name}
-                                            fill
-                                            sizes="80px"
-                                            className="object-cover"
-                                            unoptimized
-                                        />
-                                    )}
-                                </div>
-
-                                {/* Details */}
-                                <div className="flex-1 flex flex-col justify-between min-w-0">
-                                    <div>
-                                        <div className="flex justify-between items-start gap-2">
-                                            <h3 className="font-serif text-sm font-bold text-stone-900 dark:text-white uppercase tracking-wide line-clamp-2">
-                                                {item.product.name}
-                                            </h3>
-                                            <button
-                                                onClick={() => removeItem(item.product.id)}
-                                                className="text-stone-300 hover:text-red-500 transition-colors p-1 flex-shrink-0 opacity-0 group-hover:opacity-100"
-                                                aria-label={`Eliminar ${item.product.name}`}
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                        {item.selectedVariant && (
-                                            <p className="text-[10px] text-gold-600 mt-0.5 uppercase tracking-wider">{item.selectedVariant}</p>
+                        items.map((item, i) => {
+                            const itemSubtotal = getDisplayPrice(item.product.price) * item.quantity;
+                            return (
+                                <div
+                                    key={`${item.product.id}-${item.selectedVariant}`}
+                                    className="flex gap-4 group animate-fade-in-up"
+                                    style={{ animationDelay: `${i * 50}ms` }}
+                                >
+                                    {/* Image */}
+                                    <div className="relative w-20 h-24 bg-stone-100 dark:bg-stone-800 rounded-lg overflow-hidden flex-shrink-0 border border-stone-200 dark:border-stone-700">
+                                        {item.product.images[0] && (
+                                            <Image
+                                                src={item.product.images[0]}
+                                                alt={item.product.name}
+                                                fill
+                                                sizes="80px"
+                                                className="object-cover"
+                                                unoptimized
+                                            />
                                         )}
-                                        <p className="text-xs text-stone-500 mt-1 font-serif">
-                                            {formatPrice(getDisplayPrice(item.product.price), currency)}
-                                        </p>
                                     </div>
 
-                                    {/* Quantity Controls */}
-                                    <div className="flex items-center gap-3 mt-2">
-                                        <div className="flex items-center border border-stone-200 dark:border-stone-700 rounded-full">
-                                            <button
-                                                onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                                                className="p-1.5 hover:text-gold-500 transition-colors"
-                                                disabled={item.quantity <= 1}
-                                                aria-label="Reducir cantidad"
-                                            >
-                                                <Minus className="w-3 h-3" />
-                                            </button>
-                                            <span className="text-xs font-bold w-6 text-center text-stone-900 dark:text-white">{item.quantity}</span>
-                                            <button
-                                                onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                                                className="p-1.5 hover:text-gold-500 transition-colors"
-                                                aria-label="Aumentar cantidad"
-                                            >
-                                                <Plus className="w-3 h-3" />
-                                            </button>
+                                    {/* Details */}
+                                    <div className="flex-1 flex flex-col justify-between min-w-0">
+                                        <div>
+                                            <div className="flex justify-between items-start gap-2">
+                                                <h3 className="font-serif text-sm font-bold text-stone-900 dark:text-white uppercase tracking-wide line-clamp-2">
+                                                    {item.product.name}
+                                                </h3>
+                                                {/* Always visible on mobile, hover on desktop */}
+                                                <button
+                                                    onClick={() => removeItem(item.product.id)}
+                                                    className="text-stone-300 hover:text-red-500 transition-colors p-1 flex-shrink-0 md:opacity-0 md:group-hover:opacity-100"
+                                                    aria-label={`Eliminar ${item.product.name}`}
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                            {item.selectedVariant && (
+                                                <p className="text-[10px] text-gold-600 mt-0.5 uppercase tracking-wider">{item.selectedVariant}</p>
+                                            )}
+                                            <p className="text-xs text-stone-500 mt-1 font-serif">
+                                                {formatPrice(getDisplayPrice(item.product.price), currency)}
+                                                {item.quantity > 1 && (
+                                                    <span className="text-stone-400"> × {item.quantity} = <span className="text-stone-700 dark:text-stone-200 font-bold">{formatPrice(itemSubtotal, currency)}</span></span>
+                                                )}
+                                            </p>
+                                        </div>
+
+                                        {/* Quantity Controls */}
+                                        <div className="flex items-center gap-3 mt-2">
+                                            <div className="flex items-center border border-stone-200 dark:border-stone-700 rounded-full">
+                                                <button
+                                                    onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                                                    className="p-1.5 hover:text-gold-500 transition-colors"
+                                                    disabled={item.quantity <= 1}
+                                                    aria-label="Reducir cantidad"
+                                                >
+                                                    <Minus className="w-3 h-3" />
+                                                </button>
+                                                <span className="text-xs font-bold w-6 text-center text-stone-900 dark:text-white">{item.quantity}</span>
+                                                <button
+                                                    onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                                                    className="p-1.5 hover:text-gold-500 transition-colors"
+                                                    aria-label="Aumentar cantidad"
+                                                >
+                                                    <Plus className="w-3 h-3" />
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))
+                            );
+                        })
                     )}
                 </div>
 
                 {/* Footer */}
                 {items.length > 0 && (
-                    <div className="p-6 border-t border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-black/20 space-y-4 pb-safe">
+                    <div className="p-5 md:p-6 border-t border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-black/20 space-y-4 pb-safe">
                         <div className="flex justify-between items-end font-serif text-stone-900 dark:text-white">
                             <span className="text-xs uppercase tracking-widest text-stone-500">Total Estimado</span>
                             <span className="text-xl font-bold">

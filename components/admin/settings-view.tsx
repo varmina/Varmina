@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { settingsService, BrandSettings } from '@/services/settingsService';
+import { settingsService, BrandSettings, FooterLinkGroup, TrustBadge } from '@/services/settingsService';
 import { useStore } from '@/context/StoreContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LoadingScreen } from '@/components/ui/loading-screen';
-import { Globe, MessageCircle, Share2, Layout, Save, Bell, AlertTriangle, Activity } from 'lucide-react';
+import { Globe, MessageCircle, Share2, Layout, Save, Bell, AlertTriangle, Activity, ShoppingBag, Truck, Plus, Trash2, ChevronDown, ChevronUp, Footprints } from 'lucide-react';
 
 export const SettingsView: React.FC = () => {
     const { addToast } = useStore();
@@ -40,6 +40,60 @@ export const SettingsView: React.FC = () => {
         } finally {
             setIsSaving(false);
         }
+    };
+
+    // Footer links helpers
+    const addFooterGroup = () => {
+        if (!settings) return;
+        const newGroups = [...(settings.footer_links || []), { group: 'Nuevo Grupo', links: [] }];
+        setSettings({ ...settings, footer_links: newGroups });
+    };
+
+    const removeFooterGroup = (idx: number) => {
+        if (!settings) return;
+        const newGroups = settings.footer_links.filter((_, i) => i !== idx);
+        setSettings({ ...settings, footer_links: newGroups });
+    };
+
+    const updateFooterGroup = (idx: number, group: FooterLinkGroup) => {
+        if (!settings) return;
+        const newGroups = [...settings.footer_links];
+        newGroups[idx] = group;
+        setSettings({ ...settings, footer_links: newGroups });
+    };
+
+    const addFooterLink = (groupIdx: number) => {
+        if (!settings) return;
+        const newGroups = [...settings.footer_links];
+        newGroups[groupIdx].links.push({ label: '', url: '/' });
+        setSettings({ ...settings, footer_links: newGroups });
+    };
+
+    const removeFooterLink = (groupIdx: number, linkIdx: number) => {
+        if (!settings) return;
+        const newGroups = [...settings.footer_links];
+        newGroups[groupIdx].links = newGroups[groupIdx].links.filter((_, i) => i !== linkIdx);
+        setSettings({ ...settings, footer_links: newGroups });
+    };
+
+    // Trust badges helpers
+    const addTrustBadge = () => {
+        if (!settings) return;
+        const newBadges = [...(settings.trust_badges || []), { icon: 'shield', text: 'Nuevo Badge' }];
+        setSettings({ ...settings, trust_badges: newBadges });
+    };
+
+    const removeTrustBadge = (idx: number) => {
+        if (!settings) return;
+        const newBadges = settings.trust_badges.filter((_, i) => i !== idx);
+        setSettings({ ...settings, trust_badges: newBadges });
+    };
+
+    const updateTrustBadge = (idx: number, badge: TrustBadge) => {
+        if (!settings) return;
+        const newBadges = [...settings.trust_badges];
+        newBadges[idx] = badge;
+        setSettings({ ...settings, trust_badges: newBadges });
     };
 
     if (isLoading) return <div className="py-20 flex justify-center"><LoadingScreen /></div>;
@@ -211,8 +265,189 @@ export const SettingsView: React.FC = () => {
                     </div>
                 </section>
 
+                {/* 5. PRODUCT PAGE SETTINGS */}
+                <section className="bg-white dark:bg-stone-900 rounded-xl shadow-[0_2px_20px_-5px_rgba(0,0,0,0.05)] border border-stone-100 dark:border-stone-800 p-5 md:p-8">
+                    <div className="flex items-center gap-3 mb-6 border-b border-stone-100 dark:border-stone-800 pb-4">
+                        <div className="p-2 bg-gold-50 dark:bg-gold-900/10 rounded-full">
+                            <ShoppingBag className="w-4 h-4 md:w-5 md:h-5 text-gold-600" />
+                        </div>
+                        <h2 className="text-xs font-bold uppercase tracking-widest text-stone-900 dark:text-white">Página de Producto</h2>
+                    </div>
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <Input
+                                label="Texto del Botón Principal (CTA)"
+                                placeholder="Ej: Agregar al Carrito"
+                                value={settings?.product_cta_text || ''}
+                                onChange={e => settings && setSettings({ ...settings, product_cta_text: e.target.value })}
+                                className="bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 rounded-lg py-3 focus:border-gold-500 focus:ring-1 focus:ring-gold-500 dark:text-white"
+                            />
+                            <Input
+                                label="Umbral Envío Gratis (0 = desactivado)"
+                                type="number"
+                                placeholder="Ej: 100000"
+                                value={settings?.free_shipping_threshold || 0}
+                                onChange={e => settings && setSettings({ ...settings, free_shipping_threshold: Number(e.target.value) })}
+                                className="bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 rounded-lg py-3 focus:border-gold-500 focus:ring-1 focus:ring-gold-500 dark:text-white"
+                            />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-stone-50 dark:bg-stone-950/30 rounded-lg border border-stone-100 dark:border-stone-800">
+                            <div>
+                                <span className="block text-xs font-bold uppercase tracking-wider text-stone-900 dark:text-stone-200">Mostrar Urgencia de Stock</span>
+                                <span className="text-[10px] text-stone-500">Muestra &quot;¡Solo quedan X unidades!&quot; cuando el stock es bajo.</span>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    className="sr-only peer"
+                                    checked={settings?.show_stock_urgency ?? true}
+                                    onChange={e => settings && setSettings({ ...settings, show_stock_urgency: e.target.checked })}
+                                />
+                                <div className="w-11 h-6 bg-stone-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gold-300 dark:peer-focus:ring-gold-800 rounded-full peer dark:bg-stone-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-gold-500"></div>
+                            </label>
+                        </div>
+
+                        {settings?.show_stock_urgency && (
+                            <Input
+                                label="Umbral de alerta (mostrar cuando stock ≤ este número)"
+                                type="number"
+                                value={settings?.stock_urgency_threshold || 5}
+                                onChange={e => settings && setSettings({ ...settings, stock_urgency_threshold: Number(e.target.value) })}
+                                className="bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 rounded-lg py-3 focus:border-gold-500 focus:ring-1 focus:ring-gold-500 dark:text-white"
+                            />
+                        )}
+
+                        <div className="space-y-2">
+                            <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-400">Plantilla WhatsApp (Consulta por producto)</label>
+                            <textarea
+                                className="w-full bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg p-4 font-mono text-[10px] dark:text-white focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 h-20 resize-none"
+                                value={settings?.whatsapp_product_template || ''}
+                                onChange={e => settings && setSettings({ ...settings, whatsapp_product_template: e.target.value })}
+                            />
+                            <p className="text-[9px] text-stone-400">Variables: {"{{brand_name}}"}, {"{{product_name}}"}, {"{{product_id}}"}</p>
+                        </div>
+
+                        {/* Trust Badges Editor */}
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <label className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Badges de Confianza (Producto)</label>
+                                <button type="button" onClick={addTrustBadge} className="text-[10px] font-bold uppercase tracking-wider text-gold-600 hover:text-gold-500 flex items-center gap-1">
+                                    <Plus className="w-3 h-3" /> Agregar
+                                </button>
+                            </div>
+                            {(settings?.trust_badges || []).map((badge, idx) => (
+                                <div key={idx} className="flex items-center gap-3 p-3 bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700">
+                                    <select
+                                        value={badge.icon}
+                                        onChange={e => updateTrustBadge(idx, { ...badge, icon: e.target.value })}
+                                        className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded px-2 py-1.5 text-xs dark:text-white"
+                                    >
+                                        {['truck','shield','package','refresh','sparkles','heart','leaf','shieldcheck','star'].map(icon => (
+                                            <option key={icon} value={icon}>{icon}</option>
+                                        ))}
+                                    </select>
+                                    <input
+                                        type="text"
+                                        value={badge.text}
+                                        onChange={e => updateTrustBadge(idx, { ...badge, text: e.target.value })}
+                                        className="flex-1 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded px-3 py-1.5 text-xs dark:text-white"
+                                        placeholder="Texto del badge"
+                                    />
+                                    <button type="button" onClick={() => removeTrustBadge(idx)} className="p-1 text-stone-400 hover:text-red-500">
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* 6. FOOTER CONFIGURATION */}
+                <section className="bg-white dark:bg-stone-900 rounded-xl shadow-[0_2px_20px_-5px_rgba(0,0,0,0.05)] border border-stone-100 dark:border-stone-800 p-5 md:p-8">
+                    <div className="flex items-center gap-3 mb-6 border-b border-stone-100 dark:border-stone-800 pb-4">
+                        <div className="p-2 bg-gold-50 dark:bg-gold-900/10 rounded-full">
+                            <Footprints className="w-4 h-4 md:w-5 md:h-5 text-gold-600" />
+                        </div>
+                        <h2 className="text-xs font-bold uppercase tracking-widest text-stone-900 dark:text-white">Footer de la Tienda</h2>
+                    </div>
+                    <div className="space-y-6">
+                        <div className="space-y-2">
+                            <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-400">Texto &quot;Acerca de&quot; (columna izquierda del footer)</label>
+                            <textarea
+                                className="w-full bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg p-4 text-xs dark:text-white focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 h-20 resize-none"
+                                value={settings?.footer_about_text || ''}
+                                onChange={e => settings && setSettings({ ...settings, footer_about_text: e.target.value })}
+                            />
+                        </div>
+
+                        {/* Footer Link Groups */}
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <label className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Grupos de Links del Footer</label>
+                                <button type="button" onClick={addFooterGroup} className="text-[10px] font-bold uppercase tracking-wider text-gold-600 hover:text-gold-500 flex items-center gap-1">
+                                    <Plus className="w-3 h-3" /> Grupo
+                                </button>
+                            </div>
+
+                            {(settings?.footer_links || []).map((group, gIdx) => (
+                                <div key={gIdx} className="p-4 bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 space-y-4">
+                                    <div className="flex items-center gap-3">
+                                        <input
+                                            type="text"
+                                            value={group.group}
+                                            onChange={e => updateFooterGroup(gIdx, { ...group, group: e.target.value })}
+                                            className="flex-1 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded px-3 py-2 text-xs font-bold dark:text-white"
+                                            placeholder="Nombre del grupo"
+                                        />
+                                        <button type="button" onClick={() => removeFooterGroup(gIdx)} className="p-1.5 text-stone-400 hover:text-red-500">
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                    {group.links.map((link, lIdx) => (
+                                        <div key={lIdx} className="flex items-center gap-2 pl-4">
+                                            <input
+                                                type="text"
+                                                value={link.label}
+                                                onChange={e => {
+                                                    const newLinks = [...group.links];
+                                                    newLinks[lIdx] = { ...link, label: e.target.value };
+                                                    updateFooterGroup(gIdx, { ...group, links: newLinks });
+                                                }}
+                                                className="flex-1 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded px-2 py-1.5 text-[11px] dark:text-white"
+                                                placeholder="Nombre del link"
+                                            />
+                                            <input
+                                                type="text"
+                                                value={link.url}
+                                                onChange={e => {
+                                                    const newLinks = [...group.links];
+                                                    newLinks[lIdx] = { ...link, url: e.target.value };
+                                                    updateFooterGroup(gIdx, { ...group, links: newLinks });
+                                                }}
+                                                className="flex-1 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded px-2 py-1.5 text-[11px] font-mono dark:text-white"
+                                                placeholder="/ruta"
+                                            />
+                                            <button type="button" onClick={() => removeFooterLink(gIdx, lIdx)} className="p-1 text-stone-400 hover:text-red-500">
+                                                <Trash2 className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <button
+                                        type="button"
+                                        onClick={() => addFooterLink(gIdx)}
+                                        className="text-[10px] font-bold text-gold-600 hover:text-gold-500 flex items-center gap-1 pl-4"
+                                    >
+                                        <Plus className="w-3 h-3" /> Agregar Link
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                    {/* 5. SOCIAL & DESIGN */}
+                    {/* 7. SOCIAL & DESIGN */}
                     <section className="bg-white dark:bg-stone-900 rounded-xl shadow-[0_2px_20px_-5px_rgba(0,0,0,0.05)] border border-stone-100 dark:border-stone-800 p-5 md:p-8">
                         <div className="flex items-center gap-3 mb-6 border-b border-stone-100 dark:border-stone-800 pb-4">
                             <div className="p-2 bg-gold-50 dark:bg-gold-900/10 rounded-full">
@@ -233,6 +468,12 @@ export const SettingsView: React.FC = () => {
                                 onChange={e => settings && setSettings({ ...settings, tiktok_url: e.target.value })}
                                 className="bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 rounded-lg py-3 focus:border-gold-500 focus:ring-1 focus:ring-gold-500 dark:text-white"
                             />
+                            <Input
+                                label="Facebook URL"
+                                value={settings?.facebook_url || ''}
+                                onChange={e => settings && setSettings({ ...settings, facebook_url: e.target.value })}
+                                className="bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 rounded-lg py-3 focus:border-gold-500 focus:ring-1 focus:ring-gold-500 dark:text-white"
+                            />
                             <div>
                                 <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-2">Color Primario de Marca</label>
                                 <div className="flex items-center gap-4 bg-stone-50 dark:bg-stone-950/50 border border-stone-200 dark:border-stone-700 rounded-lg p-2">
@@ -248,7 +489,7 @@ export const SettingsView: React.FC = () => {
                         </div>
                     </section>
 
-                    {/* 6. ANALYTICS */}
+                    {/* 8. ANALYTICS */}
                     <section className="bg-white dark:bg-stone-900 rounded-xl shadow-[0_2px_20px_-5px_rgba(0,0,0,0.05)] border border-stone-100 dark:border-stone-800 p-5 md:p-8">
                         <div className="flex items-center gap-3 mb-6 border-b border-stone-100 dark:border-stone-800 pb-4">
                             <div className="p-2 bg-gold-50 dark:bg-gold-900/10 rounded-full">

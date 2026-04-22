@@ -2,6 +2,16 @@ import { createClient } from '@/utils/supabase/client';
 
 const supabase = createClient();
 
+export interface FooterLinkGroup {
+    group: string;
+    links: { label: string; url: string }[];
+}
+
+export interface TrustBadge {
+    icon: string;
+    text: string;
+}
+
 export interface BrandSettings {
     id: string;
     brand_name: string;
@@ -23,6 +33,18 @@ export interface BrandSettings {
     contact_email: string;
     google_analytics_id: string;
     facebook_url: string;
+    // New storefront fields
+    footer_about_text: string;
+    footer_links: FooterLinkGroup[];
+    trust_badges: TrustBadge[];
+    free_shipping_threshold: number;
+    show_stock_urgency: boolean;
+    stock_urgency_threshold: number;
+    product_cta_text: string;
+    whatsapp_product_template: string;
+    show_newsletter: boolean;
+    newsletter_title: string;
+    newsletter_subtitle: string;
     updated_at: string;
 }
 

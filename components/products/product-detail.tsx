@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Product, ProductStatus, ProductVariant } from '@/types';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { ChevronLeft, ChevronRight, Share2, Copy, Check, Truck, Shield, Package, ArrowLeft, Star, Minus, Plus, ChevronDown, ChevronUp, Sparkles, Heart, Leaf, ShieldCheck, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Share2, Copy, Check, Truck, Shield, Package, ArrowLeft, Star, Minus, Plus, ChevronDown, ChevronUp, Sparkles, Heart, Leaf, ShieldCheck, X, ZoomIn, ZoomOut, MessageCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
 import { supabaseProductService } from '@/services/supabaseProductService';
 import { useStore } from '@/context/StoreContext';
@@ -15,6 +15,7 @@ import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { usePublicProducts } from '@/hooks/use-public-products';
+import { TrustBadge } from '@/services/settingsService';
 
 interface ProductDetailProps {
     product: Product;
@@ -167,6 +168,43 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
     // A product is disabled only if it is explicitly SOLD_OUT OR if the variant is out and it's NOT made to order
     const isCtaDisabled = isSoldOut || (isVariantSoldOut && !isAvailableForOrder);
 
+    // Stock urgency
+    const showStockUrgency = settings?.show_stock_urgency ?? true;
+    const stockUrgencyThreshold = settings?.stock_urgency_threshold ?? 5;
+    const currentStock = selectedVariant?.stock ?? product.stock;
+    const isLowStock = currentStock !== undefined && currentStock !== null && currentStock > 0 && currentStock <= stockUrgencyThreshold;
+
+    // Sticky mobile CTA visibility
+    const [showStickyBar, setShowStickyBar] = useState(false);
+    const ctaButtonRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => setShowStickyBar(!entry.isIntersecting),
+            { threshold: 0 }
+        );
+        if (ctaButtonRef.current) observer.observe(ctaButtonRef.current);
+        return () => observer.disconnect();
+    }, []);
+
+    // WhatsApp direct inquiry for single product
+    const handleWhatsAppDirect = () => {
+        if (!settings?.whatsapp_number) return;
+        const phone = settings.whatsapp_number.replace(/\D/g, '');
+        let msg = settings.whatsapp_product_template || 'Hola {{brand_name}}, me interesa la pieza: "{{product_name}}" (Ref: {{product_id}}). ¿Podrían darme más información?';
+        msg = msg
+            .replace(/{{brand_name}}/g, settings.brand_name || 'Varmina')
+            .replace(/{{product_name}}/g, product.name)
+            .replace(/{{product_id}}/g, product.id.slice(0, 8));
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+    };
+
+    // CTA text from settings
+    const ctaText = settings?.product_cta_text || 'Agregar al Carrito';
+
+    // Trust badges from settings
+    const ICON_MAP: Record<string, React.FC<{className?: string}>> = { truck: Truck, shield: Shield, package: Package, refresh: RefreshCw, sparkles: Sparkles, heart: Heart, leaf: Leaf, shieldcheck: ShieldCheck, star: Star, alert: AlertTriangle };
+    const trustBadges: TrustBadge[] = settings?.trust_badges || [{ icon: 'truck', text: 'Envío Seguro' }, { icon: 'shield', text: 'Garantía de Calidad' }, { icon: 'package', text: 'Empaque Premium' }];
+
     // Keyboard Navigation
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -237,12 +275,12 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                             <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
                             <span>Volver</span>
                         </button>
-                        <span className="text-stone-200 dark:text-stone-800">/</span>
+                        <span className="text-stone-200 dark:text-stone-800">›</span>
                         <div className="hidden sm:flex items-center gap-2">
                             {product.category && (
                                 <>
                                     <span className="text-stone-400">{product.category}</span>
-                                    <span className="text-stone-200 dark:text-stone-800">/</span>
+                                    <span className="text-stone-200 dark:text-stone-800">›</span>
                                 </>
                             )}
                             <span className="text-stone-900 dark:text-white font-semibold truncate max-w-[200px]">
@@ -422,6 +460,16 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                 <StatusBadge status={product.status} />
                             </div>
 
+                            {/* Stock urgency indicator */}
+                            {showStockUrgency && isLowStock && !isSoldOut && (
+                                <div className="flex items-center gap-2 py-2 px-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 rounded-lg">
+                                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                                    <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300">
+                                        {currentStock === 1 ? '¡Última unidad disponible!' : `¡Solo quedan ${currentStock} unidades!`}
+                                    </span>
+                                </div>
+                            )}
+
                             {/* Product Features / Badges (Dynamic) */}
                             <div className="grid grid-cols-2 gap-4 py-6 border-y border-stone-100 dark:border-stone-900">
                                 {productFeatures.map((feature, idx) => (
@@ -473,7 +521,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                             )}
 
                             {/* Quantity & CTA */}
-                            <div className="space-y-4">
+                            <div className="space-y-4" ref={ctaButtonRef}>
                                 <div className="flex items-center gap-4">
                                     <div className="flex items-center border border-stone-200 dark:border-stone-800 rounded-sm h-14 px-2">
                                         <button 
@@ -501,9 +549,19 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                         onClick={handleAddToCart}
                                         isLoading={isAdding}
                                     >
-                                        {isCtaDisabled ? 'Agotado' : 'Añadir a Cotización'}
+                                        {isCtaDisabled ? 'Agotado' : ctaText}
                                     </Button>
                                 </div>
+                                {/* WhatsApp Direct Inquiry */}
+                                {settings?.whatsapp_number && (
+                                    <button
+                                        onClick={handleWhatsAppDirect}
+                                        className="w-full flex items-center justify-center gap-2 h-12 border border-green-600 text-green-700 dark:text-green-400 dark:border-green-700 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-sm transition-all text-xs font-bold uppercase tracking-[0.15em]"
+                                    >
+                                        <MessageCircle className="w-4 h-4" />
+                                        Consultar por WhatsApp
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -585,20 +643,17 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                             </div>
                         </div>
 
-                        {/* Secure Checkout Badges */}
+                        {/* Secure Checkout Badges - Configurable from Admin */}
                         <div className="flex items-center justify-center gap-6 pt-12">
-                             <div className="flex flex-col items-center gap-2 opacity-40">
-                                <Shield className="w-5 h-5" />
-                                <span className="text-[8px] uppercase tracking-widest font-bold">Seguro</span>
-                             </div>
-                             <div className="flex flex-col items-center gap-2 opacity-40">
-                                <Truck className="w-5 h-5" />
-                                <span className="text-[8px] uppercase tracking-widest font-bold">Fast</span>
-                             </div>
-                             <div className="flex flex-col items-center gap-2 opacity-40">
-                                <Package className="w-5 h-5" />
-                                <span className="text-[8px] uppercase tracking-widest font-bold">Pack</span>
-                             </div>
+                             {trustBadges.map((badge, idx) => {
+                                 const Icon = ICON_MAP[badge.icon.toLowerCase()] || Shield;
+                                 return (
+                                     <div key={idx} className="flex flex-col items-center gap-2 opacity-40">
+                                         <Icon className="w-5 h-5" />
+                                         <span className="text-[8px] uppercase tracking-widest font-bold">{badge.text}</span>
+                                     </div>
+                                 );
+                             })}
                         </div>
                     </div>
                 </div>
@@ -613,10 +668,12 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-                        {allProducts
-                            .filter((p: Product) => p.id !== product.id && (p.category === product.category || !product.category))
-                            .slice(0, 4)
-                            .map((related: Product) => (
+                        {(() => {
+                            const filtered = allProducts
+                                .filter((p: Product) => p.id !== product.id && p.status !== ProductStatus.SOLD_OUT && (p.category === product.category || !product.category));
+                            // Shuffle for variety
+                            const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+                            return shuffled.slice(0, 4).map((related: Product) => (
                                 <Link 
                                     key={related.id} 
                                     href={`/product/${related.id}`}
@@ -644,7 +701,8 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                         </p>
                                     </div>
                                 </Link>
-                            ))}
+                            ));
+                        })()}
                     </div>
                 </div>
             </main>
@@ -793,6 +851,32 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                 />
                             ))}
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Sticky Mobile Add-to-Cart Bar */}
+            {showStickyBar && !isFullscreen && (
+                <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-t border-stone-200 dark:border-stone-800 px-4 py-3 pb-safe animate-slide-up-mobile">
+                    <div className="flex items-center gap-3">
+                        <div className="flex-shrink-0">
+                            <p className="text-lg font-bold text-stone-900 dark:text-white font-serif">
+                                {formatPrice(currentPrice, currency)}
+                            </p>
+                            {isLowStock && showStockUrgency && (
+                                <p className="text-[9px] text-amber-600 font-bold uppercase tracking-wider">
+                                    {currentStock === 1 ? 'Última unidad' : `Solo ${currentStock} quedan`}
+                                </p>
+                            )}
+                        </div>
+                        <Button
+                            className="flex-1 h-12 text-[11px] font-bold uppercase tracking-[0.2em] bg-stone-900 hover:bg-stone-800 dark:bg-white dark:hover:bg-stone-200 text-white dark:text-stone-900 rounded-sm active:scale-[0.98]"
+                            disabled={isAdding || isCtaDisabled}
+                            onClick={handleAddToCart}
+                            isLoading={isAdding}
+                        >
+                            {isCtaDisabled ? 'Agotado' : ctaText}
+                        </Button>
                     </div>
                 </div>
             )}

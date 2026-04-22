@@ -291,6 +291,26 @@ a {
   animation: fadeInUp 0.8s cubic-bezier(0.19, 1, 0.22, 1) both;
 }
 
+.animate-fade-in {
+  animation: fadeIn 0.5s ease both;
+}
+
+.animate-fade-in-down {
+  animation: fadeInDown 0.5s ease both;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-up-mobile {
+  animation: slideUpMobile 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-pulse-whatsapp {
+  animation: pulse-whatsapp 2s infinite;
+}
+
 
 
 /* ── Stagger delay utilities ──────────────────── */
