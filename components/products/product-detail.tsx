@@ -707,7 +707,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
             {/* FULLSCREEN ZOOM VIEWER */}
             {isFullscreen && (
                 <div 
-                    className="fixed inset-0 z-[100] bg-white/95 dark:bg-stone-950/95 backdrop-blur-sm flex flex-col"
+                    className="fixed inset-0 z-[100] bg-white dark:bg-stone-950 flex flex-col"
                     aria-modal="true"
                     role="dialog"
                 >
