@@ -424,17 +424,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                 </div>
                             )}
 
-                            {/* Product Features / Badges (Dynamic) */}
-                            <div className="grid grid-cols-2 gap-4 py-6 border-y border-stone-100 dark:border-stone-900">
-                                {productFeatures.map((feature, idx) => (
-                                    <div key={idx} className="flex items-center gap-2.5">
-                                        <div className="w-8 h-8 rounded-full bg-stone-50 dark:bg-stone-900 flex items-center justify-center text-stone-400">
-                                            <feature.icon className="w-4 h-4" />
-                                        </div>
-                                        <span className="text-[9px] font-bold uppercase tracking-widest text-stone-500">{feature.label}</span>
-                                    </div>
-                                ))}
-                            </div>
+
                         </div>
 
 
@@ -516,6 +506,18 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                                         Consultar por WhatsApp
                                     </button>
                                 )}
+
+                                {/* Trust Bar */}
+                                <div className="grid grid-cols-2 gap-3 pt-5 mt-1 border-t border-stone-100 dark:border-stone-800">
+                                    {productFeatures.map((feature, idx) => (
+                                        <div key={idx} className="flex items-center gap-2.5">
+                                            <div className="w-7 h-7 rounded-full bg-stone-50 dark:bg-stone-900 flex items-center justify-center text-stone-400 shrink-0">
+                                                <feature.icon className="w-3.5 h-3.5" />
+                                            </div>
+                                            <span className="text-[9px] font-bold uppercase tracking-widest text-stone-400 dark:text-stone-500">{feature.label}</span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
