@@ -255,7 +255,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
 
             {/* ─── PREMIUM PRODUCT PAGE LAYOUT ─── */}
             <main className="max-w-[1600px] mx-auto px-4 md:px-12 py-4 md:py-8 pb-24">
-                <div className="grid grid-cols-1 lg:grid-cols-[100px_1fr_420px] xl:grid-cols-[120px_1fr_480px] gap-4 lg:gap-8 xl:gap-16 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-[100px_1fr_420px] xl:grid-cols-[120px_1fr_480px] gap-0 lg:gap-8 xl:gap-16 items-start">
                     
                     {/* COL 1: Vertical Thumbnails (Desktop Only) */}
                     <div className="hidden lg:flex flex-col gap-3 sticky top-32 overflow-y-auto max-h-[70vh] px-1 hide-scrollbar">
@@ -369,7 +369,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
 
                         {/* Mobile: Horizontal Thumb Strip */}
                         {imagesToDisplay.length > 1 && (
-                            <div className="flex lg:hidden gap-3 mt-2 overflow-x-auto pb-2 hide-scrollbar">
+                            <div className="flex lg:hidden gap-3 mt-2 overflow-x-auto hide-scrollbar">
                                 {imagesToDisplay.map((img, idx) => (
                                     <button
                                         key={idx}
@@ -392,7 +392,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, currency 
                         <div className="space-y-4">
                             <div className="space-y-2">
                                 {product.collections && product.collections.length > 0 && (
-                                    <div className="flex flex-wrap gap-2 mb-2">
+                                    <div className="flex flex-wrap gap-2 mb-1 mt-4 lg:mt-0">
                                         {product.collections.map((c, i) => (
                                             <span key={i} className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-[0.3em]">
                                                 {c}
